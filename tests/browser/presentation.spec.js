@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { pauseBattle } from "./helpers.js";
 
 test("제공 MP3가 오프라인에서도 반복 재생되고 5마리와 그림자가 겹치지 않음", async ({ page }) => {
   await page.addInitScript(() => {
@@ -31,6 +32,8 @@ test("제공 MP3가 오프라인에서도 반복 재생되고 5마리와 그림�
     return Math.max(...samples.map(Math.abs));
   })).toBeGreaterThan(0.0001);
   await page.keyboard.press('Escape');
+  await pauseBattle(page);
+  await page.waitForTimeout(500); // Let any in-flight attack finish before measuring idle placement.
   for (const viewport of [{width:1440,height:810},{width:844,height:390},{width:568,height:320},{width:390,height:844}]) {
     await page.setViewportSize(viewport);
     const boxes = await page.locator('#fighters .field-art').evaluateAll(nodes => nodes.map(node => {

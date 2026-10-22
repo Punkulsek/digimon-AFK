@@ -56,6 +56,7 @@ import {
 import "./style.css";
 import "./polish.css";
 import "./fullscreen.css";
+import "./collection.css";
 import { GameAudio } from "./audio.js";
 const iconSet = {
   Leaf,
@@ -188,6 +189,7 @@ $("#app").innerHTML = `
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
 </section>
 </main>
+<section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
 <nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
 function hudText(selector, value) {
@@ -383,9 +385,18 @@ function schedule() {
   clearInterval(timer);
   timer = setInterval(step, 850 / state.speed);
 }
+let replaceSlot = null;
+function leaveCollection() {
+  $("#collection-page").hidden = true;
+  $(".game-shell").classList.remove("managing");
+  replaceSlot = null;
+}
 function closeModal() {
   if (busy) return;
+  const hadModal = !!$("#modal-root").children.length;
   $("#modal-root").innerHTML = "";
+  if (!$("#collection-page").hidden && hadModal) { replaceSlot = null; collection(); return; }
+  leaveCollection();
   active = "home";
   sound.setMode(battle.boss ? "boss" : "field");
   updateNavigation();
@@ -412,19 +423,39 @@ function modal(title, subtitle, body, cls = "") {
 }
 function collection() {
   active = "collection";
+  const scroll = $(".collection-scroll")?.scrollTop || 0;
+  $("#modal-root").innerHTML = "";
+  $(".game-shell").classList.add("managing");
   const sorted = [...state.inventory].sort((a, b) =>
-    sort === "power"
-      ? power(b) - power(a)
-      : species(b.speciesId).rarity - species(a.speciesId).rarity ||
-        power(b) - power(a),
-  );
-  modal(
-    "함께할 친구들",
-    "포켓몬 도감",
-    `<div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b><small> · 편성 <span id="party-count">${state.party.length} / 5</span></small></span><button class="soft-button" data-action="sort">${i("arrow-down-wide-narrow")}${sort === "rarity" ? "등급순" : "전투력순"}</button></div><div class="collection-summary"><span>파티 전투력 <strong id="party-power">${num(partyPower())}</strong></span><span>카드를 선택해 성장·편성하세요.</span></div><div class="collection-grid">${sorted.map((p) => card(p)).join("")}</div>`,
-  );
+    (sort === "level" ? b.level - a.level : sort === "power" ? power(b) - power(a) : species(b.speciesId).rarity - species(a.speciesId).rarity) || power(b) - power(a));
+  const page = $("#collection-page");
+  page.hidden = false;
+  page.innerHTML = `<header class="party-header"><div class="management-title"><div><span class="eyebrow">함께 떠나는 모험</span><h1>포켓몬 탐험대</h1></div><div class="party-total">${i("swords")}<span>전체 전투력 <strong id="party-power">${num(partyPower())}</strong></span><small id="party-count">${state.party.length} / 5</small></div></div><div class="party-slots">${Array.from({length:5},(_,index)=>{
+    const p=state.inventory.find(p=>p.uid===state.party[index]);
+    return `<button class="party-slot ${p ? "occupied" : "empty"} ${replaceSlot === index ? "choosing" : ""}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 파티 슬롯${p ? ` ${species(p.speciesId).name}` : " 비어 있음"}"><span class="slot-number">${index+1}</span>${p ? `${art(species(p.speciesId))}<span><strong>${species(p.speciesId).name}</strong><small>Lv. ${p.level}</small></span>` : `${i("plus")}<span>포켓몬 편성</span>`}</button>`;
+  }).join("")}</div></header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
+  icons();
+  $(".collection-scroll").scrollTop = scroll;
+  updateNavigation();
+}
+function slotMenu(index) {
+  const uid = state.party[index];
+  replaceSlot = index;
+  if (!uid) { collection(); return; }
+  const p=state.inventory.find(p=>p.uid===uid);
+  modal("파티 편성", `${index+1}번 슬롯 · ${species(p.speciesId).name}`,
+    `<div class="slot-actions"><button class="primary-button full" data-action="replaceSlot">${i("rotate-ccw")}다른 포켓몬으로 교체</button><button class="soft-button full" data-action="removeSlot" data-id="${uid}">편성 해제</button><button class="text-button" data-action="detail" data-id="${uid}">상세 정보 · 성장</button></div>`, "settings-modal");
+}
+function partyChanged() {
+  battle.resetParty();
+  persist();
+  renderBattle();
+  replaceSlot = null;
+  collection();
+  toast("탐험대 편성을 저장했어요.");
 }
 function detail(uid) {
+  replaceSlot = null;
   selected = uid;
   const p = state.inventory.find((p) => p.uid === uid),
     s = species(p.speciesId),
@@ -438,6 +469,7 @@ function detail(uid) {
   );
 }
 function summonScreen() {
+  leaveCollection();
   active = "summon";
   sound.setMode("summon");
   modal(
@@ -519,6 +551,9 @@ document.addEventListener("click", (e) => {
       settings();
       break;
     case "home":
+      leaveCollection();
+      closeModal();
+      break;
     case "close":
       closeModal();
       break;
@@ -528,8 +563,35 @@ document.addEventListener("click", (e) => {
     case "detail":
       detail(btn.dataset.id);
       break;
+    case "slot":
+      slotMenu(Number(btn.dataset.slot));
+      break;
+    case "replaceSlot":
+      collection();
+      break;
+    case "cancelReplace":
+      replaceSlot = null;
+      collection();
+      break;
+    case "removeSlot": {
+      const error = toggleParty(state, btn.dataset.id);
+      if (error) toast(error); else partyChanged();
+      break;
+    }
+    case "assignSlot": {
+      if (replaceSlot === null) break;
+      const uid = btn.dataset.id;
+      const existing = state.party.indexOf(uid);
+      const target = Math.min(replaceSlot, state.party.length);
+      if (existing >= 0) {
+        if (target === state.party.length) { toast("이미 편성된 포켓몬이에요."); break; }
+        [state.party[target], state.party[existing]] = [state.party[existing], state.party[target]];
+      } else state.party[target] = uid;
+      partyChanged();
+      break;
+    }
     case "sort":
-      sort = sort === "rarity" ? "power" : "rarity";
+      sort = btn.dataset.sort;
       collection();
       break;
     case "summon":
@@ -606,6 +668,7 @@ document.addEventListener("click", (e) => {
       battle.resetParty();
       persist();
       renderBattle();
+      collection();
       detail(btn.dataset.id);
       sound.effect("level");
       toast("레벨 업! 조금 더 강해졌어요.");
@@ -620,6 +683,7 @@ document.addEventListener("click", (e) => {
       battle.resetParty();
       persist();
       renderBattle();
+      collection();
       detail(btn.dataset.id);
       toast("탐험대 편성을 저장했어요.");
       break;

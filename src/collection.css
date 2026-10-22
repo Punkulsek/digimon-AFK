@@ -1,0 +1,87 @@
+/* A single, equally divided navigation bar shared by both pages. */
+.bottom-nav .nav-inner {
+  width: min(360px, calc(100vw - 32px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid #b7c8a0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px #254b342b;
+}
+.bottom-nav .nav-button {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+.bottom-nav .nav-button + .nav-button { border-left: 1px solid #a6bc9466; }
+.bottom-nav .nav-button.active { box-shadow: inset 0 -3px #759560; }
+.managing > .topbar, .managing > .adventure { visibility: hidden; pointer-events: none; }
+.collection-page[hidden] { display: none; }
+.collection-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: max(22px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) 104px;
+  background: radial-gradient(ellipse at top right, #dbf0df, transparent 65%), #f7f6e9;
+  color: #355d40;
+  overflow: hidden;
+}
+.party-header, .collection-page > .collection-toolbar, .selection-notice { flex-shrink: 0; }
+.party-header { width: min(1100px, 100%); margin: 0 auto; }
+.management-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.management-title h1 { font-size: 24px; margin: 4px 0 0; }
+.party-total { display: flex; align-items: center; gap: 12px; }
+.party-total strong { font-size: 22px; margin-left: 8px; }
+.party-total small { background: #dcebd1; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.party-slots { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; }
+.party-slot {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 108px; min-width: 0; padding: 10px;
+  border: 1px solid #b6cdaa; border-bottom: 3px solid #b6cdaa;
+  border-radius: 14px; background: #fffef4; color: #355d40;
+  box-shadow: 0 3px 10px #254b3409; cursor: pointer; transition: background .15s, transform .15s;
+}
+.party-slot:hover, .party-slot.choosing { background: #dfeecd; border-color: #719e67; }
+.party-slot:active { transform: translateY(2px); }
+.party-slot .pokemon-art { width: 72px; height: 72px; min-height: 0; flex-shrink: 0; }
+.party-slot .pokemon-art img { width: 100%; height: 100%; object-fit: contain; }
+.party-slot strong, .party-slot small { display: block; }
+.party-slot strong { font-size: 13px; }
+.party-slot small { font-size: 11px; margin-top: 6px; color: #78916a; }
+.slot-number { position: absolute; top: 6px; left: 9px; font-size: 10px; opacity: .6; }
+.party-slot.empty { border-style: dashed; background: #e7eedf; flex-direction: column; font-size: 11px; }
+.party-slot.empty > svg { width: 28px; height: 28px; }
+.collection-page > .collection-toolbar { width: min(1100px, 100%); margin: 18px auto 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sort-options { display: flex; gap: 6px; }
+.sort-options .soft-button { padding: 8px 14px; font-size: 12px; }
+.sort-options .selected { background: #c4dfb5; border-color: #91b780; color: #284c32; }
+.collection-scroll { flex: 1; min-height: 0; width: min(1100px,100%); margin: 0 auto; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 3px 8px 16px 3px; }
+.collection-scroll .collection-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap: 14px; }
+.selection-notice { width: min(1100px,100%); margin: 0 auto 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #e0edd2; padding: 4px 12px; border-radius: 8px; }
+.slot-actions { display: grid; gap: 12px; }
+@media (max-width: 800px) {
+  .collection-page { padding-left: 14px; padding-right: 14px; }
+  .party-slots { gap: 6px; }
+  .party-slot { flex-direction: column; gap: 0; height: 116px; padding: 4px; }
+  .party-slot .pokemon-art { width: 60px; height: 60px; }
+  .party-slot small { margin-top: 2px; }
+  .party-slot strong { font-size: 11px; }
+  .management-title h1 { font-size: 19px; }
+  .party-total { gap: 5px; font-size: 11px; }
+  .party-total > svg { display: none; }
+  .party-total strong { font-size: 17px; }
+  .collection-scroll .collection-grid { grid-template-columns: repeat(auto-fill,minmax(115px,1fr)); gap: 8px; }
+  .sort-options .soft-button { padding: 7px; font-size: 11px; }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .collection-page { padding-top: 10px; padding-bottom: 72px; }
+  .management-title { margin-bottom: 6px; }
+  .management-title .eyebrow { display: none; }
+  .management-title h1 { font-size: 18px; margin: 0; }
+  .party-slot { height: 64px; flex-direction: row; }
+  .party-slot .pokemon-art { width: 44px; height: 44px; }
+  .collection-page > .collection-toolbar { margin: 8px auto 6px; }
+}
