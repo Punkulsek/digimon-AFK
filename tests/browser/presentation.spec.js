@@ -31,9 +31,11 @@ test("관동 151종 이미지·애니메이션을 브라우저에서 정상 디�
     "src",
     /animated\/1\.gif/,
   );
+  await page.locator('.nav-button[data-action="collection"]').click();
+  await expect(page.locator(".collection-grid img")).toHaveCount(6);
   expect(
     await page
-      .locator(".party-grid img")
+      .locator(".collection-grid img")
       .evaluateAll((images) =>
         images.every((img) => img.complete && img.naturalWidth > 0),
       ),
@@ -60,9 +62,11 @@ test("음악이 실제 오디오 신호를 출력하고 음소거·볼륨을 저
     };
   });
   await page.goto("/");
+  expect(await page.evaluate(() => Boolean(window.testAudioContext))).toBe(
+    false,
+  );
+  await page.getByRole("button", { name: "설정", exact: true }).click();
   const button = page.locator("#music-button");
-  await expect(button).toHaveAttribute("data-state", "waiting");
-  await button.click();
   await expect(button).toHaveAttribute("data-state", "playing");
   await expect
     .poll(() =>
@@ -76,7 +80,6 @@ test("음악이 실제 오디오 신호를 출력하고 음소거·볼륨을 저
     .toBeGreaterThan(0.0001);
   await button.click();
   await expect(button).toHaveAttribute("data-state", "muted");
-  await page.getByRole("button", { name: "설정", exact: true }).click();
   await page.getByRole("slider", { name: "배경음악 볼륨" }).fill("12");
   await page.getByRole("button", { name: "효과음 전환" }).click();
   await expect(

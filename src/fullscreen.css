@@ -1,0 +1,647 @@
+/* The battle is the canvas. HUD controls float above it without a page frame. */
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+body {
+  background: #8cb282;
+}
+.game-shell {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  aspect-ratio: auto;
+  background: none;
+  box-shadow: none;
+  overflow: hidden;
+  --sprite-size: clamp(58px, 10vh, 100px);
+}
+.adventure {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+}
+.battlefield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+.scene {
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+}
+.battle-vignette {
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 0 80px #153c2315;
+}
+.battlefield.boss-active .battle-vignette {
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 0 100px #4e223235;
+}
+
+.topbar {
+  position: absolute;
+  inset: max(18px, env(safe-area-inset-top))
+    max(22px, env(safe-area-inset-right)) auto
+    max(22px, env(safe-area-inset-left));
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 12;
+  pointer-events: none;
+}
+.topbar > * {
+  pointer-events: auto;
+}
+.topbar .profile {
+  padding: 9px 14px 12px 9px;
+  border: 1px solid #fffbe5b3;
+  border-radius: 18px;
+  background: #fffeedeb;
+  box-shadow: 0 4px 12px #294f3420;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.topbar .profile small {
+  display: block;
+}
+.topbar .currencies {
+  margin-left: auto;
+  display: flex;
+  gap: 7px;
+  padding-top: 5px;
+}
+.topbar .currency {
+  min-width: 87px;
+  max-width: 132px;
+  height: 33px;
+  padding: 7px 10px;
+  gap: 7px;
+  background: #fffbe8ec;
+  border: 1px solid #fffbe6bf;
+  border-radius: 11px;
+  box-shadow: 0 2px 8px #294f3417;
+  backdrop-filter: blur(8px);
+}
+.topbar .currency.gems {
+  background: #eff8f2ec;
+}
+.topbar .currency b {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar .currency svg {
+  width: 16px;
+  height: 16px;
+}
+.topbar .settings-button {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  flex-shrink: 0;
+  background: #fffcebec;
+  border: 1px solid #fffce6bf;
+  box-shadow: 0 3px 8px #294f3420;
+  backdrop-filter: blur(8px);
+  color: #607f5c;
+}
+.stage-banner {
+  position: absolute;
+  top: max(22px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 158px;
+  max-width: 220px;
+  padding: 10px 14px;
+  border-radius: 13px;
+  gap: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffbe7e8;
+  border: 1px solid #ffffe799;
+  box-shadow: 0 3px 10px #294f341c;
+  backdrop-filter: blur(9px);
+  color: #53724d;
+  z-index: 12;
+  font-size: 13px;
+}
+.stage-banner strong {
+  font-size: 15px;
+  color: #365f43;
+}
+.stage-banner > svg {
+  width: 12px;
+  height: 12px;
+  color: #8a9d72;
+}
+.stage-banner:active:not(:disabled) {
+  transform: translateX(-50%) translateY(2px);
+}
+
+.fighters {
+  position: absolute;
+  left: 23%;
+  right: auto;
+  top: 42%;
+  bottom: auto;
+  width: 34%;
+  height: 31%;
+  max-width: 590px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+  transform: none;
+  align-items: center;
+  justify-items: center;
+}
+.fighters .fighter {
+  width: 100%;
+  max-width: 130px;
+}
+.fighter:nth-child(3n + 2) {
+  top: 9px;
+}
+.fighters .field-art {
+  width: var(--sprite-size);
+  height: var(--sprite-size);
+}
+.fighters .field-art img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+.fighters .fighter-shadow {
+  width: 65%;
+  max-width: 65px;
+  height: 8px;
+  margin: -4px auto 4px;
+}
+.fighters .fighter-level {
+  left: 8%;
+  top: -4px;
+  font-size: 9px;
+}
+.fighters .hp-track {
+  width: 64px;
+  height: 5px;
+}
+.fighters .fighter strong {
+  font-size: 11px;
+  margin-top: 4px;
+}
+.enemy-group {
+  left: 70%;
+  top: 45%;
+  bottom: auto;
+  transform: translateX(-50%);
+}
+.enemy .field-art {
+  width: calc(var(--sprite-size) * 1.4);
+  height: calc(var(--sprite-size) * 1.25);
+}
+.enemy .field-art img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+.enemy.boss .field-art {
+  width: calc(var(--sprite-size) * 1.7);
+  height: calc(var(--sprite-size) * 1.6);
+}
+.enemy.boss .field-art img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.enemy-heading {
+  font-size: 9px;
+  padding: 5px 9px;
+}
+.enemy-heading strong {
+  font-size: 12px;
+}
+.enemy-hp {
+  width: 122px;
+  height: 7px;
+}
+.enemy-hp-number {
+  font-size: 9px;
+}
+
+.bottom-nav {
+  position: absolute;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  height: auto;
+  min-height: 0;
+  display: block;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  z-index: 14;
+}
+.nav-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 106px);
+  gap: 12px;
+  width: auto;
+  height: auto;
+  min-height: 0;
+}
+.nav-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 106px;
+  height: 66px;
+  padding: 8px 12px;
+  gap: 5px;
+  border: 1px solid #fffde1d9;
+  border-bottom: 3px solid #b7c8a0;
+  border-radius: 15px;
+  background: linear-gradient(#fffef2f5, #f0f2ddf0);
+  box-shadow: 0 5px 15px #254b342b;
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  font-weight: 700;
+  color: #7b8d68;
+}
+.nav-button.active {
+  background: linear-gradient(#d6ecc7f5, #b9d49ef5);
+  border-color: #e5f3d5;
+  border-bottom-color: #759560;
+  color: #355d40;
+  box-shadow:
+    0 5px 15px #254b342b,
+    inset 0 1px #ffffe8;
+}
+.nav-button.active:before {
+  display: none;
+}
+.nav-button > svg {
+  width: 23px;
+  height: 23px;
+}
+.nav-button .nav-ball {
+  width: 23px;
+  height: 23px;
+  margin: 0;
+}
+.nav-button .nav-ball:after {
+  width: 7px;
+  height: 7px;
+  left: 5px;
+  top: 6px;
+}
+
+/* Existing controls remain available in dialogs instead of on the field. */
+.collection-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 15px 0;
+  font-size: 10px;
+  color: #8c9b80;
+}
+.collection-summary strong {
+  margin-left: 5px;
+  color: #5a7a4c;
+  font-size: 14px;
+}
+.stage-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 22px;
+}
+.stage-actions > div {
+  flex: 1;
+  font-size: 11px;
+  color: #7c906b;
+}
+.stage-actions b {
+  margin-left: 10px;
+  color: #557c48;
+}
+.stage-actions .primary-button {
+  flex-shrink: 0;
+}
+.stage-quest {
+  padding: 13px;
+  background: #edf2e2;
+  border: 1px solid #dee7ce;
+  border-radius: 12px;
+  margin-top: 14px;
+}
+.stage-quest > svg {
+  display: block;
+}
+.audio-settings .music-player {
+  margin-top: 14px;
+}
+.modal-backdrop {
+  z-index: 30;
+}
+.modal {
+  max-height: calc(100dvh - 40px);
+}
+
+@media (min-width: 1800px) {
+  .fighters {
+    left: 28%;
+    width: 28%;
+  }
+  .enemy-group {
+    left: 67%;
+  }
+}
+@media (max-width: 900px) {
+  .topbar {
+    top: max(12px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+    right: max(14px, env(safe-area-inset-right));
+    gap: 7px;
+  }
+  .topbar .profile {
+    padding: 7px 10px 10px 7px;
+    gap: 9px;
+    border-radius: 14px;
+  }
+  .topbar .profile small {
+    font-size: 8px;
+  }
+  .topbar .profile strong {
+    font-size: 11px;
+  }
+  .topbar .profile-xp {
+    width: 98px;
+    margin-top: 6px;
+  }
+  .topbar .avatar {
+    width: 39px;
+    height: 39px;
+    border-radius: 13px;
+  }
+  .topbar .currency {
+    min-width: 76px;
+    max-width: 110px;
+    padding: 6px 8px;
+    gap: 5px;
+    height: 30px;
+  }
+  .topbar .currency b {
+    font-size: 11px;
+  }
+  .topbar .currency svg {
+    width: 14px;
+    height: 14px;
+  }
+  .topbar .settings-button {
+    width: 39px;
+    height: 39px;
+  }
+  .stage-banner {
+    top: max(16px, env(safe-area-inset-top));
+    min-width: 145px;
+    padding: 9px 11px;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .stage-banner strong {
+    font-size: 13px;
+  }
+  .fighters {
+    left: 21%;
+    width: 36%;
+  }
+  .bottom-nav {
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .nav-inner {
+    grid-template-columns: repeat(3, 92px);
+    gap: 10px;
+  }
+  .nav-button {
+    width: 92px;
+    height: 59px;
+    font-size: 11px;
+    border-radius: 13px;
+    gap: 4px;
+  }
+  .nav-button > svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+@media (max-width: 700px) {
+  .topbar .currencies {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    gap: 5px;
+  }
+  .topbar .settings-button {
+    margin-left: auto;
+  }
+  .topbar .profile small {
+    display: none;
+  }
+  .topbar .profile {
+    padding: 7px 9px 10px 7px;
+  }
+  .stage-banner {
+    min-width: 132px;
+    max-width: 165px;
+    padding: 9px;
+    font-size: 10px;
+    gap: 7px;
+  }
+  .stage-banner strong {
+    font-size: 12px;
+  }
+}
+@media (max-width: 500px) and (orientation: portrait) {
+  .topbar .currencies {
+    top: 64px;
+  }
+  .stage-banner {
+    top: 118px;
+    min-width: 142px;
+  }
+  .fighters {
+    left: 5%;
+    width: 48%;
+    top: 43%;
+    height: 29%;
+    gap: 0 3px;
+  }
+  .game-shell {
+    --sprite-size: clamp(43px, 13vw, 65px);
+  }
+  .fighters .fighter-level {
+    font-size: 7px;
+    left: 0;
+  }
+  .fighters .hp-track {
+    width: 42px;
+    height: 4px;
+  }
+  .fighters .fighter strong {
+    font-size: 9px;
+  }
+  .fighters .fighter-shadow {
+    height: 5px;
+    margin-bottom: 3px;
+  }
+  .enemy-group {
+    left: 74%;
+    top: 49%;
+  }
+  .enemy-heading {
+    padding: 4px 6px;
+    font-size: 7px;
+  }
+  .enemy-heading strong {
+    font-size: 10px;
+  }
+  .enemy-hp {
+    width: 86px;
+    height: 6px;
+  }
+  .enemy-hp-number {
+    font-size: 8px;
+  }
+  .nav-inner {
+    grid-template-columns: repeat(3, 88px);
+    gap: 9px;
+  }
+  .nav-button {
+    width: 88px;
+  }
+  .collection-summary {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .stage-actions {
+    gap: 12px;
+  }
+  .stage-actions .primary-button {
+    padding: 11px 12px;
+    font-size: 11px;
+  }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .game-shell {
+    --sprite-size: clamp(38px, 13vh, 64px);
+  }
+  .fighters {
+    top: 36%;
+    height: 36%;
+    left: 23%;
+    width: 34%;
+    transform: none;
+  }
+  .fighters .fighter-level {
+    font-size: 7px;
+    top: -5px;
+  }
+  .fighters .fighter-shadow {
+    height: 5px;
+    margin: -3px auto 3px;
+  }
+  .fighters .hp-track {
+    height: 4px;
+    width: 48px;
+  }
+  .fighters .fighter strong {
+    font-size: 8px;
+    margin-top: 3px;
+  }
+  .fighter:nth-child(3n + 2) {
+    top: 5px;
+  }
+  .enemy-group {
+    top: 35%;
+    left: 70%;
+    transform: translateX(-50%);
+  }
+  .enemy-heading {
+    font-size: 7px;
+    padding: 3px 6px;
+  }
+  .enemy-heading strong {
+    font-size: 10px;
+  }
+  .enemy-hp {
+    width: 90px;
+    height: 5px;
+  }
+  .enemy-hp-number {
+    font-size: 7px;
+  }
+  .bottom-nav {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .nav-inner {
+    grid-template-columns: repeat(3, 86px);
+    gap: 9px;
+  }
+  .nav-button {
+    width: 86px;
+    height: 50px;
+    flex-direction: row;
+    gap: 7px;
+    padding: 8px;
+  }
+  .nav-button > svg {
+    width: 18px;
+    height: 18px;
+  }
+  .nav-button .nav-ball {
+    transform: rotate(-20deg) scale(0.85);
+  }
+  .modal {
+    max-height: calc(100dvh - 24px);
+  }
+}

@@ -55,6 +55,7 @@ import {
 } from "./game.js";
 import "./style.css";
 import "./polish.css";
+import "./fullscreen.css";
 import { GameAudio } from "./audio.js";
 const iconSet = {
   Leaf,
@@ -178,71 +179,54 @@ function card(p, action = "detail") {
 $("#app").innerHTML = `
 <div class="game-shell">
 <header class="topbar"><button class="profile" data-action="profile"><div class="avatar">${i("compass")}<span>01</span></div><div><small>오늘도, 새로운 모험</small><strong>새싹 트레이너 ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
-<div class="brand"><span class="brand-ball"></span><strong>포켓몬 <em>데이즈</em></strong><span class="brand-tag">작은 모험, 매일의 성장</span></div>
-<div class="currencies"><div class="currency gold">${i("coins")}<b id="gold"></b><span>골드</span></div><button class="currency gems" data-action="summon">${i("diamond")}<b id="gems"></b>${i("plus")}</button><button class="icon-button" data-action="settings" aria-label="설정">${i("settings")}</button></div></header>
-<main class="adventure"><div class="section-heading"><div><span class="eyebrow">우리의 모험 일지</span><h1>조금씩, 더 멀리.</h1></div><div class="connection"><span></span> 모험 진행 중 <span class="divider">/</span> <span id="save-status">자동 저장됨</span></div></div>
+<div class="currencies"><div class="currency gold" aria-label="보유 골드">${i("coins")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${i("diamond")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정">${i("settings")}</button></header>
+<main class="adventure">
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
-<div class="stage-banner"><span class="stage-icon">${i("trees" in iconSet ? "trees" : "leaf")}</span><div><small>관동지방 · <span id="region-sub">첫 번째 여정</span></small><h2><span id="region-name">상록숲</span> <span class="stage-number" id="stage-number">1-1</span></h2></div><button data-action="stages" aria-label="스테이지 정보">${i("map")}</button></div>
-<aside class="mission-panel"><div class="mini-label">현재 목표 <span>STAGE <b id="mission-stage">1-1</b></span></div><h3>숲속의 작은 도전자</h3><div class="mission-count"><span>야생 포켓몬 처치</span><strong id="kills">0 <em>/ 10</em></strong></div><div class="progress-track"><div id="stage-progress"></div></div><div class="reward-label">${i("coins")} 처치 보상 <b id="reward">24 골드</b></div><div class="mission-divider"></div><button class="quest" data-action="quest"><span class="quest-icon">${i("gift")}</span><span><strong>모험의 첫걸음</strong><small id="quest-text">포켓몬 10마리 처치하기</small></span>${i("chevron-right")}</button></aside>
-<div class="field-label"><span></span><span id="battle-status">야생 포켓몬과 전투 중</span></div><div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
-<aside class="battle-controls"><button class="control auto" data-action="auto" id="auto-button">${i("play")}<span>자동 전투</span><b>켜짐</b></button><button class="control" data-action="speed">${i("fast-forward")}<span>전투 배속</span><b id="speed">1×</b></button><div class="control-separator"></div><button class="boss-button" data-action="boss" id="boss-button">${i("swords")}<span>보스 도전</span>${i("chevron-right")}</button><button class="auto-boss" data-action="autoBoss"><span id="boss-check">${i("check")}</span>자동 보스 도전</button></aside>
-<div class="battle-bottom"><span>${i("compass")} <span id="journey-text">풀잎 사이로 새로운 모험이 기다려요</span></span><button class="music-player" data-action="music" id="music-button" aria-label="배경음악 켜기" aria-pressed="false"><div class="equalizer" aria-hidden="true"><b></b><b></b><b></b><b></b></div><span>음악 켜기</span>${i("volume-2")}</button></div>
+<button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button>
+<div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
 </section>
-<section class="party-section"><div class="party-heading"><div class="party-title">${i("users")}<h2>나의 탐험대</h2><span id="party-count">6 / 6</span></div><div class="party-summary"><span>파티 전투력 <strong id="party-power"></strong></span><button data-action="collection">편성 관리 ${i("chevron-right")}</button></div></div><div class="party-grid" id="party-grid"></div></section>
 </main>
-<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button active" data-action="home">${i("home")}<span>홈</span><span class="nav-dot"></span></button><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button summon-nav" data-action="summon"><span class="nav-ball"></span><span>소환</span><small>새로운 만남</small></button><button class="nav-button" data-action="stages">${i("map")}<span>스테이지</span></button></div><span class="nav-caption">함께라서 더 즐거운 모험</span>${i("leaf", "nav-leaf")}</nav>
+<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
+function hudText(selector, value) {
+  const element = $(selector);
+  if (element) element.textContent = value;
+}
 function updateHud() {
   $(".avatar>span").textContent = String(
     Math.floor((state.stage - 1) / 5) + 1,
   ).padStart(2, "0");
   $("#gold").textContent = num(state.gold);
   $("#gems").textContent = num(state.gems);
-  $("#save-status").textContent = saved ? "자동 저장됨" : "저장 공간 확인 필요";
+  hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
   $("#region-name").textContent = regionName(state.stage);
   $("#stage-number").textContent = stageLabel(state.stage);
-  $("#mission-stage").textContent = stageLabel(state.stage);
-  $("#kills").innerHTML = `${state.kills} <em>/ 10</em>`;
-  $("#stage-progress").style.width = `${state.kills * 10}%`;
-  $("#reward").textContent =
-    `${Math.round(24 * (1 + (state.stage - 1) * 0.18))} 골드`;
-  $("#party-power").textContent = num(partyPower());
-  $("#party-count").textContent = `${state.party.length} / 6`;
-  $("#speed").textContent = `${state.speed}×`;
-  $("#auto-button").classList.toggle("off", !state.auto);
-  $("#auto-button b").textContent = state.auto ? "켜짐" : "꺼짐";
-  $("#boss-check").classList.toggle("unchecked", !state.autoBoss);
-  $("#boss-button").disabled = state.kills < 10 || battle.boss;
-  $("#battle-status").textContent = !state.auto
-    ? "잠시 쉬어가는 중"
-    : battle.boss
-      ? "보스 포켓몬과 전투 중"
-      : "야생 포켓몬과 전투 중";
-  $("#quest-text").textContent = state.questClaimed
-    ? "보상 획득 완료"
-    : state.totalKills >= 10
-      ? "다이아 300개 받기"
-      : `포켓몬 처치 ${state.totalKills} / 10`;
+  hudText("#kills", `${state.kills} / 10`);
+  if ($("#stage-progress"))
+    $("#stage-progress").style.width = `${state.kills * 10}%`;
+  hudText("#party-power", num(partyPower()));
+  hudText("#party-count", `${state.party.length} / 6`);
+  if ($("#boss-button"))
+    $("#boss-button").disabled = state.kills < 10 || battle.boss;
+  hudText(
+    "#quest-text",
+    state.questClaimed
+      ? "보상 획득 완료"
+      : state.totalKills >= 10
+        ? "다이아 300개 받기"
+        : `포켓몬 처치 ${state.totalKills} / 10`,
+  );
   $("#scene").dataset.region = Math.floor((state.stage - 1) / 20) % 4;
   $(".battlefield").classList.toggle("boss-active", battle.boss);
-  $("#journey-text").textContent = battle.boss
-    ? `보스 제한 턴 ${Math.max(0, 60 - battle.bossTurns)} · 승리 보상 다이아 100`
-    : "풀잎 사이로 새로운 모험이 기다려요";
+  hudText(
+    "#boss-status",
+    battle.boss
+      ? `보스 제한 턴 ${Math.max(0, 60 - battle.bossTurns)} · 승리 보상 다이아 100`
+      : `처치 보상 ${Math.round(24 * (1 + (state.stage - 1) * 0.18))} 골드 · 보스 보상 다이아 100`,
+  );
   if (active !== "summon") sound.setMode(battle.boss ? "boss" : "field");
-}
-function renderParty() {
-  $("#party-grid").innerHTML =
-    state.party
-      .map((uid) => card(state.inventory.find((p) => p.uid === uid)))
-      .join("") +
-    Array.from(
-      { length: 6 - state.party.length },
-      () =>
-        `<button class="empty-card" data-action="collection">${i("plus")}<span>포켓몬 편성</span></button>`,
-    ).join("");
-  icons();
 }
 function renderBattle() {
   $("#fighters").innerHTML = battle.allies
@@ -404,20 +388,27 @@ function closeModal() {
   $("#modal-root").innerHTML = "";
   active = "home";
   sound.setMode(battle.boss ? "boss" : "field");
-  document
-    .querySelectorAll(".nav-button")
-    .forEach((b) => b.classList.toggle("active", b.dataset.action === "home"));
+  updateNavigation();
   lastFocus?.focus();
+}
+function updateNavigation() {
+  const tab = active === "collection" || active === "summon" ? active : "home";
+  document.querySelectorAll(".nav-button").forEach((button) => {
+    const current = button.dataset.action === tab;
+    button.classList.toggle("active", current);
+    if (current) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
 }
 function modal(title, subtitle, body, cls = "") {
   if (!$("#modal-root").children.length) lastFocus = document.activeElement;
   $("#modal-root").innerHTML =
     `<div class="modal-backdrop"><section class="modal ${cls}" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><header class="modal-header"><div><span class="eyebrow">${subtitle}</span><h2 id="modal-title">${title}</h2></div><button class="icon-button close" data-action="close" aria-label="닫기" ${busy ? "disabled" : ""}>${i("x")}</button></header><div class="modal-body">${body}</div></section></div>`;
   icons();
+  updateHud();
+  updateAudio();
   $(".modal").focus();
-  document
-    .querySelectorAll(".nav-button")
-    .forEach((b) => b.classList.toggle("active", b.dataset.action === active));
+  updateNavigation();
 }
 function collection() {
   active = "collection";
@@ -430,7 +421,7 @@ function collection() {
   modal(
     "함께할 친구들",
     "포켓몬 도감",
-    `<div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b><small> · 편성 ${state.party.length}/6</small></span><button class="soft-button" data-action="sort">${i("arrow-down-wide-narrow")}${sort === "rarity" ? "등급순" : "전투력순"}</button></div><p class="muted">카드를 선택해 성장시키거나 탐험대에 편성해 보세요.</p><div class="collection-grid">${sorted.map((p) => card(p)).join("")}</div>`,
+    `<div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b><small> · 편성 <span id="party-count">${state.party.length} / 6</span></small></span><button class="soft-button" data-action="sort">${i("arrow-down-wide-narrow")}${sort === "rarity" ? "등급순" : "전투력순"}</button></div><div class="collection-summary"><span>파티 전투력 <strong id="party-power">${num(partyPower())}</strong></span><span>카드를 선택해 성장·편성하세요.</span></div><div class="collection-grid">${sorted.map((p) => card(p)).join("")}</div>`,
   );
 }
 function detail(uid) {
@@ -488,7 +479,7 @@ function stages() {
   modal(
     "한 걸음씩, 새로운 세상으로",
     "스테이지",
-    `<div class="stage-overview">${i("map")}<div><h3>${regionName(state.stage)}</h3><p>관동지방 · ${chapter + 1}번째 지역</p></div><span>${current} / 20</span></div><div class="stage-grid">${Array.from({ length: 20 }, (_, n) => `<div class="stage-node ${n + 1 < current ? "complete" : n + 1 === current ? "current" : ""}">${i(n + 1 < current ? "check" : n === 19 ? "crown" : "leaf")}<b>${chapter + 1}-${n + 1}</b><small>${n + 1 < current ? "클리어" : n + 1 === current ? "모험 중" : "미개방"}</small></div>`).join("")}</div><div class="stage-footer"><span>현재 진행도 <b>${state.kills} / 10</b> · 보스 보상 ${i("diamond")}100</span><p>20개 스테이지를 완료하면 다음 지역으로 자동 이동해요.</p></div>`,
+    `<div class="stage-overview">${i("map")}<div><h3>${regionName(state.stage)}</h3><p>관동지방 · ${chapter + 1}번째 지역</p></div><span>${current} / 20</span></div><div class="stage-grid">${Array.from({ length: 20 }, (_, n) => `<div class="stage-node ${n + 1 < current ? "complete" : n + 1 === current ? "current" : ""}">${i(n + 1 < current ? "check" : n === 19 ? "crown" : "leaf")}<b>${chapter + 1}-${n + 1}</b><small>${n + 1 < current ? "클리어" : n + 1 === current ? "모험 중" : "미개방"}</small></div>`).join("")}</div><div class="stage-actions"><div><span>야생 포켓몬 처치 <b id="kills">${state.kills} / 10</b></span><div class="progress-track"><div id="stage-progress"></div></div></div><button class="primary-button" data-action="boss" id="boss-button">${i("swords")}보스 도전</button></div><p id="boss-status" class="muted"></p><button class="quest stage-quest" data-action="quest"><span class="quest-icon">${i("gift")}</span><span><strong>모험의 첫걸음</strong><small id="quest-text"></small></span>${i("chevron-right")}</button>`,
   );
 }
 function audioSettings() {
@@ -502,14 +493,14 @@ function audioSettings() {
     )
     .join(
       "",
-    )}<p>첫 버튼을 누르면 음악이 시작돼요. 소리 설정은 자동 저장됩니다.</p></section>`;
+    )}<button class="music-player" data-action="music" id="music-button" aria-label="배경음악 켜기" aria-pressed="false"><div class="equalizer" aria-hidden="true"><b></b><b></b><b></b><b></b></div><span>음악 켜기</span>${i("volume-2")}</button></section>`;
 }
 function settings() {
   active = "home";
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 적 10마리 처치 후 자동으로 도전해요.</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed">${state.speed}×</button></div><div class="save-info">${i("check-check")} 진행 상황은 이 브라우저에 자동 저장돼요.<br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: 포켓몬 데이즈 오리지널 칩튠</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 적 10마리 처치 후 자동으로 도전해요.</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: 포켓몬 데이즈 오리지널 칩튠</p>`,
     "settings-modal",
   );
 }
@@ -603,6 +594,7 @@ document.addEventListener("click", (e) => {
         renderBattle();
         persist();
         toast("보스 도전! 탐험대의 힘을 보여 주세요.");
+        closeModal();
       }
       break;
     case "level": {
@@ -613,7 +605,6 @@ document.addEventListener("click", (e) => {
       }
       battle.resetParty();
       persist();
-      renderParty();
       renderBattle();
       detail(btn.dataset.id);
       sound.effect("level");
@@ -628,7 +619,6 @@ document.addEventListener("click", (e) => {
       }
       battle.resetParty();
       persist();
-      renderParty();
       renderBattle();
       detail(btn.dataset.id);
       toast("탐험대 편성을 저장했어요.");
@@ -697,7 +687,6 @@ document.addEventListener("visibilitychange", () => {
     persist();
   } else schedule();
 });
-renderParty();
 renderBattle();
 updateHud();
 updateAudio();
