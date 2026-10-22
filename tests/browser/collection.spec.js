@@ -40,12 +40,21 @@ test('전체화면 관리, 고정 파티, 내부 스크롤, 정렬 및 슬롯 �
   expect(result.inventory).toEqual(saved.inventory);
   for(const size of [{width:844,height:390},{width:568,height:320},{width:390,height:844}]) {
     await page.setViewportSize(size);
+    const bar=await page.locator('.bottom-nav').boundingBox();
+    expect(bar.x).toBe(0);
+    expect(bar.width).toBe(size.width);
+    expect(bar.y+bar.height).toBe(size.height);
+    const buttons=await page.locator('.nav-button').evaluateAll(nodes=>nodes.map(n=>n.getBoundingClientRect().width));
+    expect(Math.max(...buttons)-Math.min(...buttons)).toBeLessThan(1);
     const scroll=await page.locator('.collection-scroll').boundingBox();
     expect(scroll.height).toBeGreaterThan(35);
     const party=await page.locator('.party-header').boundingBox();
     await page.locator('.collection-scroll').evaluate(el=>el.scrollTop=0);
     expect(await page.locator('.party-header').boundingBox()).toEqual(party);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await page.locator('.collection-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);
+    const last=await page.locator('.collection-grid .pokemon-card').last().boundingBox();
+    expect(last.y+last.height).toBeLessThanOrEqual(bar.y);
   }
   await page.locator('.nav-button[data-action="home"]').click();
   await expect(page.locator('#collection-page')).toBeHidden();
