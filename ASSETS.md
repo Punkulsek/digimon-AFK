@@ -22,8 +22,8 @@ stored at `public/scene/viridian-forest.png` and embedded in `play.html`.
 - Source: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-forest.png
 - Repository license: AGPLv3. The repository credits Kyle Dove for battle backdrops; a separate per-image reuse permission has not been verified. Inclusion does not transfer underlying artwork rights.
 - Other regions retain their existing environment pending user selection.
-- Requested music: Viridian Forest (Pokémon HeartGold / SoulSilver). Pending an identifiable audio file; no substitute track has been added.
+- Current BGM: user-uploaded `1-12. Oldale Town.mp3`, stored unchanged as `public/audio/oldale-town.mp3` and embedded in `play.html`. Metadata: Oldale Town, Pokémon Omega Ruby & Alpha Sapphire Super Music Collection. User explicitly requested using this file. Underlying recording rights remain with their owners; upload does not grant a public reuse license.
 
-The original 16-bar chiptune melody, chord arrangement, and procedural effects in `src/audio.js` were created for this project. They use local Web Audio oscillators; no Pokémon soundtrack recording or third-party audio file is included.
+Procedural sound effects in `src/audio.js` use local Web Audio oscillators. The previous synthesized background melody has been replaced exclusively by the user-provided MP3. No music search or other recording was used.
 
 `public/scene/forest.svg` is an original vector environment drawn for this project. Interface icons use the installed Lucide package under its ISC license. Pokémon images retain their native aspect ratio and pixel rendering.

@@ -184,7 +184,7 @@ body {
   height: 31%;
   max-width: 590px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0 14px;
   transform: none;
@@ -192,8 +192,17 @@ body {
   justify-items: center;
 }
 .fighters .fighter {
+  grid-column: span 2;
   width: 100%;
   max-width: 130px;
+}
+.fighters .fighter:nth-child(4) { grid-column: 2 / span 2; }
+.fighters .fighter:nth-child(5) { grid-column: 4 / span 2; }
+.battlefield .fighter-shadow {
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 50%;
+  filter: blur(1px);
+  pointer-events: none;
 }
 .fighter:nth-child(3n + 2) {
   top: 9px;

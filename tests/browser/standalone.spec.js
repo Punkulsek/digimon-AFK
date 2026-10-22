@@ -27,7 +27,7 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   await context.setOffline(true);
   await openStandalone(page);
   await expect(page.locator("#gold")).toHaveText("2,400");
-  await expect(page.locator("#fighters .fighter")).toHaveCount(6);
+  await expect(page.locator("#fighters .fighter")).toHaveCount(5);
   await expect
     .poll(() =>
       page
@@ -76,7 +76,7 @@ test("저장소 접근이 차단되어도 독립 HTML 실행", async ({ page }) 
     }),
   );
   await openStandalone(page);
-  await expect(page.locator("#fighters .fighter")).toHaveCount(6);
+  await expect(page.locator("#fighters .fighter")).toHaveCount(5);
   await page.getByRole("button", { name: "설정", exact: true }).click();
   await expect(page.locator("#save-status")).toHaveText("저장 공간 확인 필요");
   await page.getByRole("button", { name: "전투 배속", exact: true }).click();

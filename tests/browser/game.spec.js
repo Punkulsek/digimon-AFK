@@ -14,7 +14,7 @@ test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ pag
   ).toBeVisible();
   await page.locator('[data-action="party"]').click();
   await page.keyboard.press("Escape");
-  await expect(page.locator("#fighters .fighter")).toHaveCount(5);
+  await expect(page.locator("#fighters .fighter")).toHaveCount(4);
   await page.locator('.nav-button[data-action="summon"]').click();
   await page.locator('[data-action="draw"][data-count="10"]').click();
   await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
@@ -30,7 +30,7 @@ test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ pag
   expect(
     await page.evaluate(() => localStorage.getItem("pokemon-days-v1")),
   ).toEqual(before);
-  await expect(page.locator("#fighters .fighter")).toHaveCount(5);
+  await expect(page.locator("#fighters .fighter")).toHaveCount(4);
   await page.getByRole("button", { name: "스테이지 정보" }).click();
   await expect(page.locator(".stage-node")).toHaveCount(20);
   expect(errors).toEqual([]);
@@ -61,7 +61,7 @@ test("기존 저장 데이터와 설정을 유지하고 스테이지 팝업에�
   ).toHaveText("2×");
   await page.keyboard.press("Escape");
   await page.locator('.nav-button[data-action="collection"]').click();
-  await expect(page.locator("#party-count")).toHaveText("6 / 6");
+  await expect(page.locator("#party-count")).toHaveText("5 / 5");
   await page.keyboard.press("Escape");
   expect(
     await page.evaluate(() =>

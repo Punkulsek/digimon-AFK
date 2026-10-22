@@ -1,31 +1,6 @@
-// Original 16-bar chiptune, synthesized locally. No downloaded music or requests.
+// User-provided Oldale Town recording; synthesized sound effects only.
 const AUDIO_KEY = "pokemon-days-audio-v1";
 const note = (midi) => 440 * 2 ** ((midi - 69) / 12);
-const MELODY = [
-  [72, 76, 79, 76, 74, 72, 67, 0],
-  [69, 72, 76, 79, 76, 72, 69, 0],
-  [65, 69, 72, 76, 74, 72, 69, 0],
-  [67, 71, 74, 79, 77, 74, 71, 0],
-  [72, 0, 79, 81, 79, 76, 74, 72],
-  [69, 72, 76, 0, 79, 76, 72, 69],
-  [65, 69, 72, 74, 76, 74, 72, 69],
-  [67, 71, 74, 77, 79, 77, 74, 71],
-  [84, 79, 76, 79, 81, 79, 76, 72],
-  [81, 76, 72, 76, 79, 76, 72, 69],
-  [77, 76, 72, 69, 72, 76, 77, 0],
-  [79, 77, 74, 71, 74, 77, 79, 0],
-  [76, 79, 84, 83, 81, 79, 76, 74],
-  [72, 76, 79, 81, 79, 76, 72, 69],
-  [77, 76, 74, 72, 69, 72, 74, 71],
-  [72, 0, 76, 0, 79, 0, 72, 0],
-];
-const CHORDS = [
-  [48, 52, 55],
-  [45, 48, 52],
-  [41, 45, 48],
-  [43, 47, 50],
-];
-
 export class GameAudio {
   constructor(storage, changed = () => {}) {
     this.storage = storage;
@@ -49,7 +24,6 @@ export class GameAudio {
     this.started = false;
     this.hidden = false;
     this.mode = "field";
-    this.tick = 0;
     this.context = null;
     this.lastEffect = 0;
   }
@@ -73,7 +47,7 @@ export class GameAudio {
       await this.context.resume();
       this.started = this.context.state === "running";
       this.applyVolume();
-      this.startScheduler();
+      await this.startMusic();
       this.changed();
       return this.started;
     } catch {
@@ -135,43 +109,23 @@ export class GameAudio {
       envelope.disconnect();
     };
   }
-  startScheduler() {
-    if (this.scheduler) return;
-    this.nextNote = this.context.currentTime + 0.06;
-    this.scheduler = setInterval(() => this.schedule(), 45);
-    this.schedule();
-  }
-  schedule() {
-    if (!this.started || this.hidden || this.context.state !== "running")
-      return;
-    const seconds =
-      60 / (this.mode === "boss" ? 132 : this.mode === "summon" ? 96 : 108) / 2;
-    if (this.nextNote < this.context.currentTime - 0.2)
-      this.nextNote = this.context.currentTime + 0.03;
-    while (this.nextNote < this.context.currentTime + 0.13) {
-      const bar = Math.floor(this.tick / 8) % 16,
-        beat = this.tick % 8,
-        chord = CHORDS[bar % 4],
-        t = this.nextNote;
-      if (this.prefs.music) {
-        const trans = this.mode === "boss" ? -12 : 0;
-        this.tone(
-          MELODY[bar][beat] + (MELODY[bar][beat] ? trans : 0),
-          t,
-          seconds * 0.85,
-          0.12,
-          "triangle",
-        );
-        this.tone(chord[beat % 3] + 12, t, seconds * 0.65, 0.045, "sine");
-        if (beat % 2 === 0)
-          this.tone(chord[0] - 12, t, seconds * 1.5, 0.11, "triangle");
-        if (beat === 0 || beat === 4)
-          for (const n of chord)
-            this.tone(n + 12, t, seconds * 3.5, 0.025, "sine");
-      }
-      this.tick++;
-      this.nextNote += seconds;
+  async startMusic() {
+    if (this.track) return;
+    if (!this.loading) {
+      this.loading = (async () => {
+        const response = await fetch(globalThis.POKEMON_BGM || "/audio/oldale-town.mp3");
+        if (!response.ok) throw new Error("BGM load failed");
+        return this.context.decodeAudioData(await response.arrayBuffer());
+      })().catch(error => { this.loading = null; throw error; });
     }
+    const buffer = await this.loading;
+    if (this.track) return;
+    const source = this.context.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(this.music);
+    source.start();
+    this.track = source;
   }
   effect(kind) {
     if (
@@ -212,8 +166,6 @@ export class GameAudio {
   async visibility(hidden) {
     this.hidden = hidden;
     if (hidden) {
-      clearInterval(this.scheduler);
-      this.scheduler = null;
       if (this.context?.state === "running") await this.context.suspend();
     } else if (this.started) {
       await this.unlock();

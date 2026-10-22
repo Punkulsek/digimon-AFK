@@ -146,7 +146,7 @@ function updateAudio() {
   );
   button.querySelector("span").textContent = {
     waiting: "음악 켜기",
-    playing: "숲속의 멜로디",
+    playing: "Oldale Town",
     muted: "음악 꺼짐",
     paused: "음악 일시정지",
     unavailable: "소리 미지원",
@@ -207,7 +207,7 @@ function updateHud() {
   if ($("#stage-progress"))
     $("#stage-progress").style.width = `${state.kills * 10}%`;
   hudText("#party-power", num(partyPower()));
-  hudText("#party-count", `${state.party.length} / 6`);
+  hudText("#party-count", `${state.party.length} / 5`);
   if ($("#boss-button"))
     $("#boss-button").disabled = state.kills < 10 || battle.boss;
   hudText(
@@ -421,7 +421,7 @@ function collection() {
   modal(
     "함께할 친구들",
     "포켓몬 도감",
-    `<div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b><small> · 편성 <span id="party-count">${state.party.length} / 6</span></small></span><button class="soft-button" data-action="sort">${i("arrow-down-wide-narrow")}${sort === "rarity" ? "등급순" : "전투력순"}</button></div><div class="collection-summary"><span>파티 전투력 <strong id="party-power">${num(partyPower())}</strong></span><span>카드를 선택해 성장·편성하세요.</span></div><div class="collection-grid">${sorted.map((p) => card(p)).join("")}</div>`,
+    `<div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b><small> · 편성 <span id="party-count">${state.party.length} / 5</span></small></span><button class="soft-button" data-action="sort">${i("arrow-down-wide-narrow")}${sort === "rarity" ? "등급순" : "전투력순"}</button></div><div class="collection-summary"><span>파티 전투력 <strong id="party-power">${num(partyPower())}</strong></span><span>카드를 선택해 성장·편성하세요.</span></div><div class="collection-grid">${sorted.map((p) => card(p)).join("")}</div>`,
   );
 }
 function detail(uid) {
@@ -483,7 +483,7 @@ function stages() {
   );
 }
 function audioSettings() {
-  return `<section class="audio-settings"><div class="audio-title">${i("volume-2")}<div><strong>모험을 채우는 소리</strong><small>오리지널 칩튠 · 숲속의 멜로디</small></div></div>${[
+  return `<section class="audio-settings"><div class="audio-title">${i("volume-2")}<div><strong>모험을 채우는 소리</strong><small>Oldale Town · 사용자 제공 BGM</small></div></div>${[
     ["music", "배경음악"],
     ["effects", "효과음"],
   ]
@@ -500,7 +500,7 @@ function settings() {
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 적 10마리 처치 후 자동으로 도전해요.</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: 포켓몬 데이즈 오리지널 칩튠</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 적 10마리 처치 후 자동으로 도전해요.</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
     "settings-modal",
   );
 }
