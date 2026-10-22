@@ -39,11 +39,16 @@ for (let id = 1; id <= 151; id++) {
   };
 }
 const forest = await readFile(resolve(root, "public/scene/forest.svg"));
+const viridianForest = await readFile(resolve(root, "public/scene/viridian-forest.png"));
 const offlineCss = css
   .replace(/@import\s+url\([^)]*\);?/g, "")
   .replace(
     /url\(["']?\/scene\/forest\.svg["']?\)/g,
     `url("data:image/svg+xml;base64,${forest.toString("base64")}")`,
+  )
+  .replace(
+    /url\(["']?\/scene\/viridian-forest\.png["']?\)/g,
+    `url("data:image/png;base64,${viridianForest.toString("base64")}")`,
   );
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">

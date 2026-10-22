@@ -44,6 +44,11 @@ body {
   box-shadow: none;
   overflow: hidden;
 }
+.scene[data-region="0"] {
+  background-image: url("/scene/viridian-forest.png");
+  image-rendering: pixelated;
+}
+
 .scene {
   inset: 0;
   background-position: center;

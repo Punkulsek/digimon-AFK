@@ -17,6 +17,13 @@ Kanto data was imported from the user-provided PokeAPI ZIP. The PokeAPI data lic
 
 ## Music and environment art
 
+The user selected background A for Viridian Forest (region index 0). Its image is
+stored at `public/scene/viridian-forest.png` and embedded in `play.html`.
+- Source: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-forest.png
+- Repository license: AGPLv3. The repository credits Kyle Dove for battle backdrops; a separate per-image reuse permission has not been verified. Inclusion does not transfer underlying artwork rights.
+- Other regions retain their existing environment pending user selection.
+- Requested music: Viridian Forest (Pokémon HeartGold / SoulSilver). Pending an identifiable audio file; no substitute track has been added.
+
 The original 16-bar chiptune melody, chord arrangement, and procedural effects in `src/audio.js` were created for this project. They use local Web Audio oscillators; no Pokémon soundtrack recording or third-party audio file is included.
 
 `public/scene/forest.svg` is an original vector environment drawn for this project. Interface icons use the installed Lucide package under its ISC license. Pokémon images retain their native aspect ratio and pixel rendering.
