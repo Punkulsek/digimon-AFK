@@ -18,6 +18,9 @@ test('독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
  await openStandalone(page);
  await expect(page.locator('#gold')).toHaveText('2,400');
  await expect(page.locator('.party-grid .pokemon-card')).toHaveCount(6);
+ await expect.poll(()=>page.locator('.party-grid img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0))).toBe(true);
+ await expect(page.locator('.party-grid img').first()).toHaveAttribute('src',/^data:image\/png;base64,/);
+ await expect(page.locator('#fighters img').first()).toHaveAttribute('src',/^data:image\/gif;base64,/);
  await expect.poll(()=>page.locator('.enemy-hp-number').textContent()).not.toBe('95 / 95');
  await page.locator('[data-action="auto"]').click();
  await page.locator('.party-grid [data-id="starter-0"]').click();
