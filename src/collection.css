@@ -250,3 +250,17 @@
 .material-list { max-height:230px; overflow:auto; margin:12px 0; }
 .material-list label { display:flex; align-items:center; gap:12px; padding:12px; background:#eef5e8; margin:5px 0; border-radius:8px; }
 .material-list input { width:22px; height:22px; }
+
+/* Reserve a separate sub-navigation row without resizing the formation header. */
+.collection-page { --subnav-height: 42px; padding-bottom:calc(var(--menu-height) + var(--subnav-height) + env(safe-area-inset-bottom, 0px) + 1px); }
+.collection-subnav { position:absolute; left:0; right:0; bottom:calc(var(--menu-height) + env(safe-area-inset-bottom, 0px)); height:var(--subnav-height); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:#edf4e4; border-top:1px solid #aac49c; }
+.collection-subnav button { border:0; border-radius:0; background:transparent; color:#355d40; font-weight:800; cursor:pointer; }
+.collection-subnav button+button { border-left:1px solid #aac49c; }
+.collection-subnav button.selected { background:#bedcaf; box-shadow:inset 0 -3px #6b965b; }
+.dex-header { flex-shrink:0; padding:20px 11%; }
+.dex-header h1 { margin:0; }
+.dex-card { display:flex; flex-direction:column; align-items:center; padding:12px; gap:8px; border:1px solid #b6cdaa; border-radius:12px; background:#f8f9ed; color:#355d40; cursor:pointer; }
+.dex-card .pokemon-art { width:90px; height:90px; }
+.dex-card.undiscovered img { filter:brightness(0); opacity:.4; }
+.collection-scroll .rarity-stars { display:block; position:absolute; top:27px; right:6px; z-index:3; }
+.collection-scroll .growth-stars { font-size:11px; gap:0; }

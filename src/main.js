@@ -1,4 +1,4 @@
-import {evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
+import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
   createIcons,
   Leaf,
@@ -183,7 +183,7 @@ function growthStars(p) {
 const materialNames={fire:'불꽃',water:'물',grass:'풀',electric:'전기',rock:'바위',ice:'얼음'};
 function growthPanel(p) {
  const options=evolutionOptions(p);
- return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li><li>${state.materials[e.material]>=e.amount?'✓':'○'} ${materialNames[e.material]} 진화 재료 ${num(e.amount)}개 / 보유 ${num(state.materials[e.material])}개</li></ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>동일 포켓몬 ${breakthroughCost(p)}장 필요 · 사용 가능 ${breakthroughCandidates(state,p).length}장</p><button class="soft-button full" data-action="breakthroughPreview" data-id="${p.uid}">돌파 재료 선택</button>`:'<p>최대 돌파 달성</p>'}</section>`;
+ return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li><li>${state.materials[e.material]>=e.amount?'✓':'○'} ${materialNames[e.material]} 진화 재료 ${num(e.amount)}개 / 보유 ${num(state.materials[e.material])}개</li></ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 재료 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>미편성 Lv.1·0돌파 카드가 자동 등록됩니다. 편성·육성 카드는 보호됩니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
 }
 function card(p, action = "detail") {
   const s = species(p.speciesId),
@@ -460,6 +460,7 @@ function modal(title, subtitle, body, cls = "") {
   $(".modal").focus();
   updateNavigation();
 }
+let collectionTab = "pokemon";
 function collection() {
   dungeonUI.close();
   active = "collection";
@@ -474,6 +475,11 @@ function collection() {
     const p=state.inventory.find(p=>p.uid===state.party[index]);
     return `<button class="party-slot ${p ? "occupied" : "empty"} ${replaceSlot === index ? "choosing" : ""}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 파티 슬롯${p ? ` ${species(p.speciesId).name}` : " 비어 있음"}"><span class="slot-number">${index+1}</span>${p ? `${art(species(p.speciesId), "field-art party-sprite")}<span class="slot-caption"><strong>${species(p.speciesId).name}</strong><small>Lv. ${p.level}</small></span>` : `${i("plus")}<span>포켓몬 편성</span>`}</button>`;
   }).join("")}</div></header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
+  if(collectionTab==='dex') {
+    const acquired=new Set(state.discovered||state.inventory.map(p=>p.speciesId));
+    page.innerHTML=`<header class="dex-header"><h1>관동 포켓몬 도감</h1><p>수집률 ${((acquired.size/SPECIES.length)*100).toFixed(1)}% · ${acquired.size} / ${SPECIES.length}</p></header><div class="collection-scroll dex-scroll" tabindex="0" aria-label="도감 목록"><div class="collection-grid">${[...SPECIES].sort((a,b)=>a.id-b.id).map(p=>`<button class="dex-card ${acquired.has(p.id)?'':'undiscovered'}" data-action="dexDetail" data-species="${p.id}"><small>No. ${String(p.id).padStart(3,'0')}</small>${art(p)}<strong>${acquired.has(p.id)?p.name:'미획득'}</strong></button>`).join('')}</div></div>`;
+  }
+  page.insertAdjacentHTML('beforeend',`<nav class="collection-subnav" aria-label="포켓몬 하위 메뉴">${[['pokemon','포켓몬'],['dex','도감']].map(([key,label])=>`<button data-action="collectionTab" data-tab="${key}" class="${collectionTab===key?'selected':''}" aria-pressed="${collectionTab===key}">${label}</button>`).join('')}</nav>`);
   icons();
   $(".collection-scroll").scrollTop = scroll;
   updateNavigation();
@@ -610,7 +616,16 @@ document.addEventListener("click", (e) => {
     case "close":
       closeModal();
       break;
+    case "collectionTab":
+      collectionTab=btn.dataset.tab;replaceSlot=null;collection();break;
+    case "dexDetail": {
+      const p=species(Number(btn.dataset.species));
+      const relations=EVOLUTIONS.filter(e=>evolutionFamily(e.from)===evolutionFamily(p.id));
+      modal(p.name,`관동 도감 No. ${String(p.id).padStart(3,'0')}`,`<p>타입: ${p.types.join(' / ')}</p><h3>진화 관계</h3>${relations.length?relations.map(e=>`<p>${species(e.from).name} → ${species(e.to).name}</p>`).join(''):'<p>관동 도감 내 진화 관계가 없습니다.</p>'}`);
+      break;
+    }
     case "collection":
+      collectionTab="pokemon";
       collection();
       break;
     case "detail":
@@ -716,18 +731,13 @@ document.addEventListener("click", (e) => {
       const p=state.inventory.find(p=>p.uid===btn.dataset.id);
       const e=evolutionOptions(p).find(e=>e.to===Number(btn.dataset.target));
       if(!e)break;
-      modal("진화 확인", `${species(p.speciesId).name} → ${species(e.to).name}`, `<p>${materialNames[e.material]} 진화 재료 ${num(e.amount)}개가 소비됩니다. 레벨과 돌파는 유지되며, 진화 후에는 같은 진화형 카드가 돌파 재료로 필요합니다.</p><button class="primary-button full" data-action="evolveConfirm" data-id="${p.uid}" data-target="${e.to}">진화 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
-      break;
-    }
-    case "breakthroughPreview": {
-      const p=state.inventory.find(p=>p.uid===btn.dataset.id);
-      modal("돌파 재료 선택", `동일 포켓몬 ${breakthroughCost(p)}장 선택`, `<p>선택한 카드는 영구 소비됩니다. 미편성 Lv.1·0돌파 카드만 사용할 수 있습니다.</p><div class="material-list">${breakthroughCandidates(state,p).map((q,j)=>`<label><input type="checkbox" name="breakthrough-material" value="${q.uid}">${species(q.speciesId).name} · Lv.1 · 카드 ${j+1}</label>`).join('')||'<p>사용 가능한 중복 카드가 없습니다.</p>'}</div><button class="primary-button full" data-action="breakthroughConfirm" data-id="${p.uid}">선택 카드로 돌파 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
+      modal("진화 확인", `${species(p.speciesId).name} → ${species(e.to).name}`, `<p>${materialNames[e.material]} 진화 재료 ${num(e.amount)}개가 소비됩니다. 레벨과 돌파는 유지되며, 진화 후에도 같은 진화 계열의 돌파 재료를 공유합니다.</p><button class="primary-button full" data-action="evolveConfirm" data-id="${p.uid}" data-target="${e.to}">진화 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
       break;
     }
     case "evolveConfirm":
     case "breakthroughConfirm": {
       const evolving=btn.dataset.action==='evolveConfirm';
-      const error=evolving?evolve(state,btn.dataset.id,Number(btn.dataset.target)):breakthrough(state,btn.dataset.id,[...document.querySelectorAll('input[name="breakthrough-material"]:checked')].map(el=>el.value));
+      const error=evolving?evolve(state,btn.dataset.id,Number(btn.dataset.target)):breakthrough(state,btn.dataset.id);
       if(error){toast(error);break;}
       battle.resetParty();persist();renderBattle();collection();detail(btn.dataset.id);sound.effect("level");toast(evolving?'진화 완료!':'돌파 완료!');
       break;

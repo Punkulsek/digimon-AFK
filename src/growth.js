@@ -1,3 +1,4 @@
+import {recordCollection} from "./collection-record.js";
 // Game-specific long-term requirements, not the main-series evolution rules.
 // Each row: source, target, level, cleared region, material type, quantity.
 export const EVOLUTIONS = [
@@ -41,18 +42,26 @@ export function evolve(state,uid,target) {
  const e=p&&evolutionOptions(p).find(e=>e.to===target);
  if(!e)return '진화할 수 없는 대상이에요.';
  if(!evolutionReady(state,p,e))return '레벨·일반 스테이지·진화 재료 조건을 모두 충족해야 해요.';
- state.materials[e.material]-=e.amount;p.speciesId=e.to;
+ recordCollection(state,[e.to]);state.materials[e.material]-=e.amount;p.speciesId=e.to;
  return null;
 }
-export function breakthroughCandidates(state,p) {
- return state.inventory.filter(q=>q.uid!==p.uid&&q.speciesId===p.speciesId&&!state.party.includes(q.uid)&&q.level===1&&!(q.breakthrough||0));
+export function evolutionFamily(id) {
+ const parent=EVOLUTIONS.find(e=>e.to===id);
+ return parent?evolutionFamily(parent.from):id;
 }
-export function breakthrough(state,uid,ids) {
+// Inventory is the material ledger: registration is automatic, consumption only on breakthrough.
+// Party members and invested cards are protected from automatic consumption.
+export function breakthroughCandidates(state,p) {
+ return state.inventory.filter(q=>q.uid!==p.uid&&evolutionFamily(q.speciesId)===evolutionFamily(p.speciesId)&&!state.party.includes(q.uid)&&q.level===1&&!(q.breakthrough||0));
+}
+export function breakthrough(state,uid) {
  const p=state.inventory.find(p=>p.uid===uid);
  if(!p)return '포켓몬을 찾을 수 없어요.';
  if((p.breakthrough||0)>=10)return '최대 10돌파에 도달했어요.';
- const available=new Set(breakthroughCandidates(state,p).map(q=>q.uid));
- if(!Array.isArray(ids)||ids.length!==breakthroughCost(p)||new Set(ids).size!==ids.length||!ids.every(id=>available.has(id)))return '동일 포켓몬의 미편성 Lv.1·0돌파 카드가 부족하거나 선택이 변경됐어요.';
- const consumed=new Set(ids);state.inventory=state.inventory.filter(q=>!consumed.has(q.uid));p.breakthrough=(p.breakthrough||0)+1;
+ const candidates=breakthroughCandidates(state,p),cost=breakthroughCost(p);
+ if(candidates.length<cost)return '같은 진화 계열의 돌파 재료가 부족해요.';
+ recordCollection(state);
+ const consumed=new Set(candidates.slice(0,cost).map(q=>q.uid));
+ state.inventory=state.inventory.filter(q=>!consumed.has(q.uid));p.breakthrough=(p.breakthrough||0)+1;
  return null;
 }

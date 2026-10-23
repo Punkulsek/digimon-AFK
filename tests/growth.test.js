@@ -18,14 +18,27 @@ test('돌파 1~10 비용·능력치 증가, 최대 제한 및 저장 복원',()=
  const s=initialState(),p=s.inventory[0];let prev=stats(p);
  for(let n=1;n<=10;n++){
  const ids=Array.from({length:n},(_,j)=>`copy-${n}-${j}`);s.inventory.push(...ids.map(uid=>({uid,speciesId:1,level:1,breakthrough:0})));
- assert.equal(breakthroughCost(p),n);assert.equal(breakthrough(s,p.uid,ids),null);assert.equal(p.breakthrough,n);assert.ok(stats(p).hp>prev.hp&&stats(p).atk>prev.atk);prev=stats(p);assert.ok(ids.every(id=>!s.inventory.some(q=>q.uid===id)));
+ assert.equal(breakthroughCost(p),n);assert.equal(breakthrough(s,p.uid),null);assert.equal(p.breakthrough,n);assert.ok(stats(p).hp>prev.hp&&stats(p).atk>prev.atk);prev=stats(p);assert.ok(ids.every(id=>!s.inventory.some(q=>q.uid===id)));
  }
- assert.ok(breakthrough(s,p.uid,[]));assert.equal(load({getItem:()=>JSON.stringify(s)}).state.inventory[0].breakthrough,10);
+ assert.ok(breakthrough(s,p.uid));assert.equal(load({getItem:()=>JSON.stringify(s)}).state.inventory[0].breakthrough,10);
 });
-test('재료 보호·중복 선택·다른 종·부족 시 무변경 및 레거시 저장',()=>{
- const s=initialState(),p=s.inventory[0];p.breakthrough=1;
- s.inventory.push({uid:'plain',speciesId:1,level:1},{uid:'raised',speciesId:1,level:2},{uid:'starred',speciesId:1,level:1,breakthrough:1});
- assert.deepEqual(breakthroughCandidates(s,p).map(q=>q.uid),['plain']);
- for(const ids of [[],['plain','plain'],['plain','raised'],['plain','starred'],['plain',s.party[1]],['plain',p.uid]]) {const before=JSON.stringify(s);assert.ok(breakthrough(s,p.uid,ids));assert.equal(JSON.stringify(s),before);}
+test('자동 재료의 계열 공유·편성 및 육성 보호·부족 시 무변경',()=>{
+ const s=initialState(),p=s.inventory[1];p.speciesId=6;p.breakthrough=4;p.level=80;
+ s.inventory.push(...[4,4,5,5,5].map((speciesId,j)=>({uid:`copy-${j}`,speciesId,level:1})));
+ s.inventory.push({uid:'raised',speciesId:4,level:2},{uid:'starred',speciesId:5,level:1,breakthrough:1});
+ assert.equal(breakthroughCandidates(s,p).length,5);
+ assert.equal(breakthrough(s,p.uid),null);assert.equal(p.breakthrough,5);
+ assert.ok(s.inventory.some(q=>q.uid==='raised'));assert.ok(s.inventory.some(q=>q.uid==='starred'));
+ assert.ok(s.discovered.includes(4)&&s.discovered.includes(5)&&s.discovered.includes(6));
+ const before=JSON.stringify(s);assert.ok(breakthrough(s,p.uid));assert.equal(JSON.stringify(s),before);
  delete p.breakthrough;assert.equal(load({getItem:()=>JSON.stringify(s)}).status,'loaded');p.breakthrough=11;assert.equal(validateState(s),false);
+});
+test('진화·소비 후 계열 재료와 도감 획득 기록 저장',()=>{
+ const s=initialState(),p=s.inventory[1];p.level=40;s.stage=61;s.materials.fire=150;
+ s.inventory.push({uid:'duplicate',speciesId:6,level:1});
+ assert.equal(breakthroughCandidates(s,p).length,1);assert.equal(evolve(s,p.uid,5),null);assert.equal(breakthroughCandidates(s,p).length,1);
+ assert.equal(breakthrough(s,p.uid),null);
+ const restored=load({getItem:()=>JSON.stringify(s)}).state;
+ for(const id of [4,5,6])assert.ok(restored.discovered.includes(id));
+ assert.equal(breakthroughCandidates(restored,restored.inventory[1]).length,0);
 });

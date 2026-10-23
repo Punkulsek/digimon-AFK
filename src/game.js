@@ -1,3 +1,4 @@
+import {recordCollection} from "./collection-record.js";
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES} from './dungeon-config.js';
 import {SPECIES,species,RARITIES} from './data.js';
@@ -6,16 +7,17 @@ export const SAVE_KEY='pokemon-days-v1';
 export const stats = p => {const s=species(p.speciesId), boost=1+(p.breakthrough||0)*.15;return {hp:Math.round(s.hp*boost*(1+(p.level-1)*.14)),atk:Math.round(s.atk*boost*(1+(p.level-1)*.16))}};
 export const power = p => {const s=stats(p);return s.hp+s.atk*5};
 export const levelCost = p => Math.ceil(p.level/5);
-export function initialState(){return {...dungeonDefaults(),version:1,stage:1,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
+export function initialState(){return {...dungeonDefaults(),version:1,discovered:[1,4,7,25,39,133],stage:1,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
+ if(s.discovered!==undefined&&(!Array.isArray(s.discovered)||s.discovered.length>151||new Set(s.discovered).size!==s.discovered.length||!s.discovered.every(id=>species(id))))return false;
  if(!s.inventory.every(p=>p&&typeof p.uid==='string'&&species(p.speciesId)&&Number.isSafeInteger(p.level)&&p.level>=1&&p.level<=100&&(p.breakthrough===undefined||(Number.isInteger(p.breakthrough)&&p.breakthrough>=0&&p.breakthrough<=10))))return false;
  if(!Number.isSafeInteger(s.candies)||s.candies<0||!s.materials||!s.dungeonClears)return false;
  if(!EVOLUTION_TYPES.every(t=>Number.isSafeInteger(s.materials[t.id])&&s.materials[t.id]>=0)||!DUNGEONS.every(d=>Number.isInteger(s.dungeonClears[d.id])&&s.dungeonClears[d.id]>=0&&s.dungeonClears[d.id]<=DUNGEON_STAGES))return false;
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
  return Array.isArray(s.party)&&s.party.length>0&&s.party.length<=partyLimit&&new Set(s.party).size===s.party.length&&s.party.every(id=>s.inventory.some(p=>p.uid===id))&&typeof s.auto==='boolean'&&typeof s.autoBoss==='boolean'&&[1,2,3].includes(s.speed)&&Number.isSafeInteger(s.totalKills)&&s.totalKills>=0&&typeof s.questClaimed==='boolean'&&Number.isSafeInteger(s.summons)&&s.summons>=0;
 }
-export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s))return {state:s,status:'loaded'};return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
+export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
 export function save(storage,state){try{storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
 export function summon(state,count,rng=Math.random){
  if(![1,10].includes(count))return {error:'잘못된 소환 횟수입니다.'};
@@ -26,7 +28,7 @@ export function summon(state,count,rng=Math.random){
  for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;for(let r=0;r<RARITIES.length;r++){roll-=RARITIES[r].chance;if(roll<0){rarity=r;break;}}
  const pool=SPECIES.filter(p=>p.rarity===rarity);const s=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
  const p={uid:`summon-${++state.summons}`,speciesId:s.id,level:1,breakthrough:0};state.inventory.push(p);result.push(p);}
- return {result,cost};
+ recordCollection(state);return {result,cost};
 }
 export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
