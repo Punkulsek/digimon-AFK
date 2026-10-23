@@ -239,6 +239,8 @@ function updateHud() {
         ? "다이아 300개 받기"
         : `포켓몬 처치 ${state.totalKills} / 10`,
   );
+  if (battle.dungeon) $("#scene").dataset.dungeon = battle.dungeon.id;
+  else delete $("#scene").dataset.dungeon;
   $("#scene").dataset.region = Math.floor((state.stage - 1) / 20) % 4;
   $(".battlefield").classList.toggle("boss-active", battle.boss);
   hudText(

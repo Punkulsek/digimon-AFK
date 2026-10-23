@@ -90,3 +90,31 @@ test("저장소 접근이 차단되어도 독립 HTML 실행", async ({ page }) 
   ).toHaveText("2×");
   expect(errors).toEqual([]);
 });
+
+test('모든 승인 던전 배경을 오프라인 표시하고 일반 지역 배경 복원', async ({page}) => {
+  await openStandalone(page);
+  await pauseBattle(page);
+  const scene = page.locator('#scene');
+  const original = await scene.evaluate(el => getComputedStyle(el).backgroundImage);
+  const backgrounds = new Set();
+  for (const id of ['coin','candy','evolution-fire','evolution-water','evolution-grass','evolution-electric','evolution-rock','evolution-ice']) {
+    await page.getByRole('button',{name:'던전',exact:true}).click();
+    if (id.startsWith('evolution-')) await page.locator('[data-dungeon="evolution"]').click();
+    await page.locator(`[data-dungeon="${id}"]`).click();
+    await page.getByRole('button',{name:'던전 입장'}).click();
+    await expect(scene).toHaveAttribute('data-dungeon',id);
+    await expect(scene).toHaveCSS('filter','none');
+    const background = await scene.evaluate(async el => {
+      const value = getComputedStyle(el).backgroundImage;
+      const img = new Image(); img.src = value.slice(5,-2); await img.decode();
+      if (!img.naturalWidth) throw new Error('Missing background');
+      return value;
+    });
+    expect(background).toContain('data:image/png;base64,');
+    backgrounds.add(background);
+    await page.locator('.nav-button[data-action="home"]').click();
+    await expect(scene).not.toHaveAttribute('data-dungeon');
+    expect(await scene.evaluate(el => getComputedStyle(el).backgroundImage)).toBe(original);
+  }
+  expect(backgrounds.size).toBe(8);
+});

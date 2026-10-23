@@ -31,3 +31,21 @@ Procedural sound effects in `src/audio.js` use local Web Audio oscillators. The 
 ## Currency icons
 
 `public/currency/pokecoin.png` and `diamond.png` are unchanged PNG files extracted from the user-provided 포켓코인.zip and 다이아.zip, respectively. Both are embedded in the standalone HTML. No substitute artwork was generated.
+
+## Approved dungeon backgrounds
+
+The user approved the recommended combination. Files are unchanged copies from
+Pokémon Showdown client revision `0de26d2ef7258e5619057f63b3774240b45cecbd`,
+stored under `public/scene/dungeons/` and embedded in `play.html`.
+
+- `coin.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-earthycave.png
+- `candy.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-meadow.png
+- `evolution-fire.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-volcanocave.png
+- `evolution-water.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-beach.png
+- `evolution-grass.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-forest.png
+- `evolution-electric.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-thunderplains.png
+- `evolution-rock.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-mountain.png
+- `evolution-ice.png`: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-icecave.png
+
+The client repository specifies AGPLv3; separate per-image reuse permissions
+have not been verified. User selection does not transfer underlying artwork rights.

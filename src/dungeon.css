@@ -55,3 +55,15 @@
 @media(max-height:420px) and (orientation:landscape){
  .dungeon-page { padding-top:6px; }
 }
+
+/* User-approved dungeon backdrops, independent of the overworld region. */
+.scene[data-dungeon] { filter: none; transition: none; image-rendering: pixelated; }
+.scene[data-dungeon] > * { display: none; }
+.scene[data-dungeon="coin"] { background-image: url("/scene/dungeons/coin.png"); }
+.scene[data-dungeon="candy"] { background-image: url("/scene/dungeons/candy.png"); }
+.scene[data-dungeon="evolution-fire"] { background-image: url("/scene/dungeons/evolution-fire.png"); }
+.scene[data-dungeon="evolution-water"] { background-image: url("/scene/dungeons/evolution-water.png"); }
+.scene[data-dungeon="evolution-grass"] { background-image: url("/scene/dungeons/evolution-grass.png"); }
+.scene[data-dungeon="evolution-electric"] { background-image: url("/scene/dungeons/evolution-electric.png"); }
+.scene[data-dungeon="evolution-rock"] { background-image: url("/scene/dungeons/evolution-rock.png"); }
+.scene[data-dungeon="evolution-ice"] { background-image: url("/scene/dungeons/evolution-ice.png"); }
