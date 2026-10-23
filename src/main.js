@@ -57,6 +57,8 @@ import "./style.css";
 import "./polish.css";
 import "./fullscreen.css";
 import "./collection.css";
+import "./dungeon.css";
+import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
   Leaf,
@@ -186,13 +188,16 @@ $("#app").innerHTML = `
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button>
+<button class="dungeon-entry soft-button" data-action="dungeons">${i("swords")}<span>던전</span></button>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
 </section>
 </main>
+<section id="dungeon-page" class="dungeon-page" hidden aria-label="던전"></section>
 <section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
 <nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
+const dungeonUI = createDungeonUI({state,art,icon:i,icons,onSave:persist,onHome:closeModal,sound});
 function hudText(selector, value) {
   const element = $(selector);
   if (element) element.textContent = value;
@@ -327,6 +332,7 @@ function attackEffect(uid, critical) {
   };
 }
 function step() {
+  if (dungeonUI.isOpen()) { dungeonUI.tick(); return; }
   const events = battle.tick();
   let refresh = false;
   for (const e of events) {
@@ -393,6 +399,7 @@ function leaveCollection() {
   replaceSlot = null;
 }
 function closeModal() {
+  dungeonUI.close();
   if (busy) return;
   const hadModal = !!$("#modal-root").children.length;
   $("#modal-root").innerHTML = "";
@@ -423,6 +430,7 @@ function modal(title, subtitle, body, cls = "") {
   updateNavigation();
 }
 function collection() {
+  dungeonUI.close();
   active = "collection";
   const scroll = $(".collection-scroll")?.scrollTop || 0;
   $("#modal-root").innerHTML = "";
@@ -465,11 +473,12 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${s.rarity}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${"✦".repeat(s.rarity + 1)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>${currencyIcon("pokecoin", "포켓코인")}${num(levelCost(p))}</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 포켓코인 ${num(state.gold)} · 편성 변경 시 전투 HP가 회복돼요</small></div></div>`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${s.rarity}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${"✦".repeat(s.rarity + 1)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>`,
     "detail-modal",
   );
 }
 function summonScreen() {
+  dungeonUI.close();
   leaveCollection();
   active = "summon";
   sound.setMode("summon");
@@ -543,7 +552,15 @@ document.addEventListener("click", (e) => {
   const action = btn.dataset.action;
   if (action !== "music" && !sound.started) sound.unlock();
   if (action !== "music") sound.effect("click");
+  if (dungeonUI.handle(action, btn)) return;
   switch (action) {
+    case "dungeons":
+      leaveCollection();
+      $("#modal-root").innerHTML = "";
+      active = "dungeons";
+      dungeonUI.open();
+      updateNavigation();
+      break;
     case "music":
       sound.toggleMusic();
       break;

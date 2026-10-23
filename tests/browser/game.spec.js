@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 import { pauseBattle } from "./helpers.js";
 import { initialState } from "../../src/game.js";
 test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ page }) => {
+  const seed = initialState(); seed.candies=10;
+  await page.addInitScript(s=>{if(!localStorage.getItem("pokemon-days-v1"))localStorage.setItem("pokemon-days-v1",JSON.stringify(s));},seed);
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");

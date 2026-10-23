@@ -1,0 +1,85 @@
+.dungeon-entry { position:absolute; top:110px; right:24px; z-index:8; padding:12px 20px; box-shadow:0 4px 0 #90ad79; }
+.dungeon-entry svg { width:24px; height:24px; }
+.dungeon-page[hidden] { display:none; }
+.in-dungeon > .topbar,.in-dungeon > .adventure { visibility:hidden; pointer-events:none; }
+.dungeon-page { position:absolute; inset:0; display:flex; flex-direction:column; padding:24px 5% calc(var(--menu-height) + env(safe-area-inset-bottom,0px) + 16px); background:radial-gradient(ellipse at top right,#cae9e4,transparent 65%),#f5f4e6; color:#355d40; }
+.dungeon-header { display:flex; align-items:center; justify-content:space-between; gap:15px; flex-shrink:0; padding-bottom:16px; }
+.dungeon-header h1 { font-size:26px; margin:4px 0; }
+.dungeon-content { overflow-y:auto; flex:1; min-height:0; padding:5px 6px 20px; overscroll-behavior:contain; }
+.dungeon-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.dungeon-card { min-width:0; border:1px solid #bbd2ac; border-bottom:4px solid #a7bf98; border-radius:20px; padding:24px 14px; background:linear-gradient(#fffef5,#e5eedb); color:#355d40; display:flex; flex-direction:column; align-items:center; gap:14px; cursor:pointer; box-shadow:0 6px 15px #2a593314; transition:transform .15s; }
+.dungeon-card:hover { transform:translateY(-3px); }
+.dungeon-card h2 { font-size:20px; margin:0; }
+.dungeon-card p { font-size:13px; margin:0; }
+.dungeon-card strong { font-size:14px; }
+.dungeon-card small { font-size:12px; color:#668363; }
+.dungeon-card .pokemon-art { height:100px; width:120px; }
+.dungeon-card .pokemon-art img { width:100%; height:100%; object-fit:contain; }
+.dungeon-types { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.type-dungeon { border-top:5px solid var(--type-color); padding:16px; gap:8px; }
+.type-dungeon > svg { color:var(--type-color); }
+.type-dungeon .pokemon-art { height:70px; width:90px; }
+.dungeon-wallet { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:20px 0 10px; padding:15px; background:#dfead6; border:1px solid #b8cca9; border-radius:12px; font-size:12px; }
+.dungeon-wallet span { border-left:1px solid #b8cca9; padding-left:10px; }
+.dungeon-note { text-align:center; color:#72876a; font-size:12px; }
+.dungeon-stage-list { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:8px; }
+.dungeon-stage-list button { flex-direction:column; padding:12px 5px; gap:8px; }
+.dungeon-stage-list small { font-size:10px; }
+.dungeon-stage-list .selected { background:#b9d5a5; outline:2px solid #74925d; }
+.dungeon-stage-list button:disabled { opacity:.45; cursor:not-allowed; }
+.dungeon-preview { margin:24px auto; max-width:850px; padding:25px; display:flex; align-items:center; justify-content:center; gap:40px; background:#fffef4; border:1px solid #bdcfae; border-radius:18px; }
+.dungeon-preview > .pokemon-art { width:160px; height:160px; }
+.dungeon-preview > .pokemon-art img { width:100%; height:100%; object-fit:contain; }
+.dungeon-preview h2 { font-size:22px; }
+.dungeon-preview p { font-size:14px; }
+.dungeon-reward { color:#527c3d; font-weight:700; }
+.dungeon-arena { min-height:260px; display:flex; align-items:center; justify-content:space-around; gap:18px; padding:28px; border-radius:24px; border:2px solid #a9cdb7; background:radial-gradient(ellipse at center,#cce5c1,#87b9ac); }
+.dungeon-team { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; width:60%; max-width:620px; }
+.dungeon-combatant { display:flex; align-items:center; flex-direction:column; gap:4px; min-width:0; text-align:center; }
+.dungeon-combatant .pokemon-art { width:100px; height:90px; max-width:100%; }
+.dungeon-combatant .pokemon-art img { width:100%; height:100%; object-fit:contain; }
+.dungeon-combatant strong { font-size:12px; }
+.dungeon-combatant small { font-size:11px; }
+.dungeon-combatant progress { width:90px; max-width:100%; height:9px; accent-color:#4d9c61; }
+.dungeon-shadow { width:50px; max-width:75%; height:7px; background:#0004; border-radius:50%; margin-top:-7px; }
+.dungeon-opponent .pokemon-art { width:150px; height:140px; }
+.dungeon-opponent progress { accent-color:#c66d5d; }
+.dungeon-vs { font-size:22px; font-weight:900; color:#3a786c; }
+.dungeon-combat-log { text-align:center; font-weight:700; }
+.dungeon-result { margin:20px auto; padding:30px; max-width:600px; text-align:center; border-radius:24px; border:1px solid #b7cdaa; background:#fffdf1; }
+.dungeon-result > svg { width:50px; height:50px; color:#b5a475; }
+.dungeon-result.won > svg { color:#d9ab41; }
+.dungeon-result strong { font-size:20px; color:#568342; }
+.dungeon-result-actions { display:flex; justify-content:center; gap:12px; margin-top:25px; }
+@media(max-width:800px){
+ .dungeon-page { padding:14px 3% calc(var(--menu-height) + env(safe-area-inset-bottom,0px) + 8px); }
+ .dungeon-header h1 { font-size:20px; }
+ .dungeon-header .eyebrow { display:none; }
+ .dungeon-cards { gap:10px; }
+ .dungeon-card { padding:15px 8px; gap:10px; }
+ .dungeon-card h2 { font-size:15px; }
+ .dungeon-card p { font-size:11px; }
+ .dungeon-card strong { font-size:12px; }
+ .dungeon-stage-list { grid-template-columns:repeat(5,minmax(0,1fr)); }
+ .dungeon-preview { gap:15px; padding:15px; }
+ .dungeon-team { gap:14px; }
+ .dungeon-arena { padding:15px; gap:10px; }
+ .dungeon-combatant .pokemon-art { width:65px; height:65px; }
+ .dungeon-opponent .pokemon-art { width:100px; height:100px; }
+}
+@media(max-width:500px){ .dungeon-cards{grid-template-columns:1fr;} .dungeon-types{grid-template-columns:repeat(2,minmax(0,1fr));} .dungeon-preview{flex-direction:column;} .dungeon-entry{top:165px;right:14px;padding:8px 12px;} }
+@media(max-height:540px) and (orientation:landscape){ .dungeon-entry{top:90px;padding:8px 14px;} .dungeon-card .pokemon-art{height:65px;} .dungeon-header{padding-bottom:6px;} .dungeon-arena{min-height:200px;} .dungeon-preview{margin:12px auto;} }
+@media(max-height:420px) and (orientation:landscape){
+ .dungeon-entry { top:126px; right:14px; }
+ .dungeon-page { padding-top:6px; }
+ .dungeon-arena { min-height:0; height:150px; padding:6px 12px; }
+ .dungeon-team { gap:6px; }
+ .dungeon-combatant { gap:2px; }
+ .dungeon-combatant .pokemon-art { width:42px; height:42px; }
+ .dungeon-combatant strong { font-size:9px; }
+ .dungeon-combatant small { display:none; }
+ .dungeon-combatant progress { height:6px; }
+ .dungeon-opponent .pokemon-art { width:80px; height:80px; }
+ .dungeon-combat-log { font-size:11px; margin:6px 0; }
+}
+@media(max-width:700px) and (orientation:landscape){ .dungeon-entry { top:126px; right:14px; } }
