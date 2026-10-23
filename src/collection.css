@@ -92,33 +92,6 @@
   .sort-options .soft-button { padding: 7px; font-size: 11px; }
 }
 
-/* Keep the management surface centered, with stable card dimensions. */
-.game-shell .collection-page {
-  inset: 0 11%;
-  width: 78%;
-  border-left: 1px solid #b9d0ad;
-  border-right: 1px solid #b9d0ad;
-}
-.game-shell.managing { background: #c7ddcf; }
-.collection-page .collection-scroll .collection-grid {
-  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
-  gap: 9px;
-}
-.currency .currency-name { font-size: 10px; white-space: nowrap; }
-.currency-name { display: inline-block; font-size: 11px; white-space: nowrap; }
-@media (max-width: 700px) {
-  .topbar .currencies { left: auto; right: 0; }
-}
-.collection-page .party-slot .party-sprite { max-width: 100%; }
-@media (max-width: 600px) {
-  .collection-page .collection-scroll .collection-grid { grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); }
-  .collection-page .management-title { flex-wrap: wrap; gap: 3px; }
-  .collection-page .collection-toolbar { flex-wrap: wrap; gap: 4px; }
-  .collection-page .sort-options { gap: 3px; }
-  .collection-page .party-slot .slot-caption { flex-direction: column; gap: 0; }
-  .collection-page .party-slot strong { font-size: 9px; }
-  .collection-page .party-total { margin-left: auto; }
-}
 @media (max-height: 540px) and (orientation: landscape) {
   .collection-page { padding-top: 10px; padding-bottom: 72px; }
   .management-title { margin-bottom: 6px; }
@@ -244,4 +217,24 @@
   .collection-scroll .collection-grid { grid-template-columns: repeat(auto-fill,minmax(94px,1fr)); }
   .bottom-nav .nav-button { font-size: 14px; }
   .bottom-nav .nav-button > svg, .bottom-nav .nav-button .nav-ball { width: 24px; height: 24px; }
+}
+
+/* Only the inventory list is narrowed; the original formation stays full width. */
+.collection-page .collection-scroll {
+  width: 78%;
+  margin-inline: auto;
+  background: transparent;
+}
+.collection-page .collection-scroll .collection-grid {
+  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+  gap: 9px;
+}
+.currency-icon { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; flex-shrink: 0; }
+.topbar .currency-icon { width: 24px; height: 24px; }
+@media (max-width: 700px) {
+  .topbar .currencies { left: auto; right: 0; }
+  .topbar .currency-icon { width: 21px; height: 21px; }
+}
+@media (max-width: 600px) {
+  .collection-page .collection-scroll .collection-grid { grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); }
 }

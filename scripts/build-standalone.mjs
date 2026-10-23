@@ -38,6 +38,11 @@ for (let id = 1; id <= 151; id++) {
     animated: `data:image/gif;base64,${animated.toString("base64")}`,
   };
 }
+const currencyData = {};
+for (const name of ["pokecoin", "diamond"]) {
+  const png = await readFile(resolve(root, `public/currency/${name}.png`));
+  currencyData[name] = `data:image/png;base64,${png.toString("base64")}`;
+}
 const bgm = await readFile(resolve(root, "public/audio/oldale-town.mp3"));
 const forest = await readFile(resolve(root, "public/scene/forest.svg"));
 const viridianForest = await readFile(resolve(root, "public/scene/viridian-forest.png"));
@@ -55,7 +60,7 @@ const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>
 <body><div id="app"></div>
-<script>window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
+<script>window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
 <script type="module">${safeScript}</script>
 <!-- PokeAPI data attribution and license:\n${license.replace(/-->/g, "-- >")}-->
 <!-- Asset credits:\n${credits.replace(/-->/g, "-- >")}-->

@@ -27,3 +27,7 @@ stored at `public/scene/viridian-forest.png` and embedded in `play.html`.
 Procedural sound effects in `src/audio.js` use local Web Audio oscillators. The previous synthesized background melody has been replaced exclusively by the user-provided MP3. No music search or other recording was used.
 
 `public/scene/forest.svg` is an original vector environment drawn for this project. Interface icons use the installed Lucide package under its ISC license. Pokémon images retain their native aspect ratio and pixel rendering.
+
+## Currency icons
+
+`public/currency/pokecoin.png` and `diamond.png` are unchanged PNG files extracted from the user-provided 포켓코인.zip and 다이아.zip, respectively. Both are embedded in the standalone HTML. No substitute artwork was generated.

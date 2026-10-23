@@ -13,8 +13,15 @@ test('전체화면 관리, 고정 파티, 내부 스크롤, 정렬 및 슬롯 �
   await page.locator('[data-action="collection"]').click();
   await expect(page.locator('#collection-page')).toBeVisible();
   const management=await page.locator('#collection-page').boundingBox();
-  expect(management.width).toBeCloseTo(1440*.78,0);
-  expect(management.x).toBeCloseTo(1440*.11,0);
+  expect(management.width).toBe(1440);
+  expect(management.x).toBe(0);
+  const formation=await page.locator('.party-header').boundingBox();
+  expect(formation.width).toBe(1440);
+  expect(formation.x).toBe(0);
+  const inventory=await page.locator('.collection-scroll').boundingBox();
+  expect(inventory.width).toBeCloseTo(1440*.78,0);
+  expect(inventory.x).toBeCloseTo(1440*.11,0);
+  await expect(page.locator('.collection-scroll')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
   await expect(page.locator('.adventure')).toBeHidden();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.party-slot')).toHaveCount(5);

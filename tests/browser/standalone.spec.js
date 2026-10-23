@@ -27,6 +27,11 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   await context.setOffline(true);
   await openStandalone(page);
   await expect(page.locator("#gold")).toHaveText("10,000");
+  for (const name of ['포켓코인','다이아']) {
+    const icon=page.locator('.currencies').getByRole('img',{name,exact:true});
+    await expect(icon).toHaveAttribute('src',/^data:image\/png;base64,/);
+    expect(await icon.evaluate(async img=>{await img.decode();return img.naturalWidth;})).toBe(1254);
+  }
   await expect(page.locator("#fighters .fighter")).toHaveCount(5);
   await expect
     .poll(() =>
