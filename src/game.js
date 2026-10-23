@@ -4,7 +4,7 @@ export const SAVE_KEY='pokemon-days-v1';
 export const stats = p => {const s=species(p.speciesId);return {hp:Math.round(s.hp*(1+(p.level-1)*.14)),atk:Math.round(s.atk*(1+(p.level-1)*.16))}};
 export const power = p => {const s=stats(p);return s.hp+s.atk*5};
 export const levelCost = p => p.level*80;
-export function initialState(){return {version:1,stage:1,kills:0,gold:2400,gems:3600,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
+export function initialState(){return {version:1,stage:1,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
  if(!s.inventory.every(p=>p&&typeof p.uid==='string'&&species(p.speciesId)&&Number.isSafeInteger(p.level)&&p.level>=1&&p.level<=100))return false;
@@ -24,7 +24,7 @@ export function summon(state,count,rng=Math.random){
  const p={uid:`summon-${++state.summons}`,speciesId:s.id,level:1};state.inventory.push(p);result.push(p);}
  return {result,cost};
 }
-export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.gold<cost)return '골드가 부족해요.';state.gold-=cost;p.level++;return null;}
+export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.gold<cost)return '포켓코인가 부족해요.';state.gold-=cost;p.level++;return null;}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
  constructor(state){this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();}

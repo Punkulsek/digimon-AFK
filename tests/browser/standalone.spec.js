@@ -26,7 +26,7 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   page.on("pageerror", (e) => errors.push(e.message));
   await context.setOffline(true);
   await openStandalone(page);
-  await expect(page.locator("#gold")).toHaveText("2,400");
+  await expect(page.locator("#gold")).toHaveText("10,000");
   await expect(page.locator("#fighters .fighter")).toHaveCount(5);
   await expect
     .poll(() =>
@@ -59,7 +59,7 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
   await page.keyboard.press("Escape");
   await page.reload();
-  await expect(page.locator("#gems")).toHaveText("900");
+  await expect(page.locator("#gems")).toHaveText("7,300");
   await page.locator('.nav-button[data-action="collection"]').click();
   await expect(page.locator(".collection-grid .pokemon-card")).toHaveCount(16);
   expect(errors).toEqual([]);

@@ -19,6 +19,11 @@ test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ pag
   await page.locator('[data-action="draw"][data-count="10"]').click();
   await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
   await page.locator(".result-confirm").click();
+  for (let n=0;n<2;n++) {
+    await page.locator('[data-action="draw"][data-count="10"]').click();
+    await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
+    await page.locator(".result-confirm").click();
+  }
   await page.locator('[data-action="draw"][data-count="10"]').click();
   await expect(page.getByRole("status")).toContainText("다이아가 부족");
   await page.keyboard.press("Escape");
@@ -26,7 +31,7 @@ test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ pag
     localStorage.getItem("pokemon-days-v1"),
   );
   await page.reload();
-  await expect(page.locator("#gems")).toHaveText("900");
+  await expect(page.locator("#gems")).toHaveText("1,900");
   expect(
     await page.evaluate(() => localStorage.getItem("pokemon-days-v1")),
   ).toEqual(before);
@@ -73,10 +78,10 @@ test("기존 저장 데이터와 설정을 유지하고 스테이지 팝업에�
     page.getByRole("button", { name: "보스 도전", exact: true }),
   ).toBeEnabled();
   await page.locator('[data-action="quest"]').click();
-  await expect(page.locator("#gems")).toHaveText("3,900");
+  await expect(page.locator("#gems")).toHaveText("10,300");
   await expect(page.locator("#quest-text")).toHaveText("보상 획득 완료");
   await page.locator('[data-action="quest"]').click();
-  await expect(page.locator("#gems")).toHaveText("3,900");
+  await expect(page.locator("#gems")).toHaveText("10,300");
   await page.getByRole("button", { name: "보스 도전", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".enemy-heading")).toHaveClass(/is-boss/);
