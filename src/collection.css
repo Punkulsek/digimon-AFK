@@ -238,3 +238,15 @@
 @media (max-width: 600px) {
   .collection-page .collection-scroll .collection-grid { grid-template-columns: repeat(auto-fill,minmax(100px,1fr)); }
 }
+
+.growth-stars { display:inline-flex; gap:2px; white-space:nowrap; font-size:16px; }
+.growth-stars .gold { color:#d5a018; }
+.growth-stars .purple { color:#a15bdd; }
+.growth-stars .empty { color:#87938d; }
+.growth-panel { margin-top:20px; padding:18px; background:#edf4e9; border-radius:16px; }
+.growth-panel h3 { margin:12px 0; }
+.evolution-option { margin:12px 0; padding:12px; border:1px solid #ceddca; border-radius:12px; }
+.evolution-option ul { padding-left:20px; line-height:1.8; }
+.material-list { max-height:230px; overflow:auto; margin:12px 0; }
+.material-list label { display:flex; align-items:center; gap:12px; padding:12px; background:#eef5e8; margin:5px 0; border-radius:8px; }
+.material-list input { width:22px; height:22px; }

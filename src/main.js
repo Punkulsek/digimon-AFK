@@ -1,3 +1,4 @@
+import {evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
   createIcons,
   Leaf,
@@ -175,10 +176,19 @@ function art(s, extra = "") {
   const animated = extra.includes("field-art") && !reducedMotion;
   return `<div class="pokemon-art type-${s.type} ${extra}" title="${s.name} · ${s.types.join(" / ")}"><img src="${animated ? s.animated : s.sprite}" data-still="${s.sprite}" alt="${s.name}" decoding="async" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src=this.dataset.still}else{this.hidden=true;this.nextElementSibling.hidden=false}"><div class="placeholder" hidden><div class="placeholder-ball"><span></span></div><span class="type-emblem">${i(s.icon)}</span><small>No. ${String(s.id).padStart(3, "0")}</small></div></div>`;
 }
+function growthStars(p) {
+  const n=p.breakthrough||0;
+  return `<span class="growth-stars" role="img" aria-label="${n}돌파">${Array.from({length:5},(_,j)=>`<span class="${j<n-5?'purple':j<n?'gold':'empty'}">${j<n?'★':'☆'}</span>`).join('')}</span>`;
+}
+const materialNames={fire:'불꽃',water:'물',grass:'풀',electric:'전기',rock:'바위',ice:'얼음'};
+function growthPanel(p) {
+ const options=evolutionOptions(p);
+ return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li><li>${state.materials[e.material]>=e.amount?'✓':'○'} ${materialNames[e.material]} 진화 재료 ${num(e.amount)}개 / 보유 ${num(state.materials[e.material])}개</li></ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>동일 포켓몬 ${breakthroughCost(p)}장 필요 · 사용 가능 ${breakthroughCandidates(state,p).length}장</p><button class="soft-button full" data-action="breakthroughPreview" data-id="${p.uid}">돌파 재료 선택</button>`:'<p>최대 돌파 달성</p>'}</section>`;
+}
 function card(p, action = "detail") {
   const s = species(p.speciesId),
     r = RARITIES[s.rarity];
-  return `<button class="pokemon-card rarity-${s.rarity}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${i(s.icon)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${"✦".repeat(s.rarity + 1)}</span></span><span>${i("swords")}${num(power(p))}</span></div></button>`;
+  return `<button class="pokemon-card rarity-${s.rarity}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${i(s.icon)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${growthStars(p)}</span></span><span>${i("swords")}${num(power(p))}</span></div></button>`;
 }
 $("#app").innerHTML = `
 <div class="game-shell">
@@ -494,7 +504,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${s.rarity}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${"✦".repeat(s.rarity + 1)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${s.rarity}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }
@@ -702,6 +712,26 @@ document.addEventListener("click", (e) => {
         closeModal();
       }
       break;
+    case "evolvePreview": {
+      const p=state.inventory.find(p=>p.uid===btn.dataset.id);
+      const e=evolutionOptions(p).find(e=>e.to===Number(btn.dataset.target));
+      if(!e)break;
+      modal("진화 확인", `${species(p.speciesId).name} → ${species(e.to).name}`, `<p>${materialNames[e.material]} 진화 재료 ${num(e.amount)}개가 소비됩니다. 레벨과 돌파는 유지되며, 진화 후에는 같은 진화형 카드가 돌파 재료로 필요합니다.</p><button class="primary-button full" data-action="evolveConfirm" data-id="${p.uid}" data-target="${e.to}">진화 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
+      break;
+    }
+    case "breakthroughPreview": {
+      const p=state.inventory.find(p=>p.uid===btn.dataset.id);
+      modal("돌파 재료 선택", `동일 포켓몬 ${breakthroughCost(p)}장 선택`, `<p>선택한 카드는 영구 소비됩니다. 미편성 Lv.1·0돌파 카드만 사용할 수 있습니다.</p><div class="material-list">${breakthroughCandidates(state,p).map((q,j)=>`<label><input type="checkbox" name="breakthrough-material" value="${q.uid}">${species(q.speciesId).name} · Lv.1 · 카드 ${j+1}</label>`).join('')||'<p>사용 가능한 중복 카드가 없습니다.</p>'}</div><button class="primary-button full" data-action="breakthroughConfirm" data-id="${p.uid}">선택 카드로 돌파 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
+      break;
+    }
+    case "evolveConfirm":
+    case "breakthroughConfirm": {
+      const evolving=btn.dataset.action==='evolveConfirm';
+      const error=evolving?evolve(state,btn.dataset.id,Number(btn.dataset.target)):breakthrough(state,btn.dataset.id,[...document.querySelectorAll('input[name="breakthrough-material"]:checked')].map(el=>el.value));
+      if(error){toast(error);break;}
+      battle.resetParty();persist();renderBattle();collection();detail(btn.dataset.id);sound.effect("level");toast(evolving?'진화 완료!':'돌파 완료!');
+      break;
+    }
     case "level": {
       const error = levelUp(state, btn.dataset.id);
       if (error) {
