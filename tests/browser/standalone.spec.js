@@ -48,7 +48,7 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   );
   await expect
     .poll(() => page.locator(".enemy-hp-number").textContent())
-    .not.toBe("95 / 95");
+    .not.toBe("55 / 55");
   await pauseBattle(page);
   await page.locator('.nav-button[data-action="collection"]').click();
   await expect(page.locator(".collection-grid img").first()).toHaveAttribute(

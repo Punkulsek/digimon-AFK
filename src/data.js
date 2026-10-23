@@ -1,3 +1,4 @@
+import {STAGE_REGIONS,regionForStage,localStage,regionIndex} from "./stages.js";
 import kanto from "./generated/kanto.json" with { type: "json" };
 
 export const RARITIES = [
@@ -87,8 +88,6 @@ export const SPECIES = kanto.map((entry) => {
   };
 });
 export const species = (id) => SPECIES.find((p) => p.id === id);
-export const REGIONS = ["상록숲", "달맞이산", "블루시티 해안", "무지개 초원"];
-export const stageLabel = (stage) =>
-  `${Math.floor((stage - 1) / 20) + 1}-${((stage - 1) % 20) + 1}`;
-export const regionName = (stage) =>
-  REGIONS[Math.floor((stage - 1) / 20) % REGIONS.length];
+export const REGIONS = STAGE_REGIONS.map(region=>region.name);
+export const stageLabel = stage => `${regionIndex(stage)+1}-${localStage(stage)}`;
+export const regionName = stage => regionForStage(stage).name;

@@ -1,3 +1,4 @@
+import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,attackDamage,stageGold} from "./stages.js";
 import {recordCollection} from "./collection-record.js";
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES} from './dungeon-config.js';
@@ -7,9 +8,10 @@ export const SAVE_KEY='pokemon-days-v1';
 export const stats = p => {const s=species(p.speciesId), boost=1+(p.breakthrough||0)*.15;return {hp:Math.round(s.hp*boost*(1+(p.level-1)*.14)),atk:Math.round(s.atk*boost*(1+(p.level-1)*.16))}};
 export const power = p => {const s=stats(p);return s.hp+s.atk*5};
 export const levelCost = p => Math.ceil(p.level/5);
-export function initialState(){return {...dungeonDefaults(),version:1,discovered:[1,4,7,25,39,133],stage:1,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
+export function initialState(){return {...dungeonDefaults(),version:1,discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
- if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
+ if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||s.stage>MAX_STAGE||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
+ if(s.campaignCleared!==undefined&&(typeof s.campaignCleared!=='boolean'||(s.campaignCleared&&s.stage!==MAX_STAGE)))return false;
  if(s.discovered!==undefined&&(!Array.isArray(s.discovered)||s.discovered.length>151||new Set(s.discovered).size!==s.discovered.length||!s.discovered.every(id=>species(id))))return false;
  if(!s.inventory.every(p=>p&&typeof p.uid==='string'&&species(p.speciesId)&&Number.isSafeInteger(p.level)&&p.level>=1&&p.level<=100&&(p.breakthrough===undefined||(Number.isInteger(p.breakthrough)&&p.breakthrough>=0&&p.breakthrough<=10))))return false;
  if(!Number.isSafeInteger(s.candies)||s.candies<0||!s.materials||!s.dungeonClears)return false;
@@ -17,7 +19,7 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
  return Array.isArray(s.party)&&s.party.length>0&&s.party.length<=partyLimit&&new Set(s.party).size===s.party.length&&s.party.every(id=>s.inventory.some(p=>p.uid===id))&&typeof s.auto==='boolean'&&typeof s.autoBoss==='boolean'&&[1,2,3].includes(s.speed)&&Number.isSafeInteger(s.totalKills)&&s.totalKills>=0&&typeof s.questClaimed==='boolean'&&Number.isSafeInteger(s.summons)&&s.summons>=0;
 }
-export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
+export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
 export function save(storage,state){try{storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
 export function summon(state,count,rng=Math.random){
  if(![1,10].includes(count))return {error:'잘못된 소환 횟수입니다.'};
@@ -39,18 +41,21 @@ export class Battle {
  this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();
  }
  resetParty(){this.allies=this.state.party.map(uid=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p),maxHp:stats(p).hp}});}
- spawn(){if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk};return;}const scale=1+(this.state.stage-1)*.22;const ids=this.boss?[25,94,149]:[10,16,19,43,54];const s=species(ids[(this.state.stage+this.state.kills-1)%ids.length]);const hp=Math.round((this.boss?300:95)*scale);this.enemy={speciesId:s.id,hp,maxHp:hp,atk:Math.round((this.boss?18:6)*scale)};this.bossTurns=0;}
- challenge(){if(this.dungeon||this.boss||this.state.kills<10)return false;this.boss=true;this.resetParty();this.spawn();return true;}
+ spawn(){
+ if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk,def:0};return;}
+ this.enemy=stageEnemy(this.state.stage,this.boss,this.state.kills);this.bossTurns=0;
+ }
+ challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
  tick(){this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto))return this.events;
  this.turn++;const alive=this.allies.filter(a=>a.hp>0);
  if(!alive.length){this.fail();return this.events;}
- const a=alive[(this.turn-1)%alive.length];const crit=this.turn%7===0;const damage=Math.round(a.atk*(crit?1.8:1));this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
- if(this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=Math.round((this.boss?180:24)*(1+(this.state.stage-1)*.18));this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
- if(this.boss){this.state.stage++;this.state.kills=0;this.state.gems+=100;this.boss=false;this.events.push({type:'stage'});}else this.state.kills=Math.min(10,this.state.kills+1);
+ const a=alive[(this.turn-1)%alive.length];const crit=this.turn%7===0;const damage=attackDamage(a.atk,this.enemy.def,crit);this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
+ if(this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=stageGold(this.state.stage,this.boss);this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
+ if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}else this.state.kills=Math.min(10,this.state.kills+1);
  this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
- if(this.state.kills===10&&this.state.autoBoss){this.challenge();this.events.push({type:'boss'});}else this.spawn();return this.events;}
+ if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge()){this.events.push({type:'boss'});}else this.spawn();return this.events;}
  if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];target.hp=Math.max(0,target.hp-this.enemy.atk);this.events.push({type:'hit',uid:target.uid,damage:this.enemy.atk});}
- if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=60){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
+ if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=BOSS_TURN_LIMIT){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
  }
  finishDungeon(status){
  if(this.status!=='fighting')return;

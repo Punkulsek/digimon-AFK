@@ -1,0 +1,32 @@
+/* Compact top-center progress HUD: dark track, gold fill, boss marker. */
+.stage-hud { position:absolute; top:max(18px,env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:clamp(260px,26vw,370px); z-index:12; padding:8px 12px; border:1px solid #fff4b77a; border-radius:14px; background:#183e38d9; box-shadow:0 4px 12px #15342f35; color:#fff4cb; backdrop-filter:blur(8px); }
+.stage-hud .stage-banner { position:static; transform:none; width:100%; min-width:0; max-width:none; padding:0 0 5px; flex-direction:row; gap:8px; background:none; border:0; box-shadow:none; backdrop-filter:none; color:#f8edc0; font-size:12px; }
+.stage-hud .stage-banner:active { transform:translateY(1px); }
+.stage-hud .stage-banner #region-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.stage-hud .stage-banner strong { color:#fff9d7; font-size:13px; white-space:nowrap; }
+.boss-progress-ui[hidden] { display:none; }
+.boss-gauge-row { display:flex; align-items:center; gap:5px; height:25px; }
+.gauge-shield { display:flex; width:15px; color:#ffe580; }
+.gauge-shield svg { width:15px; height:18px; }
+.boss-gauge { flex:1; height:14px; padding:2px; border:1px solid #a58b4e; border-radius:5px; background:#172f2a; box-shadow:inset 0 2px 3px #0008; overflow:hidden; }
+.boss-gauge > span { display:block; width:0; height:100%; border-radius:2px; background:linear-gradient(#fff299,#e8b637); box-shadow:0 0 8px #ffe16c66; transition:width .25s; }
+.hud-boss-button { display:grid; place-items:center; flex-shrink:0; width:29px; height:29px; padding:3px; color:#ffe6bd; background:linear-gradient(#db6a4e,#8b3431); border:2px solid #f3c678; border-radius:50%; box-shadow:0 2px 0 #082b28; cursor:pointer; }
+.hud-boss-button svg { width:18px; height:18px; }
+.hud-boss-button:disabled { opacity:.5; cursor:default; }
+.hud-boss-button.ready { box-shadow:0 0 12px #ffd25a9c; }
+.boss-gauge-caption { display:flex; align-items:center; justify-content:space-between; gap:5px; margin-top:5px; font-size:10px; }
+#hud-auto-boss { border:0; padding:3px 6px; border-radius:4px; background:#f2cc57; color:#35432a; font:inherit; font-weight:800; cursor:pointer; white-space:nowrap; }
+#hud-auto-boss[aria-pressed="false"] { background:#748179; color:#fff; }
+.region-itinerary { margin:12px 0; color:#45694b; }
+.region-itinerary summary { cursor:pointer; font-weight:bold; }
+.region-itinerary ol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding-left:24px; }
+.region-itinerary li { padding:5px; font-size:12px; }
+.region-itinerary li.current { background:#d9edc8; border-radius:6px; }
+.region-itinerary small { display:block; margin-top:3px; color:#73856b; }
+@media(max-width:1100px) { .stage-hud { top:12px; width:270px; padding:6px 10px; } }
+@media(max-width:800px) { .stage-hud { width:240px; } }
+@media(max-width:620px) { .stage-hud { top:12px; width:210px; } .stage-hud .stage-banner { font-size:11px; } }
+@media(max-width:500px) and (orientation:portrait) { .stage-hud { top:118px; } }
+@media(prefers-reduced-motion:reduce) { .boss-gauge > span { transition:none; } }
+
+#boss-progress-label { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

@@ -1,3 +1,4 @@
+import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
 import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
   createIcons,
@@ -59,6 +60,7 @@ import "./polish.css";
 import "./fullscreen.css";
 import "./collection.css";
 import "./dungeon.css";
+import "./stages.css";
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
@@ -197,7 +199,7 @@ $("#app").innerHTML = `
 <main class="adventure">
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
-<button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button>
+<div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
 </section>
@@ -240,7 +242,7 @@ function updateHud() {
   hudText("#party-power", num(partyPower()));
   hudText("#party-count", `${state.party.length} / 5`);
   if ($("#boss-button"))
-    $("#boss-button").disabled = state.kills < 10 || battle.boss;
+    $("#boss-button").disabled = state.kills < STAGE_KILLS || battle.boss || state.campaignCleared;
   hudText(
     "#quest-text",
     state.questClaimed
@@ -251,13 +253,26 @@ function updateHud() {
   );
   if (battle.dungeon) $("#scene").dataset.dungeon = battle.dungeon.id;
   else delete $("#scene").dataset.dungeon;
-  $("#scene").dataset.region = Math.floor((state.stage - 1) / 20) % 4;
+  // New region art remains unassigned until the user's per-region selection.
+  $("#scene").dataset.region = regionIndex(state.stage);
+  $("#boss-progress-ui").hidden = !!battle.dungeon;
+  const ready=state.kills>=STAGE_KILLS&&!battle.boss&&!state.campaignCleared;
+  $("#boss-gauge").setAttribute("aria-valuenow",state.campaignCleared||battle.boss?STAGE_KILLS:state.kills);
+  $("#boss-gauge-fill").style.width=`${state.campaignCleared||battle.boss?100:state.kills/STAGE_KILLS*100}%`;
+  const label=state.campaignCleared?"관동 400스테이지 완료":battle.boss?`${BOSS_NAMES[bossTier(state.stage)]} · ${Math.max(0,BOSS_TURN_LIMIT-battle.bossTurns)}턴`:ready?`${BOSS_NAMES[bossTier(state.stage)]} 도전 가능`:`보스까지 ${STAGE_KILLS-state.kills}마리 · ${state.kills}/${STAGE_KILLS}`;
+  hudText("#boss-progress-label",label);
+  $("#boss-gauge").setAttribute("aria-valuetext",label);
+  $("#hud-boss-button").disabled=!ready;
+  $("#hud-boss-button").classList.toggle("ready",ready);
+  $("#hud-auto-boss").setAttribute("aria-pressed",String(state.autoBoss));
+  $("#hud-auto-boss").disabled=!!state.campaignCleared;
+  hudText("#hud-auto-boss",`자동 도전 ${state.autoBoss?'ON':'OFF'}`);
   $(".battlefield").classList.toggle("boss-active", battle.boss);
   hudText(
     "#boss-status",
     battle.boss
-      ? `보스 제한 턴 ${Math.max(0, 60 - battle.bossTurns)} · 승리 보상 다이아 100`
-      : `처치 보상 ${Math.round(24 * (1 + (state.stage - 1) * 0.18))} 포켓코인 · 보스 보상 다이아 100`,
+      ? `보스 제한 턴 ${Math.max(0, BOSS_TURN_LIMIT - battle.bossTurns)} · 승리 보상 다이아 100`
+      : state.campaignCleared ? "관동 정복 완료 · 현재 지역에서 자동 사냥 중" : `처치 보상 ${stageGold(state.stage)} 포켓코인 · 보스 보상 다이아 100`,
   );
   if (active !== "summon") sound.setMode(battle.boss ? "boss" : "field");
 }
@@ -272,7 +287,7 @@ function renderBattle() {
   const e = battle.enemy,
     s = species(e.speciesId);
   $("#enemy").innerHTML =
-    `<div class="enemy-heading ${battle.boss ? "is-boss" : ""}">${battle.dungeon ? "던전" : battle.boss ? i("crown") : "야생"} <strong>${s.name}</strong><span>Lv.${battle.dungeon?.stage || state.stage}</span></div><div class="enemy-hp"><span style="width:${(e.hp / e.maxHp) * 100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${battle.boss ? "boss" : ""}" id="enemy-fighter">${art(s, "field-art")}<div class="fighter-shadow"></div></div>`;
+    `<div class="enemy-heading ${battle.boss ? "is-boss" : ""}">${battle.dungeon ? "던전" : battle.boss ? `${i("crown")} ${BOSS_NAMES[bossTier(state.stage)]}` : "야생"} <strong>${s.name}</strong><span>Lv.${battle.dungeon?.stage || state.stage}</span></div><div class="enemy-hp"><span style="width:${(e.hp / e.maxHp) * 100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${battle.boss ? "boss" : ""}" id="enemy-fighter">${art(s, "field-art")}<div class="fighter-shadow"></div></div>`;
   icons();
 }
 function paintHealth() {
@@ -390,9 +405,11 @@ function step() {
       floatDamage(`+${e.gold} 포켓코인`, $("#enemy-fighter"), "gold-reward");
       refresh = true;
     }
-    if (e.type === "stage") {
+    if (e.type === "stage" || e.type === "campaignComplete") {
       sound.effect("clear");
       const t = $("#stage-transition");
+      t.querySelector("strong").textContent=e.type==='campaignComplete'?'관동지방 정복 완료!':'스테이지 클리어!';
+      t.querySelector("span").textContent=e.type==='campaignComplete'?'400스테이지 완료 · 마지막 지역에서 사냥을 계속합니다':`${regionName(state.stage)} · ${stageLabel(state.stage)}`;
       t.classList.add("visible");
       setTimeout(() => t.classList.remove("visible"), 1600);
       refresh = true;
@@ -558,7 +575,7 @@ function stages() {
   modal(
     "한 걸음씩, 새로운 세상으로",
     "스테이지",
-    `<div class="stage-overview">${i("map")}<div><h3>${regionName(state.stage)}</h3><p>관동지방 · ${chapter + 1}번째 지역</p></div><span>${current} / 20</span></div><div class="stage-grid">${Array.from({ length: 20 }, (_, n) => `<div class="stage-node ${n + 1 < current ? "complete" : n + 1 === current ? "current" : ""}">${i(n + 1 < current ? "check" : n === 19 ? "crown" : "leaf")}<b>${chapter + 1}-${n + 1}</b><small>${n + 1 < current ? "클리어" : n + 1 === current ? "모험 중" : "미개방"}</small></div>`).join("")}</div><div class="stage-actions"><div><span>야생 포켓몬 처치 <b id="kills">${state.kills} / 10</b></span><div class="progress-track"><div id="stage-progress"></div></div></div><button class="primary-button" data-action="boss" id="boss-button">${i("swords")}보스 도전</button></div><p id="boss-status" class="muted"></p><button class="quest stage-quest" data-action="quest"><span class="quest-icon">${i("gift")}</span><span><strong>모험의 첫걸음</strong><small id="quest-text"></small></span>${i("chevron-right")}</button>`,
+    `<div class="stage-overview">${i("map")}<div><h3>${regionName(state.stage)}</h3><p>관동지방 · ${chapter + 1} / 20 지역 · 총 400스테이지</p></div><span>${current} / 20</span></div><details class="region-itinerary"><summary>관동 20개 지역 보기</summary><ol>${STAGE_REGIONS.map((r,index)=>`<li class="${index===chapter?'current':''}">${r.name}<small>${index+1}-1 ~ ${index+1}-20 · ${index<chapter||state.campaignCleared?'완료':index===chapter?'진행 중':'미개방'}</small></li>`).join('')}</ol></details><div class="stage-grid">${Array.from({ length: 20 }, (_, n) => `<div class="stage-node ${n + 1 < current || state.campaignCleared ? "complete" : n + 1 === current ? "current" : ""}">${i(n + 1 < current || state.campaignCleared ? "check" : n === 19 || n === 9 ? "crown" : "leaf")}<b>${chapter + 1}-${n + 1}</b><small>${n + 1 < current || state.campaignCleared ? "클리어" : n + 1 === current ? "모험 중" : "미개방"}</small></div>`).join("")}</div><div class="stage-actions"><div><span>야생 포켓몬 처치 <b id="kills">${state.kills} / 10</b></span><div class="progress-track"><div id="stage-progress"></div></div></div><button class="primary-button" data-action="boss" id="boss-button">${i("swords")}보스 도전</button></div><p id="boss-status" class="muted"></p><button class="quest stage-quest" data-action="quest"><span class="quest-icon">${i("gift")}</span><span><strong>모험의 첫걸음</strong><small id="quest-text"></small></span>${i("chevron-right")}</button>`,
   );
 }
 function audioSettings() {

@@ -90,7 +90,7 @@ test("기존 저장 데이터와 설정을 유지하고 스테이지 팝업에�
   await expect(page.locator(".battlefield")).toHaveClass(/boss-active/);
   await expect
     .poll(() => page.locator(".enemy-hp-number").textContent())
-    .not.toBe("300 / 300");
+    .not.toBe("127 / 127");
 });
 test("전투 배경이 모든 화면을 채우고 하단 4개 메뉴를 균등 배치", async ({
   page,
