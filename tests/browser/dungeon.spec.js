@@ -14,7 +14,11 @@ test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메�
  await expect(page.locator('[data-stage="2"]')).toBeDisabled();
  await expect(page.locator('.dungeon-preview')).toContainText('예상 보상 · 불꽃 진화 재료 3개');
  await page.getByRole('button',{name:'던전 입장'}).click();
- await expect(page.locator('.dungeon-team .dungeon-combatant')).toHaveCount(5);
+ await expect(page.locator('#fighters .fighter')).toHaveCount(5);
+ await expect(page.locator('.battlefield')).toBeVisible();
+ await expect(page.locator('#dungeon-page')).toBeHidden();
+ await expect(page.locator('#region-name')).toHaveText('불꽃타입 진화재료 던전');
+ await expect(page.locator('.dungeon-arena')).toHaveCount(0);
  await expect(page.locator('.dungeon-result')).toContainText('불꽃 진화 재료 3개 획득',{timeout:15000});
  await page.getByRole('button',{name:'단계 선택'}).click();
  await expect(page.locator('[data-stage="2"]')).toBeEnabled();
@@ -36,7 +40,7 @@ test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메�
  await page.reload();
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')));
  expect(s.candies).toBe(9);expect(s.materials.fire).toBe(3);expect(s.dungeonClears['evolution-fire']).toBe(1);expect(s.gold).toBe(10000);expect(s.stage).toBe(1);
- await expect(page.locator('.nav-button')).toHaveText(['포켓몬','홈','소환']);
+ await expect(page.locator('.nav-button')).toHaveText(['포켓몬','홈','던전','소환']);
 });
 
 test('작은 가로 화면에서 던전 패배·재도전·이탈 시 보상과 스테이지 보존',async({page})=>{
@@ -45,9 +49,9 @@ test('작은 가로 화면에서 던전 패배·재도전·이탈 시 보상과 
  await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),seed);
  await page.goto('/');await page.getByRole('button',{name:'던전',exact:true}).click();
  await page.locator('[data-dungeon="coin"]').click();await page.locator('[data-stage="10"]').click();await page.getByRole('button',{name:'던전 입장'}).click();
- const arena=await page.locator('.dungeon-arena').boundingBox(),nav=await page.locator('.bottom-nav').boundingBox();expect(arena.y+arena.height).toBeLessThanOrEqual(nav.y);
+ const arena=await page.locator('#enemy-fighter').boundingBox(),nav=await page.locator('.bottom-nav').boundingBox();expect(arena.y+arena.height).toBeLessThanOrEqual(nav.y);
  await expect(page.locator('.dungeon-result')).toContainText('획득 보상 없음',{timeout:15000});
- await page.getByRole('button',{name:'재도전',exact:true}).click();await expect(page.locator('.dungeon-arena')).toBeVisible();
+ await page.getByRole('button',{name:'재도전',exact:true}).click();await expect(page.locator('.battlefield')).toBeVisible();
  await page.locator('.nav-button[data-action="home"]').click();
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')));expect(s.gold).toBe(10000);expect(s.dungeonClears.coin).toBe(9);expect(s.stage).toBe(1);
  for(const size of [{width:568,height:450},{width:844,height:390},{width:390,height:844}]) {

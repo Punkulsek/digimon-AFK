@@ -1,3 +1,4 @@
+import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES} from './dungeon-config.js';
 import {SPECIES,species,RARITIES} from './data.js';
 export const PARTY_LIMIT=5;
@@ -30,20 +31,36 @@ export function summon(state,count,rng=Math.random){
 export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
- constructor(state){this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();}
+ constructor(state,dungeon=null){
+ if(dungeon&&!canEnterDungeon(state,dungeon.id,dungeon.stage))throw new Error('아직 개방되지 않은 던전입니다.');
+ this.dungeon=dungeon?dungeonInfo(dungeon.id,dungeon.stage):null;this.info=this.dungeon;this.status='fighting';
+ this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();
+ }
  resetParty(){this.allies=this.state.party.map(uid=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p),maxHp:stats(p).hp}});}
- spawn(){const scale=1+(this.state.stage-1)*.22;const ids=this.boss?[25,94,149]:[10,16,19,43,54];const s=species(ids[(this.state.stage+this.state.kills-1)%ids.length]);const hp=Math.round((this.boss?300:95)*scale);this.enemy={speciesId:s.id,hp,maxHp:hp,atk:Math.round((this.boss?18:6)*scale)};this.bossTurns=0;}
- challenge(){if(this.boss||this.state.kills<10)return false;this.boss=true;this.resetParty();this.spawn();return true;}
- tick(){this.events=[];if(!this.state.auto)return this.events;
+ spawn(){if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk};return;}const scale=1+(this.state.stage-1)*.22;const ids=this.boss?[25,94,149]:[10,16,19,43,54];const s=species(ids[(this.state.stage+this.state.kills-1)%ids.length]);const hp=Math.round((this.boss?300:95)*scale);this.enemy={speciesId:s.id,hp,maxHp:hp,atk:Math.round((this.boss?18:6)*scale)};this.bossTurns=0;}
+ challenge(){if(this.dungeon||this.boss||this.state.kills<10)return false;this.boss=true;this.resetParty();this.spawn();return true;}
+ tick(){this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto))return this.events;
  this.turn++;const alive=this.allies.filter(a=>a.hp>0);
  if(!alive.length){this.fail();return this.events;}
  const a=alive[(this.turn-1)%alive.length];const crit=this.turn%7===0;const damage=Math.round(a.atk*(crit?1.8:1));this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
- if(this.enemy.hp===0){const gold=Math.round((this.boss?180:24)*(1+(this.state.stage-1)*.18));this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
+ if(this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=Math.round((this.boss?180:24)*(1+(this.state.stage-1)*.18));this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
  if(this.boss){this.state.stage++;this.state.kills=0;this.state.gems+=100;this.boss=false;this.events.push({type:'stage'});}else this.state.kills=Math.min(10,this.state.kills+1);
  this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
  if(this.state.kills===10&&this.state.autoBoss){this.challenge();this.events.push({type:'boss'});}else this.spawn();return this.events;}
  if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];target.hp=Math.max(0,target.hp-this.enemy.atk);this.events.push({type:'hit',uid:target.uid,damage:this.enemy.atk});}
- if(this.boss&&++this.bossTurns>=60){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
+ if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=60){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
  }
- fail(){this.boss=false;this.state.autoBoss=false;this.resetParty();this.spawn();this.events.push({type:'defeat'});}
+ finishDungeon(status){
+ if(this.status!=='fighting')return;
+ this.status=status;
+ if(status==='won'){
+ const d=this.dungeon;
+ if(d.id==='coin')this.state.gold+=d.amount;
+ else if(d.id==='candy')this.state.candies+=d.amount;
+ else this.state.materials[d.material]+=d.amount;
+ this.state.dungeonClears[d.id]=Math.max(this.state.dungeonClears[d.id],d.stage);
+ }
+ this.events.push({type:'dungeonResult',status});
+ }
+ fail(){if(this.dungeon){this.finishDungeon('lost');return;}this.boss=false;this.state.autoBoss=false;this.resetParty();this.spawn();this.events.push({type:'defeat'});}
 }

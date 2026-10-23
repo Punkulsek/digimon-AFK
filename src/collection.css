@@ -12,7 +12,7 @@
 }
 .bottom-nav .nav-inner {
   width: 100%;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   border: 0;
   border-top: 1px solid #b7c8a0;

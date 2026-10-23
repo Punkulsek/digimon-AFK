@@ -188,16 +188,28 @@ $("#app").innerHTML = `
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button>
-<button class="dungeon-entry soft-button" data-action="dungeons">${i("swords")}<span>던전</span></button>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
 </section>
 </main>
 <section id="dungeon-page" class="dungeon-page" hidden aria-label="던전"></section>
 <section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
-<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
+<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="dungeons">${i("swords")}<span>던전</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
-const dungeonUI = createDungeonUI({state,art,icon:i,icons,onSave:persist,onHome:closeModal,sound});
+let overworldBattle = null;
+function restoreOverworld(){
+ if(!overworldBattle)return;
+ battle=overworldBattle;overworldBattle=null;
+ renderBattle();updateHud();
+}
+function enterDungeon(info){
+ if(!overworldBattle)overworldBattle=battle;
+ battle=new Battle(state,info);
+ $("#modal-root").innerHTML="";
+ active="dungeons";
+ renderBattle();updateHud();updateNavigation();
+}
+const dungeonUI = createDungeonUI({state,art,icon:i,icons,onEnter:enterDungeon,onLeave:restoreOverworld,onHome:closeModal,sound});
 function hudText(selector, value) {
   const element = $(selector);
   if (element) element.textContent = value;
@@ -209,8 +221,9 @@ function updateHud() {
   $("#gold").textContent = num(state.gold);
   $("#gems").textContent = num(state.gems);
   hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
-  $("#region-name").textContent = regionName(state.stage);
-  $("#stage-number").textContent = stageLabel(state.stage);
+  $("#region-name").textContent = battle.dungeon ? battle.dungeon.name : regionName(state.stage);
+  $(".stage-banner").dataset.action = battle.dungeon ? "dungeonStatus" : "stages";
+  $("#stage-number").textContent = battle.dungeon ? `${battle.dungeon.stage}단계` : stageLabel(state.stage);
   hudText("#kills", `${state.kills} / 10`);
   if ($("#stage-progress"))
     $("#stage-progress").style.width = `${state.kills * 10}%`;
@@ -247,7 +260,7 @@ function renderBattle() {
   const e = battle.enemy,
     s = species(e.speciesId);
   $("#enemy").innerHTML =
-    `<div class="enemy-heading ${battle.boss ? "is-boss" : ""}">${battle.boss ? i("crown") : "야생"} <strong>${s.name}</strong><span>Lv.${state.stage}</span></div><div class="enemy-hp"><span style="width:${(e.hp / e.maxHp) * 100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${battle.boss ? "boss" : ""}" id="enemy-fighter">${art(s, "field-art")}<div class="fighter-shadow"></div></div>`;
+    `<div class="enemy-heading ${battle.boss ? "is-boss" : ""}">${battle.dungeon ? "던전" : battle.boss ? i("crown") : "야생"} <strong>${s.name}</strong><span>Lv.${battle.dungeon?.stage || state.stage}</span></div><div class="enemy-hp"><span style="width:${(e.hp / e.maxHp) * 100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${battle.boss ? "boss" : ""}" id="enemy-fighter">${art(s, "field-art")}<div class="fighter-shadow"></div></div>`;
   icons();
 }
 function paintHealth() {
@@ -332,10 +345,12 @@ function attackEffect(uid, critical) {
   };
 }
 function step() {
-  if (dungeonUI.isOpen()) { dungeonUI.tick(); return; }
+  if (dungeonUI.isOpen()) return;
   const events = battle.tick();
   let refresh = false;
+  let dungeonEnded = false;
   for (const e of events) {
+    if (e.type === "dungeonResult") dungeonEnded = true;
     if (e.type === "attack") {
       attackEffect(e.uid, e.crit);
       sound.effect(e.crit ? "critical" : "attack");
@@ -386,6 +401,7 @@ function step() {
     persist();
   } else paintHealth();
   updateHud();
+  if (dungeonEnded) { $("#modal-root").innerHTML=""; persist(); dungeonUI.result(battle); }
 }
 let timer;
 function schedule() {
@@ -399,6 +415,9 @@ function leaveCollection() {
   replaceSlot = null;
 }
 function closeModal() {
+  if(battle.dungeon && !dungeonUI.isOpen() && $("#modal-root").children.length){
+    $("#modal-root").innerHTML="";active="dungeons";updateNavigation();return;
+  }
   dungeonUI.close();
   if (busy) return;
   const hadModal = !!$("#modal-root").children.length;
@@ -411,7 +430,7 @@ function closeModal() {
   lastFocus?.focus();
 }
 function updateNavigation() {
-  const tab = active === "collection" || active === "summon" ? active : "home";
+  const tab = battle.dungeon ? "dungeons" : ["collection","summon","dungeons"].includes(active) ? active : "home";
   document.querySelectorAll(".nav-button").forEach((button) => {
     const current = button.dataset.action === tab;
     button.classList.toggle("active", current);
@@ -554,6 +573,9 @@ document.addEventListener("click", (e) => {
   if (action !== "music") sound.effect("click");
   if (dungeonUI.handle(action, btn)) return;
   switch (action) {
+    case "dungeonStatus":
+      modal(battle.dungeon.name, `${battle.dungeon.stage}단계`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="dungeons">도전 종료 · 던전 선택</button>`);
+      break;
     case "dungeons":
       leaveCollection();
       $("#modal-root").innerHTML = "";
@@ -569,6 +591,7 @@ document.addEventListener("click", (e) => {
       settings();
       break;
     case "home":
+      dungeonUI.close();
       leaveCollection();
       closeModal();
       break;

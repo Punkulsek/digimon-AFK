@@ -92,7 +92,7 @@ test("기존 저장 데이터와 설정을 유지하고 스테이지 팝업에�
     .poll(() => page.locator(".enemy-hp-number").textContent())
     .not.toBe("300 / 300");
 });
-test("전투 배경이 모든 화면을 채우고 홈 버튼은 하단 중앙에 고정", async ({
+test("전투 배경이 모든 화면을 채우고 하단 4개 메뉴를 균등 배치", async ({
   page,
 }) => {
   await page.goto("/");
@@ -114,11 +114,11 @@ test("전투 배경이 모든 화면을 채우고 홈 버튼은 하단 중앙에
       expect(box.height).toBeCloseTo(viewport.height, 0);
     }
     const nav = page.getByRole("navigation", { name: "주요 메뉴" });
-    await expect(nav.getByRole("button")).toHaveText(["포켓몬", "홈", "소환"]);
+    await expect(nav.getByRole("button")).toHaveText(["포켓몬", "홈", "던전", "소환"]);
     const home = await nav
       .getByRole("button", { name: "홈", exact: true })
       .boundingBox();
-    expect(home.x + home.width / 2).toBeCloseTo(viewport.width / 2, 0);
+    expect(home.x + home.width / 2).toBeCloseTo(viewport.width * 3 / 8, 0);
     expect(viewport.height - home.y - home.height).toBeLessThanOrEqual(25);
     const profile = await page.locator(".profile").boundingBox();
     const stage = await page

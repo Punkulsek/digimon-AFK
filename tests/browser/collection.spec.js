@@ -9,7 +9,7 @@ test('전체화면 관리, 고정 파티, 내부 스크롤, 정렬 및 슬롯 �
   await page.goto('/');
   const nav=page.locator('.nav-button');
   const boxes=await nav.evaluateAll(nodes=>nodes.map(n=>{const b=n.getBoundingClientRect();return {x:b.x,width:b.width};}));
-  for(let n=1;n<3;n++) {expect(boxes[n].width).toBeCloseTo(boxes[0].width,1);expect(boxes[n].x).toBeCloseTo(boxes[n-1].x+boxes[n-1].width,1);}
+  for(let n=1;n<4;n++) {expect(boxes[n].width).toBeCloseTo(boxes[0].width,1);expect(boxes[n].x).toBeCloseTo(boxes[n-1].x+boxes[n-1].width,1);}
   await page.locator('[data-action="collection"]').click();
   await expect(page.locator('#collection-page')).toBeVisible();
   const management=await page.locator('#collection-page').boundingBox();
