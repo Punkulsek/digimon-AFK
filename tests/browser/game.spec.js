@@ -19,21 +19,23 @@ test("성장, 편성, 10회 소환 및 새로고침 저장 복원", async ({ pag
   await expect(page.locator("#fighters .fighter")).toHaveCount(4);
   await page.locator('.nav-button[data-action="summon"]').click();
   await page.locator('[data-action="draw"][data-count="10"]').click();
+  await page.locator('[data-action="skipSummon"]').click();
   await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
   await page.locator(".result-confirm").click();
-  for (let n=0;n<2;n++) {
+  for (let n=0;n<9;n++) {
     await page.locator('[data-action="draw"][data-count="10"]').click();
-    await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
+    await page.locator('[data-action="skipSummon"]').click();
+  await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
     await page.locator(".result-confirm").click();
   }
-  await page.locator('[data-action="draw"][data-count="10"]').click();
-  await expect(page.getByRole("status")).toContainText("다이아가 부족");
+  await expect(page.locator('[data-action="draw"][data-count="10"]')).toBeDisabled();
+  await page.locator('.nav-button[data-action="home"]').click();
   await page.keyboard.press("Escape");
   const before = await page.evaluate(() =>
     localStorage.getItem("pokemon-days-v1"),
   );
   await page.reload();
-  await expect(page.locator("#gems")).toHaveText("1,900");
+  await expect(page.locator("#gems")).toHaveText("0");
   expect(
     await page.evaluate(() => localStorage.getItem("pokemon-days-v1")),
   ).toEqual(before);

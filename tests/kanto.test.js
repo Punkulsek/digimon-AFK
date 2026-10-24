@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SPECIES,species,RARITIES} from '../src/data.js';
+import {SPECIES,species} from '../src/data.js';
+import {SUMMON_POOLS,SUMMON_RATES} from '../src/summoning.js';
 import {initialState,summon,validateState} from '../src/game.js';
 
 test('첨부 PokeAPI에서 관동 151종의 한글 이름·타입·도감 정보 로드',()=>{
@@ -18,17 +19,17 @@ test('첨부 PokeAPI에서 관동 151종의 한글 이름·타입·도감 정보
  assert.equal(species(25).weight,6);
 });
 
-test('추가된 모든 포켓몬이 해당 등급에서 소환되고 저장 가능',()=>{
+test('모든 기본 진화 포켓몬이 소환 등급에서 소환되고 저장 가능',()=>{
  let offset=0;
- for(let rarity=0;rarity<RARITIES.length;rarity++){
-  const pool=SPECIES.filter(p=>p.rarity===rarity);
+ for(let rarity=0;rarity<SUMMON_POOLS.length;rarity++){
+  const pool=SUMMON_POOLS[rarity];
   assert.ok(pool.length>0);
   for(let idx=0;idx<pool.length;idx++){
    const state=initialState();let call=0;
-   const result=summon(state,1,()=>call++===0?(offset+.5)/100:(idx+.5)/pool.length);
+   const result=summon(state,1,()=>call++===0?(offset+SUMMON_RATES[0][rarity]/2)/100:(idx+.5)/pool.length);
    assert.equal(result.result[0].speciesId,pool[idx].id);
    assert.ok(validateState(state));
   }
-  offset+=RARITIES[rarity].chance;
+  offset+=SUMMON_RATES[0][rarity];
  }
 });

@@ -26,6 +26,8 @@ export class GameAudio {
     this.mode = "field";
     this.context = null;
     this.lastEffect = 0;
+    this.musicDuck = 1;
+    this.cinematic = null;
   }
   async unlock() {
     if (this.hidden) return false;
@@ -60,7 +62,7 @@ export class GameAudio {
     if (!this.context) return;
     const t = this.context.currentTime;
     this.music.gain.setTargetAtTime(
-      this.prefs.music ? (this.prefs.musicVolume / 100) * 0.42 : 0,
+      this.prefs.music ? (this.prefs.musicVolume / 100) * 0.42 * this.musicDuck : 0,
       t,
       0.04,
     );
@@ -128,6 +130,7 @@ export class GameAudio {
     this.track = source;
   }
   effect(kind) {
+    if (this.cinematic) return;
     if (
       !this.started ||
       this.hidden ||
@@ -162,6 +165,39 @@ export class GameAudio {
       ),
     );
     this.lastEffect = now;
+  }
+  beginCinematic() {
+    this.cinematic?.dispose();
+    const nodes = new Set();
+    let ended = false;
+    const play = (frequency, duration, volume, type = "sine", target = frequency) => {
+      if (ended || !this.started || this.hidden || !this.prefs.effects || this.context?.state !== "running") return;
+      const t = this.context.currentTime, oscillator = this.context.createOscillator(), gain = this.context.createGain();
+      oscillator.type = type; oscillator.frequency.setValueAtTime(frequency,t); oscillator.frequency.exponentialRampToValueAtTime(Math.max(20,target),t+duration);
+      gain.gain.setValueAtTime(0,t);gain.gain.linearRampToValueAtTime(volume,t+.025);gain.gain.exponentialRampToValueAtTime(.001,t+duration);
+      oscillator.connect(gain);gain.connect(this.effects);nodes.add(oscillator);oscillator.start(t);oscillator.stop(t+duration+.03);
+      oscillator.onended=()=>{nodes.delete(oscillator);oscillator.disconnect();gain.disconnect();};
+    };
+    const session = {
+      cue: (phase, grade) => {
+        if (ended) return;
+        this.musicDuck = phase === "stillness" ? .08 : phase === "reveal" ? .7 : .45;this.applyVolume();
+        if (phase === "arrival") { play(110,.8,.13,"sine",180);play(440,.5,.07); }
+        if (phase === "charge") { play(100,1.2,.13,"triangle",650+grade*120);play(220,1.1,.07,"sine",880); }
+        if (phase === "eclipse") { play(65,1,.16,"sine",42);play(1320,.7,.04,"sine",330); }
+        if (phase === "stillness") for (const node of nodes) { try { node.stop(); } catch {} }
+        if (phase === "burst") { play(90,.85,.3,"sine",28);play(680,.45,.13,"triangle",90);play(1800,.24,.06,"sine",350); }
+        if (phase === "silhouette") play(440,.6,.06,"sine",660);
+        if (phase === "reveal") for (const frequency of grade === 3 ? [261.63,329.63,392,523.25,783.99] : [392,493.88,587.33]) play(frequency,1.3,.055,"triangle");
+      },
+      dispose: () => {
+        if (ended) return; ended=true;
+        for (const node of nodes) { try { node.stop(); } catch {} }nodes.clear();
+        if(this.cinematic === session) this.cinematic=null;
+        this.musicDuck=1;this.applyVolume();
+      },
+    };
+    this.cinematic=session;return session;
   }
   async visibility(hidden) {
     this.hidden = hidden;
