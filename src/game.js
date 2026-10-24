@@ -1,3 +1,4 @@
+import {SUMMON_RATES,SUMMON_POOLS,summonLevel} from "./summoning.js";
 import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,attackDamage,stageGold} from "./stages.js";
 import {recordCollection} from "./collection-record.js";
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
@@ -22,13 +23,13 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
 export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
 export function save(storage,state){try{storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
 export function summon(state,count,rng=Math.random){
- if(![1,10].includes(count))return {error:'잘못된 소환 횟수입니다.'};
- const cost=count===10?2700:300;
+ if(![1,10,30].includes(count))return {error:'잘못된 소환 횟수입니다.'};
+ const cost=count*100;
  if(state.gems<cost)return {error:'다이아가 부족해요. 퀘스트와 보스를 통해 모아 보세요.'};
  if(state.inventory.length+count>10000)return {error:'보유 한도에 도달했어요.'};
  state.gems-=cost;const result=[];
- for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;for(let r=0;r<RARITIES.length;r++){roll-=RARITIES[r].chance;if(roll<0){rarity=r;break;}}
- const pool=SPECIES.filter(p=>p.rarity===rarity);const s=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
+ for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;const rates=SUMMON_RATES[summonLevel(state.summons)-1];for(let r=0;r<rates.length;r++){roll-=rates[r];if(roll<0){rarity=r;break;}}
+ const pool=SUMMON_POOLS[rarity];const s=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
  const p={uid:`summon-${++state.summons}`,speciesId:s.id,level:1,breakthrough:0};state.inventory.push(p);result.push(p);}
  recordCollection(state);return {result,cost};
 }

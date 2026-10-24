@@ -1,3 +1,4 @@
+import {SUMMON_THRESHOLDS,SUMMON_RATES,SUMMON_POOLS,SUMMON_GRADES,summonLevel,summonGrade} from "./summoning.js";
 import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionForStage,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
 import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
@@ -535,42 +536,22 @@ function detail(uid) {
     "detail-modal",
   );
 }
-function summonScreen() {
-  dungeonUI.close();
-  leaveCollection();
-  active = "summon";
-  sound.setMode("summon");
-  modal(
-    "새로운 인연이 기다려요",
-    "포켓몬 소환",
-    `<div class="summon-banner"><div class="summon-orbit orbit-one"></div><div class="summon-orbit orbit-two"></div><span class="summon-spark spark-one">✦</span><span class="summon-spark spark-two">✧</span><span class="banner-label">관동지방의 특별한 만남 · 151마리</span><h3>너와 함께라면, 어디든.</h3><div class="summon-featured"><div>${art(species(133), "field-art")}</div><div>${art(species(25), "field-art")}</div><div>${art(species(149), "field-art")}</div></div><div class="summon-pedestal"></div><div class="big-ball"><span></span></div><p>오늘, 우리의 이야기가 시작됩니다.</p><button class="rate-button" data-action="rates">${i("circle-help")}소환 확률 안내</button></div><div class="summon-wallet">${currencyIcon("diamond", "다이아")}보유 다이아 <b>${num(state.gems)}</b></div><div class="summon-actions"><button class="soft-button" data-action="draw" data-count="1"><strong>1회 소환</strong><span>${currencyIcon("diamond", "다이아")}300</span></button><button class="primary-button" data-action="draw" data-count="10"><span class="discount">10% 할인</span><strong>10회 소환</strong><span>${currencyIcon("diamond", "다이아")}2,700</span></button></div><p class="summon-note">중복 포켓몬도 개별 획득하며, 각각 성장·편성할 수 있어요.</p>`,
-    "summon-modal",
-  );
+let revealSummon=null;
+function summonPage(body){
+ dungeonUI.close();leaveCollection();active="summon";sound.setMode("summon");
+ $("#modal-root").innerHTML='';
+ let page=document.getElementById('summon-page');if(!page){page=document.createElement('section');page.id='summon-page';document.querySelector('.game-shell').append(page);}
+ page.innerHTML=body;icons();updateNavigation();
 }
-function draw(count) {
-  if (busy) return;
-  const outcome = summon(state, count);
-  if (outcome.error) return toast(outcome.error);
-  persist();
-  busy = true;
-  sound.effect("summon");
-  modal(
-    "두근두근, 새로운 만남",
-    "소환 중",
-    `<div class="summoning"><div class="big-ball"><span></span></div><p>몬스터볼이 반짝이고 있어요…</p></div>`,
-  );
-  setTimeout(() => {
-    busy = false;
-    const legendary = outcome.result.some(
-      (p) => species(p.speciesId).rarity === 4,
-    );
-    sound.effect(legendary ? "legendary" : "reveal");
-    modal(
-      legendary ? "전설의 친구가 찾아왔어요!" : "우리의 모험에 온 걸 환영해!",
-      "소환 결과",
-      `<div class="result-message">${i(legendary ? "crown" : "sparkles")} ${count}마리의 포켓몬을 획득했어요</div><div class="result-grid ${count === 1 ? "single" : ""} ${legendary ? "legendary-result" : ""}">${outcome.result.map((p, n) => `<div class="reveal-card" style="--reveal:${n}">${card(p)}</div>`).join("")}</div><button class="primary-button result-confirm" data-action="summon">확인 ${i("check")}</button>`,
-    );
-  }, 950);
+function summonScreen(){
+ const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
+ summonPage(`<header><h1>포켓몬 소환 · Lv.${lv}</h1><p>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}회`} · 누적 ${num(state.summons)}회</p><progress max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><p>보유 다이아 ${num(state.gems)}</p><button class="soft-button" data-action="summonRates">확률 정보</button></header><div class="summon-banner"><h3>새로운 인연이 기다려요</h3><div class="big-ball"><span></span></div></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button" data-action="draw" data-count="${n}" ${state.gems<n*100?'disabled':''}>${n}회 소환 · 다이아 ${num(n*100)}</button>`).join('')}</div>`);
+}
+function summonRates(){const lv=summonLevel(state.summons);summonPage(`<h1>확률 정보 · Lv.${lv}</h1><p>각 등급 내 포켓몬은 동일 확률입니다. 분기 진화는 최종 종족값 최댓값으로 등급을 정합니다.</p><div class="summon-scroll"><table><thead><tr><th>레벨</th>${SUMMON_GRADES.map(g=>`<th>${g}</th>`).join('')}</tr></thead><tbody>${SUMMON_RATES.map((r,n)=>`<tr><td>Lv.${n+1}</td>${r.map(v=>`<td>${v}%</td>`).join('')}</tr>`).join('')}</tbody></table>${SUMMON_POOLS.map((pool,g)=>`<h2>${SUMMON_GRADES[g]} · ${SUMMON_RATES[lv-1][g]}%</h2><p>${pool.map(p=>`${p.name} (${SUMMON_RATES[lv-1][g]}/${pool.length}% ≈ ${(SUMMON_RATES[lv-1][g]/pool.length).toFixed(6)}%)`).join(' · ')}</p>`).join('')}</div><button class="primary-button" data-action="summon">돌아가기</button>`);}
+function draw(count){
+ if(busy)return;const outcome=summon(state,count);if(outcome.error)return toast(outcome.error);persist();busy=true;
+ const finish=()=>{if(revealSummon!==finish)return;revealSummon=null;busy=false;const grade=Math.max(...outcome.result.map(p=>summonGrade(p.speciesId)));sound.effect(grade===3?'legendary':'reveal');summonPage(`<h1>${grade>=2?SUMMON_GRADES[grade]+' 등장!':'소환 완료'} · ${count}마리</h1><p>소환 Lv.${summonLevel(state.summons)} · 보유 다이아 ${num(state.gems)}</p><div class="summon-scroll"><div class="result-grid ${grade>=2?'legendary-result':''}">${outcome.result.map(p=>`<div><strong>${SUMMON_GRADES[summonGrade(p.speciesId)]}</strong>${card(p)}</div>`).join('')}</div></div><button class="primary-button result-confirm" data-action="summon">확인</button>`);};
+ revealSummon=finish;summonPage(`<h1>소환 중 · 다이아 ${num(state.gems)}</h1><div class="summoning"><div class="big-ball"><span></span></div></div><button class="primary-button" data-action="skipSummon">연출 건너뛰기</button>`);setTimeout(finish,1200);
 }
 function stages() {
   active = "stages";
@@ -606,7 +587,10 @@ function settings() {
 }
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
-  if (!btn || btn.disabled || busy) return;
+  if (!btn || btn.disabled) return;
+  if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
+  if(busy)return;
+  if(["home","collection","dungeons"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;
   if (action !== "music" && !sound.started) sound.unlock();
   if (action !== "music") sound.effect("click");
@@ -686,6 +670,7 @@ document.addEventListener("click", (e) => {
     case "summon":
       summonScreen();
       break;
+    case "summonRates": summonRates();break;
     case "draw":
       draw(Number(btn.dataset.count));
       break;
