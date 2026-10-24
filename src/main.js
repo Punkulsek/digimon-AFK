@@ -603,7 +603,9 @@ document.addEventListener("click", (e) => {
   if (action !== "music") sound.effect("click");
   if (dungeonUI.handle(action, btn)) return;
   switch (action) {
-    case "upgrades": upgradeScreen(); break;
+    case "upgrades":
+      if(document.getElementById('upgrade-page')){document.getElementById('upgrade-page').remove();active='home';updateNavigation();}else upgradeScreen();
+      break;
     case "buyUpgrade": {
       const error=buyUpgrade(state,btn.dataset.key,btn.dataset.count==='MAX'?'MAX':Number(btn.dataset.count));
       if(error){toast(error);break;}

@@ -6,3 +6,12 @@ test('upgrade menu purchase persists and navigation closes page',async({page})=>
  await page.reload();await page.locator('[data-action="upgrades"]').click();await expect(page.locator('.upgrade-grid article').first()).toContainText('Lv.10');
  await page.locator('.nav-button[data-action="home"]').click();await expect(page.locator('#upgrade-page')).toHaveCount(0);
 });
+
+test('upgrade drawer leaves battle running and occupies only bottom of screen',async({page})=>{
+ const s=initialState();s.auto=true;s.speed=3;s.kills=9;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);await page.goto('/');await page.locator('[data-action="upgrades"]').click();
+ const box=await page.locator('#upgrade-page').boundingBox();expect(box.y).toBeGreaterThan(350);expect(box.height).toBeLessThan(300);
+ await expect(page.locator('#fighters')).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')).totalKills),{timeout:15000}).toBeGreaterThan(0);
+ await expect(page.locator('#upgrade-page')).toBeVisible();await page.locator('[data-action="upgrades"]').click();await expect(page.locator('#upgrade-page')).toHaveCount(0);
+});

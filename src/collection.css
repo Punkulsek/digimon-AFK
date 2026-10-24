@@ -288,3 +288,13 @@
 .detail-modal .modal-body{overflow-y:auto;scrollbar-gutter:stable}
 
 #upgrade-page{position:absolute;inset:0 0 calc(var(--menu-height) + env(safe-area-inset-bottom,0px));z-index:15;background:linear-gradient(#d4efe9,#f7f2dc);padding:24px 7%;overflow:auto;color:#355d40}#upgrade-page header{text-align:center}.upgrade-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;max-width:1100px;margin:24px auto}.upgrade-grid article{background:#fffbed;border:2px solid #bdd6bb;border-radius:20px;padding:20px;text-align:center;box-shadow:0 6px 0 #a9c4ac}.upgrade-icon{font-size:36px}.upgrade-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.upgrade-buttons button{display:flex;flex-direction:column;padding:12px 6px;font-size:15px}.upgrade-buttons small{font-size:10px}@media(max-height:540px){#upgrade-page{padding:8px 4%}#upgrade-page h1{font-size:20px}.upgrade-grid{margin:12px auto;gap:12px}.upgrade-grid article{padding:10px}.upgrade-grid h2{font-size:17px}.upgrade-icon{font-size:22px}}
+
+/* Non-modal upgrade drawer: battlefield and its animation loop stay visible. */
+#upgrade-page{inset:auto 0 calc(var(--menu-height) + env(safe-area-inset-bottom,0px));height:clamp(190px,32vh,270px);padding:10px 5%;border-top:3px solid #73cbbb;border-radius:18px 18px 0 0;background:linear-gradient(#e3f5eefa,#f7f2dcfa);box-shadow:0 -6px 24px #163e382b}
+#upgrade-page header{display:flex;align-items:center;justify-content:space-between;gap:10px}#upgrade-page header h1{font-size:18px;margin:0}#upgrade-page header p{font-size:11px;margin:0}
+#upgrade-page .upgrade-grid{margin:10px auto 0;gap:12px;max-width:1100px}
+#upgrade-page .upgrade-grid article{padding:8px 10px;border-radius:12px;position:relative;box-shadow:0 3px 0 #a9c4ac}
+#upgrade-page .upgrade-icon{position:absolute;left:12px;top:10px;font-size:22px}
+#upgrade-page h2{font-size:14px;margin:0 0 4px}#upgrade-page h3{font-size:13px;margin:0 0 6px}#upgrade-page article>p{display:none}
+#upgrade-page .upgrade-buttons{gap:5px}#upgrade-page .upgrade-buttons button{padding:5px;min-height:32px;font-size:12px}#upgrade-page .upgrade-buttons small{font-size:9px}
+@media(max-height:540px){#upgrade-page{height:42vh;min-height:130px;padding:6px 3%;border-radius:12px 12px 0 0}#upgrade-page header h1{font-size:14px}#upgrade-page header p{font-size:9px}#upgrade-page .upgrade-grid{margin-top:6px;gap:8px}#upgrade-page .upgrade-grid article{padding:5px}#upgrade-page .upgrade-icon{display:none}#upgrade-page .upgrade-buttons{grid-template-columns:repeat(4,1fr)}#upgrade-page .upgrade-buttons button{font-size:10px;padding:4px 2px}#upgrade-page .upgrade-buttons small{font-size:8px}}
