@@ -204,7 +204,7 @@ $("#app").innerHTML = `
 <div class="scene" id="scene"><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
-<div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
+<div class="stage-transition" id="stage-transition" role="status" aria-live="polite"><div class="clear-ribbon"><small>스테이지</small><strong>클리어!</strong><span>다음 모험을 향해 출발해요</span></div></div>
 </section>
 </main>
 <section id="dungeon-page" class="dungeon-page" hidden aria-label="던전"></section>
@@ -415,10 +415,11 @@ function step() {
     if (e.type === "stage" || e.type === "campaignComplete") {
       sound.effect("clear");
       const t = $("#stage-transition");
-      t.querySelector("strong").textContent=e.type==='campaignComplete'?'관동지방 정복 완료!':'스테이지 클리어!';
+      t.querySelector("strong").textContent=e.type==='campaignComplete'?'관동 정복!':'클리어!';
       t.querySelector("span").textContent=e.type==='campaignComplete'?'400스테이지 완료 · 마지막 지역에서 사냥을 계속합니다':`${regionName(state.stage)} · ${stageLabel(state.stage)}`;
       t.classList.add("visible");
-      setTimeout(() => t.classList.remove("visible"), 1600);
+      clearTimeout(t.hideTimer);
+      t.hideTimer=setTimeout(() => t.classList.remove("visible"), 1600);
       refresh = true;
     }
     if (e.type === "boss") {
