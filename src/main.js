@@ -230,6 +230,7 @@ function hudText(selector, value) {
   if (element) element.textContent = value;
 }
 function updateHud() {
+  refreshUpgradeButtons();
   $(".avatar>span").textContent = String(
     Math.floor((state.stage - 1) / 5) + 1,
   ).padStart(2, "0");
@@ -544,10 +545,21 @@ function summonPage(body){
  let page=document.getElementById('summon-page');if(!page){page=document.createElement('section');page.id='summon-page';document.querySelector('.game-shell').append(page);}
  page.innerHTML=body;icons();updateNavigation();
 }
+let upgradeAmount=1;
+function refreshUpgradeButtons(){
+ document.querySelectorAll('#upgrade-page [data-action="buyUpgrade"]').forEach(button=>{
+  const q=upgradeQuote(state,button.dataset.key,upgradeAmount);
+  button.dataset.count=String(upgradeAmount);button.disabled=!q.levels||q.cost>state.gold;
+  button.querySelector('.upgrade-buy-label').textContent=`레벨업${upgradeAmount==='MAX'?` +${q.levels}`:upgradeAmount===1?'':` +${upgradeAmount}`}`;
+  button.querySelector('.upgrade-price').textContent=Number.isFinite(q.cost)?num(q.cost):'강화 한도';
+ });
+}
 function upgradeScreen(){
  dungeonUI.close();leaveCollection();$("#modal-root").innerHTML='';active='upgrades';
  let page=document.getElementById('upgrade-page');if(!page){page=document.createElement('section');page.id='upgrade-page';document.querySelector('.game-shell').append(page);}
- page.innerHTML=`<header><h1>전체 포켓몬 강화</h1><p>포켓코인 ${num(state.gold)} · 모든 아군에게 영구 적용</p></header><div class="upgrade-grid">${[['atk','공격력','⚔'],['def','방어력','🛡'],['hp','최대 체력','♥']].map(([key,label,icon])=>{const level=state.upgrades?.[key]||0;return `<article><span class="upgrade-icon">${icon}</span><h2>${label} 강화</h2><h3>Lv.${level} · +${(level*.5).toFixed(1)}%</h3><p>레벨당 +0.5%</p><div class="upgrade-buttons">${[1,10,100,'MAX'].map(n=>{const q=upgradeQuote(state,key,n);return `<button class="primary-button" data-action="buyUpgrade" data-key="${key}" data-count="${n}" ${!q.levels||q.cost>state.gold?'disabled':''}>${n==='MAX'?`MAX (+${q.levels})`:`+${n}`}<small>${Number.isFinite(q.cost)?num(q.cost)+' 포켓코인':'강화 한도'}</small></button>`;}).join('')}</div></article>`;}).join('')}</div>`;updateNavigation();
+ const total=Object.values(state.upgrades||{}).reduce((a,b)=>a+b,0);
+ page.innerHTML=`<header><h1>전체 강화 <b>${total}</b> 단계</h1><div class="upgrade-amounts" role="group" aria-label="강화 수량">${[1,10,100,'MAX'].map(n=>`<button data-action="upgradeAmount" data-count="${n}" aria-pressed="${upgradeAmount===n}">${n==='MAX'?'MAX':'×'+n}</button>`).join('')}</div></header><div class="upgrade-grid">${[['atk','공격력','swords'],['def','방어력','shield'],['hp','체력','heart']].map(([key,label,icon])=>{const level=state.upgrades?.[key]||0;return `<article><h3>Lv.${level}</h3><div class="upgrade-stat"><span class="upgrade-symbol">${i(icon)}</span><h2>${label}<strong>+${(level*.5).toFixed(1)}%</strong></h2></div><button class="upgrade-buy" data-action="buyUpgrade" data-key="${key}" aria-label="${label} 레벨업"><span class="upgrade-buy-label">레벨업</span><span class="upgrade-cost">${currencyIcon('pokecoin','포켓코인')}<b class="upgrade-price"></b></span></button></article>`;}).join('')}</div>`;
+ icons();refreshUpgradeButtons();updateNavigation();
 }
 function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
@@ -606,6 +618,8 @@ document.addEventListener("click", (e) => {
     case "upgrades":
       if(document.getElementById('upgrade-page')){document.getElementById('upgrade-page').remove();active='home';updateNavigation();}else upgradeScreen();
       break;
+    case "upgradeAmount":
+      upgradeAmount=btn.dataset.count==='MAX'?'MAX':Number(btn.dataset.count);upgradeScreen();break;
     case "buyUpgrade": {
       const error=buyUpgrade(state,btn.dataset.key,btn.dataset.count==='MAX'?'MAX':Number(btn.dataset.count));
       if(error){toast(error);break;}
