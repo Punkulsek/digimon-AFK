@@ -65,6 +65,8 @@ for (const file of await readdir(resolve(root, "public/scene/regions"))) {
   const png = await readFile(resolve(root, "public/scene/regions", file));
   offlineCss = offlineCss.replaceAll(`/scene/regions/${file}`, `data:image/png;base64,${png.toString("base64")}`);
 }
+const summonArt = await readFile(resolve(root, "public/scene/summon/pokemon-ensemble.png"));
+offlineCss = offlineCss.replaceAll("/scene/summon/pokemon-ensemble.png", `data:image/png;base64,${summonArt.toString("base64")}`);
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>

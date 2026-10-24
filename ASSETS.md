@@ -67,3 +67,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 - All five sheets are embedded once in `play.html` for offline play.
 - `sources.json` records SHA-256 hashes and the region mapping; it does not assert
   a third-party asset license for these generated images.
+
+## 소환 포켓몬 일러스트
+사용자 요청에 따라 새로 생성한 만화풍 포켓몬 단체 일러스트: `public/scene/summon/pokemon-ensemble.png`. 포켓몬 캐릭터 권리는 Nintendo / Creatures / GAME FREAK에 있습니다. 독립 실행 HTML에도 포함합니다.

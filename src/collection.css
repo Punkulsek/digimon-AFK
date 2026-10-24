@@ -266,3 +266,6 @@
 .collection-scroll .growth-stars { font-size:11px; gap:0; }
 #summon-page {position:absolute;inset:0 0 calc(var(--menu-height) + env(safe-area-inset-bottom,0px));z-index:15;background:radial-gradient(ellipse at top,#d4efe9,#f7f2dc);padding:20px 8%;display:flex;flex-direction:column;overflow:hidden;gap:12px;color:#355d40}
 #summon-page header {flex-shrink:0} #summon-page h1,#summon-page p {margin:4px 0} #summon-page .summon-banner {flex:1;min-height:70px;max-height:340px} #summon-page .summon-scroll {overflow:auto;min-height:0;flex:1} #summon-page .summon-actions {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex-shrink:0} #summon-page table {width:100%;text-align:center} #summon-page progress {width:100%;accent-color:#67ad8c} #summon-page .result-grid {grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+
+#summon-page .pokemon-ensemble{background:#123d61 url("/scene/summon/pokemon-ensemble.png") center/contain no-repeat;max-height:none;border:3px solid #48c5c4;border-radius:16px;box-shadow:0 8px 22px #153f4930;margin:0;overflow:hidden}
+#summon-page .pokemon-ensemble::before,#summon-page .pokemon-ensemble::after{display:none}
