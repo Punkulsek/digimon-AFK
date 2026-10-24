@@ -12,7 +12,7 @@
 }
 .bottom-nav .nav-inner {
   width: 100%;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0;
   border: 0;
   border-top: 1px solid #b7c8a0;
@@ -286,3 +286,5 @@
 /* Growth refreshes the detail content repeatedly; keep its geometry stable. */
 .modal.detail-modal{animation:none;transform:none}
 .detail-modal .modal-body{overflow-y:auto;scrollbar-gutter:stable}
+
+#upgrade-page{position:absolute;inset:0 0 calc(var(--menu-height) + env(safe-area-inset-bottom,0px));z-index:15;background:linear-gradient(#d4efe9,#f7f2dc);padding:24px 7%;overflow:auto;color:#355d40}#upgrade-page header{text-align:center}.upgrade-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;max-width:1100px;margin:24px auto}.upgrade-grid article{background:#fffbed;border:2px solid #bdd6bb;border-radius:20px;padding:20px;text-align:center;box-shadow:0 6px 0 #a9c4ac}.upgrade-icon{font-size:36px}.upgrade-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.upgrade-buttons button{display:flex;flex-direction:column;padding:12px 6px;font-size:15px}.upgrade-buttons small{font-size:10px}@media(max-height:540px){#upgrade-page{padding:8px 4%}#upgrade-page h1{font-size:20px}.upgrade-grid{margin:12px auto;gap:12px}.upgrade-grid article{padding:10px}.upgrade-grid h2{font-size:17px}.upgrade-icon{font-size:22px}}

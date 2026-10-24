@@ -1,3 +1,4 @@
+import {upgradeQuote,buyUpgrade} from './upgrades.js';
 import {SUMMON_THRESHOLDS,SUMMON_RATES,SUMMON_POOLS,SUMMON_GRADES,summonLevel,summonGrade} from "./summoning.js";
 import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionForStage,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
 import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
@@ -164,7 +165,7 @@ function updateAudio() {
 const partyPower = () =>
   state.inventory
     .filter((p) => state.party.includes(p.uid))
-    .reduce((s, p) => s + power(p), 0);
+    .reduce((s, p) => s + power(p,state), 0);
 function persist() {
   saved = save(storage, state);
   updateHud();
@@ -192,7 +193,7 @@ function growthPanel(p) {
 function card(p, action = "detail") {
   const s = species(p.speciesId),
     r = {name:SUMMON_GRADES[summonGrade(s.id)],color:["#87938d","#559bc4","#a078c0","#d6ab4e"][summonGrade(s.id)]};
-  return `<button class="pokemon-card rarity-${[0,2,3,4][summonGrade(s.id)]}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${i(s.icon)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${growthStars(p)}</span></span><span>${i("swords")}${num(power(p))}</span></div></button>`;
+  return `<button class="pokemon-card rarity-${[0,2,3,4][summonGrade(s.id)]}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${i(s.icon)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${growthStars(p)}</span></span><span>${i("swords")}${num(power(p,state))}</span></div></button>`;
 }
 $("#app").innerHTML = `
 <div class="game-shell">
@@ -208,7 +209,7 @@ $("#app").innerHTML = `
 </main>
 <section id="dungeon-page" class="dungeon-page" hidden aria-label="던전"></section>
 <section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
-<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="dungeons">${i("swords")}<span>던전</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
+<nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection">${i("backpack")}<span>포켓몬</span></button><button class="nav-button" data-action="upgrades"><span aria-hidden="true">✦</span><span>강화</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="dungeons">${i("swords")}<span>던전</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
 let overworldBattle = null;
 function restoreOverworld(){
@@ -464,7 +465,7 @@ function closeModal() {
   lastFocus?.focus();
 }
 function updateNavigation() {
-  const tab = battle.dungeon ? "dungeons" : ["collection","summon","dungeons"].includes(active) ? active : "home";
+  const tab = active === "upgrades" ? "upgrades" : battle.dungeon ? "dungeons" : ["collection","summon","dungeons","upgrades"].includes(active) ? active : "home";
   document.querySelectorAll(".nav-button").forEach((button) => {
     const current = button.dataset.action === tab;
     button.classList.toggle("active", current);
@@ -490,7 +491,7 @@ function collection() {
   $("#modal-root").innerHTML = "";
   $(".game-shell").classList.add("managing");
   const sorted = [...state.inventory].sort((a, b) =>
-    (sort === "level" ? b.level - a.level : sort === "power" ? power(b) - power(a) : summonGrade(b.speciesId) - summonGrade(a.speciesId)) || power(b) - power(a));
+    (sort === "level" ? b.level - a.level : sort === "power" ? power(b,state) - power(a,state) : summonGrade(b.speciesId) - summonGrade(a.speciesId)) || power(b,state) - power(a,state));
   const page = $("#collection-page");
   page.hidden = false;
   page.innerHTML = `<header class="party-header"><div class="management-title"><div><span class="eyebrow">함께 떠나는 모험</span><h1>포켓몬 탐험대</h1></div><div class="party-total">${i("swords")}<span>전체 전투력 <strong id="party-power">${num(partyPower())}</strong></span><small id="party-count">${state.party.length} / 5</small></div></div><div class="party-slots">${Array.from({length:5},(_,index)=>{
@@ -528,11 +529,11 @@ function detail(uid) {
   const p = state.inventory.find((p) => p.uid === uid),
     s = species(p.speciesId),
     r = {name:SUMMON_GRADES[summonGrade(s.id)],color:["#87938d","#559bc4","#a078c0","#d6ab4e"][summonGrade(s.id)]},
-    st = stats(p);
+    st = stats(p,state);
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 방어력 <b>${num(st.def)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p,state))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }
@@ -542,6 +543,11 @@ function summonPage(body){
  $("#modal-root").innerHTML='';
  let page=document.getElementById('summon-page');if(!page){page=document.createElement('section');page.id='summon-page';document.querySelector('.game-shell').append(page);}
  page.innerHTML=body;icons();updateNavigation();
+}
+function upgradeScreen(){
+ dungeonUI.close();leaveCollection();$("#modal-root").innerHTML='';active='upgrades';
+ let page=document.getElementById('upgrade-page');if(!page){page=document.createElement('section');page.id='upgrade-page';document.querySelector('.game-shell').append(page);}
+ page.innerHTML=`<header><h1>전체 포켓몬 강화</h1><p>포켓코인 ${num(state.gold)} · 모든 아군에게 영구 적용</p></header><div class="upgrade-grid">${[['atk','공격력','⚔'],['def','방어력','🛡'],['hp','최대 체력','♥']].map(([key,label,icon])=>{const level=state.upgrades?.[key]||0;return `<article><span class="upgrade-icon">${icon}</span><h2>${label} 강화</h2><h3>Lv.${level} · +${(level*.5).toFixed(1)}%</h3><p>레벨당 +0.5%</p><div class="upgrade-buttons">${[1,10,100,'MAX'].map(n=>{const q=upgradeQuote(state,key,n);return `<button class="primary-button" data-action="buyUpgrade" data-key="${key}" data-count="${n}" ${!q.levels||q.cost>state.gold?'disabled':''}>${n==='MAX'?`MAX (+${q.levels})`:`+${n}`}<small>${Number.isFinite(q.cost)?num(q.cost)+' 포켓코인':'강화 한도'}</small></button>`;}).join('')}</div></article>`;}).join('')}</div>`;updateNavigation();
 }
 function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
@@ -590,12 +596,20 @@ document.addEventListener("click", (e) => {
   if (!btn || btn.disabled) return;
   if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
   if(busy)return;
-  if(["home","collection","dungeons"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
+  if(["home","collection","dungeons","upgrades"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;
+  if(["home","collection","dungeons","summon"].includes(action))document.getElementById('upgrade-page')?.remove();
   if (action !== "music" && !sound.started) sound.unlock();
   if (action !== "music") sound.effect("click");
   if (dungeonUI.handle(action, btn)) return;
   switch (action) {
+    case "upgrades": upgradeScreen(); break;
+    case "buyUpgrade": {
+      const error=buyUpgrade(state,btn.dataset.key,btn.dataset.count==='MAX'?'MAX':Number(btn.dataset.count));
+      if(error){toast(error);break;}
+      for(const ally of battle.allies){const p=state.inventory.find(p=>p.uid===ally.uid),next=stats(p,state);const ratio=ally.hp/ally.maxHp;Object.assign(ally,next,{maxHp:next.hp,hp:Math.round(next.hp*ratio)});}
+      persist();renderBattle();updateHud();upgradeScreen();sound.effect('level');break;
+    }
     case "dungeonStatus":
       modal(battle.dungeon.name, `${battle.dungeon.stage}단계`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="dungeons">도전 종료 · 던전 선택</button>`);
       break;
@@ -758,9 +772,9 @@ document.addEventListener("click", (e) => {
       persist();
       renderBattle();
       const p = state.inventory.find(p => p.uid === btn.dataset.id);
-      const st = stats(p), info = $(".detail-info");
+      const st = stats(p,state), info = $(".detail-info");
       info.querySelector("h3").firstChild.textContent = `Lv. ${p.level} `;
-      const values = [st.hp, st.atk, power(p)];
+      const values = [st.hp, st.atk, st.def, power(p,state)];
       info.querySelectorAll(".stat-row b").forEach((el, index) => { el.textContent = num(values[index]); });
       btn.querySelector("span").textContent = `이상한사탕 ${num(levelCost(p))}개`;
       btn.disabled = p.level >= 100;
