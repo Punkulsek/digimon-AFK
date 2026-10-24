@@ -2,11 +2,11 @@ import {STAGE_REGIONS,regionForStage,localStage,regionIndex} from "./stages.js";
 import kanto from "./generated/kanto.json" with { type: "json" };
 
 export const RARITIES = [
-  { name: "일반", color: "#87938d", chance: 50 },
-  { name: "고급", color: "#57a780", chance: 28 },
-  { name: "희귀", color: "#559bc4", chance: 15 },
-  { name: "영웅", color: "#a078c0", chance: 6 },
-  { name: "전설", color: "#d6ab4e", chance: 1 },
+  { name: "R", color: "#87938d", chance: 50 },
+  { name: "SR", color: "#57a780", chance: 28 },
+  { name: "SR", color: "#559bc4", chance: 15 },
+  { name: "SSR", color: "#a078c0", chance: 6 },
+  { name: "SSR+", color: "#d6ab4e", chance: 1 },
 ];
 // 사용자 제공 도트 파일을 public/pokemon에 넣거나 sprite 경로를 변경하세요.
 const STARTER_BALANCE = [

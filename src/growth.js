@@ -42,6 +42,7 @@ export function evolve(state,uid,target) {
  const e=p&&evolutionOptions(p).find(e=>e.to===target);
  if(!e)return '진화할 수 없는 대상이에요.';
  if(!evolutionReady(state,p,e))return '레벨·일반 스테이지·진화 재료 조건을 모두 충족해야 해요.';
+ if(state.inventory.some(q=>q.uid!==uid&&q.speciesId===e.to))return '이미 보유한 진화형이에요.';
  recordCollection(state,[e.to]);state.materials[e.material]-=e.amount;p.speciesId=e.to;
  return null;
 }
@@ -49,19 +50,14 @@ export function evolutionFamily(id) {
  const parent=EVOLUTIONS.find(e=>e.to===id);
  return parent?evolutionFamily(parent.from):id;
 }
-// Inventory is the material ledger: registration is automatic, consumption only on breakthrough.
-// Party members and invested cards are protected from automatic consumption.
 export function breakthroughCandidates(state,p) {
- return state.inventory.filter(q=>q.uid!==p.uid&&evolutionFamily(q.speciesId)===evolutionFamily(p.speciesId)&&!state.party.includes(q.uid)&&q.level===1&&!(q.breakthrough||0));
+ return {length:state.shards?.[evolutionFamily(p.speciesId)]||0};
 }
 export function breakthrough(state,uid) {
  const p=state.inventory.find(p=>p.uid===uid);
  if(!p)return '포켓몬을 찾을 수 없어요.';
  if((p.breakthrough||0)>=10)return '최대 10돌파에 도달했어요.';
- const candidates=breakthroughCandidates(state,p),cost=breakthroughCost(p);
- if(candidates.length<cost)return '같은 진화 계열의 돌파 재료가 부족해요.';
- recordCollection(state);
- const consumed=new Set(candidates.slice(0,cost).map(q=>q.uid));
- state.inventory=state.inventory.filter(q=>!consumed.has(q.uid));p.breakthrough=(p.breakthrough||0)+1;
- return null;
+ const family=evolutionFamily(p.speciesId),cost=breakthroughCost(p);
+ if((state.shards?.[family]||0)<cost)return '같은 진화 계열의 돌파 조각이 부족해요.';
+ state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;return null;
 }

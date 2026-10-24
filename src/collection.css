@@ -282,3 +282,7 @@
 #summon-page .summon-actions{width:min(82%,720px);align-self:center;gap:8px}
 #summon-page .summon-actions button{padding:10px 12px;min-height:42px;font-size:13px;justify-content:center;border-radius:10px}
 @media(max-width:700px){#summon-page .pokemon-ensemble,#summon-page .summon-actions{width:94%}#summon-page .summon-actions{gap:6px}#summon-page .summon-actions button{padding:8px 5px;font-size:11px;min-height:38px}}
+
+/* Growth refreshes the detail content repeatedly; keep its geometry stable. */
+.modal.detail-modal{animation:none;transform:none}
+.detail-modal .modal-body{overflow-y:auto;scrollbar-gutter:stable}
