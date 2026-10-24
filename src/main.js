@@ -757,10 +757,19 @@ document.addEventListener("click", (e) => {
       battle.resetParty();
       persist();
       renderBattle();
-      const detailScroll = $(".modal-body")?.scrollTop || 0;
-      collection();
-      detail(btn.dataset.id);
-      $(".modal-body").scrollTop = detailScroll;
+      const p = state.inventory.find(p => p.uid === btn.dataset.id);
+      const st = stats(p), info = $(".detail-info");
+      info.querySelector("h3").firstChild.textContent = `Lv. ${p.level} `;
+      const values = [st.hp, st.atk, power(p)];
+      info.querySelectorAll(".stat-row b").forEach((el, index) => { el.textContent = num(values[index]); });
+      btn.querySelector("span").textContent = `이상한사탕 ${num(levelCost(p))}개`;
+      btn.disabled = p.level >= 100;
+      info.querySelector("small.muted").textContent = `보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개`;
+      // Refresh evolution eligibility without replacing the dialog, sprite or level button.
+      const panel = $(".growth-panel"), template = document.createElement("template");
+      template.innerHTML = growthPanel(p);
+      panel.innerHTML = template.content.firstElementChild.innerHTML;
+      updateHud();
       sound.effect("level");
       toast("레벨 업! 조금 더 강해졌어요.");
       break;
