@@ -275,3 +275,10 @@
 #summon-page .summon-compact-header p{font-size:11px;line-height:1.3;margin:0;grid-column:1}
 #summon-page .summon-compact-header progress{height:6px;grid-column:1;display:block}
 #summon-page .summon-compact-header button{grid-column:2;grid-row:1/4;font-size:11px;padding:7px 10px;min-height:32px}
+
+/* Compact summon artwork and actions, centered without cropping the illustration. */
+#summon-page:has(.pokemon-ensemble){justify-content:center}
+#summon-page .pokemon-ensemble{flex:0 1 auto;width:min(82%,880px);height:auto;aspect-ratio:1672/941;max-height:calc(100% - 120px);align-self:center;border-width:2px;border-radius:12px}
+#summon-page .summon-actions{width:min(82%,720px);align-self:center;gap:8px}
+#summon-page .summon-actions button{padding:10px 12px;min-height:42px;font-size:13px;justify-content:center;border-radius:10px}
+@media(max-width:700px){#summon-page .pokemon-ensemble,#summon-page .summon-actions{width:94%}#summon-page .summon-actions{gap:6px}#summon-page .summon-actions button{padding:8px 5px;font-size:11px;min-height:38px}}
