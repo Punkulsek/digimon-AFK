@@ -1,0 +1,167 @@
+[
+  {
+    "file": "kanto-1.png",
+    "sha256": "cdf834ada17f947ac9dd03007996abc6d48dc207405ea2a1936ff796e46eae79",
+    "width": 1536,
+    "height": 1024,
+    "source": "OpenAI image generation, user-requested original environment art",
+    "regions": [
+      {
+        "id": 1,
+        "name": "상록숲",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "id": 2,
+        "name": "회색체육관",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "id": 3,
+        "name": "달맞이산",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "id": 4,
+        "name": "블루체육관",
+        "column": 1,
+        "row": 1
+      }
+    ]
+  },
+  {
+    "file": "kanto-2.png",
+    "sha256": "ad5c39df9a722c81667c01db1e71cba67bfff34c1563ea5c526799c58dcbd7c4",
+    "width": 1536,
+    "height": 1024,
+    "source": "OpenAI image generation, user-requested original environment art",
+    "regions": [
+      {
+        "id": 5,
+        "name": "상트안느호",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "id": 6,
+        "name": "갈색체육관",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "id": 7,
+        "name": "바위터널",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "id": 8,
+        "name": "포켓몬타워",
+        "column": 1,
+        "row": 1
+      }
+    ]
+  },
+  {
+    "file": "kanto-3.png",
+    "sha256": "d0012fcd8d89b9c317f81f94b7e47ac8b51ed8b559562ef8fbe16d1a4c0434e4",
+    "width": 1536,
+    "height": 1024,
+    "source": "OpenAI image generation, user-requested original environment art",
+    "regions": [
+      {
+        "id": 9,
+        "name": "로켓단 아지트",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "id": 10,
+        "name": "무지개체육관",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "id": 11,
+        "name": "실프주식회사",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "id": 12,
+        "name": "사파리존",
+        "column": 1,
+        "row": 1
+      }
+    ]
+  },
+  {
+    "file": "kanto-4.png",
+    "sha256": "9d08c9a4fb99fd9922aac3e9afec26a51ee17df5ef282eae71fb0ed972ec132e",
+    "width": 1536,
+    "height": 1024,
+    "source": "OpenAI image generation, user-requested original environment art",
+    "regions": [
+      {
+        "id": 13,
+        "name": "무인발전소",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "id": 14,
+        "name": "쌍둥이섬",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "id": 15,
+        "name": "포켓몬저택",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "id": 16,
+        "name": "홍련체육관",
+        "column": 1,
+        "row": 1
+      }
+    ]
+  },
+  {
+    "file": "kanto-5.png",
+    "sha256": "b76ea3adf60b1d761374f52999b5c07dde134dee7c7db4983e3dcb86c8b4aabc",
+    "width": 1536,
+    "height": 1024,
+    "source": "OpenAI image generation, user-requested original environment art",
+    "regions": [
+      {
+        "id": 17,
+        "name": "상록체육관",
+        "column": 0,
+        "row": 0
+      },
+      {
+        "id": 18,
+        "name": "챔피언로드",
+        "column": 1,
+        "row": 0
+      },
+      {
+        "id": 19,
+        "name": "석영고원",
+        "column": 0,
+        "row": 1
+      },
+      {
+        "id": 20,
+        "name": "블루시티 동굴",
+        "column": 1,
+        "row": 1
+      }
+    ]
+  }
+]

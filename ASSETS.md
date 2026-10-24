@@ -17,11 +17,12 @@ Kanto data was imported from the user-provided PokeAPI ZIP. The PokeAPI data lic
 
 ## Music and environment art
 
-The user selected background A for Viridian Forest (region index 0). Its image is
-stored at `public/scene/viridian-forest.png` and embedded in `play.html`.
+The user previously selected background A for Viridian Forest. The legacy file is
+retained at `public/scene/viridian-forest.png`. The current overworld uses the newly
+generated region art described below.
 - Source: https://github.com/smogon/pokemon-showdown-client/blob/0de26d2ef7258e5619057f63b3774240b45cecbd/play.pokemonshowdown.com/fx/bg-forest.png
 - Repository license: AGPLv3. The repository credits Kyle Dove for battle backdrops; a separate per-image reuse permission has not been verified. Inclusion does not transfer underlying artwork rights.
-- Other regions retain their existing environment pending user selection.
+- This legacy art has been superseded for overworld regions; the approved dungeon art is retained.
 - Current BGM: user-uploaded `1-12. Oldale Town.mp3`, stored unchanged as `public/audio/oldale-town.mp3` and embedded in `play.html`. Metadata: Oldale Town, Pokémon Omega Ruby & Alpha Sapphire Super Music Collection. User explicitly requested using this file. Underlying recording rights remain with their owners; upload does not grant a public reuse license.
 
 Procedural sound effects in `src/audio.js` use local Web Audio oscillators. The previous synthesized background melody has been replaced exclusively by the user-provided MP3. No music search or other recording was used.
@@ -49,3 +50,20 @@ stored under `public/scene/dungeons/` and embedded in `play.html`.
 
 The client repository specifies AGPLv3; separate per-image reuse permissions
 have not been verified. User selection does not transfer underlying artwork rights.
+
+## Generated Kanto region backgrounds
+
+The user explicitly requested creating and applying new backgrounds in a similar
+pixel-art style to the existing environments. Twenty new environment scenes were
+created with OpenAI image generation for this project. These are original generated
+interpretations of the requested locations, not extracted official game backgrounds.
+No Pokémon sprites, music, currency icons or dungeon art were generated or replaced.
+
+- Files: `public/scene/regions/kanto-1.png` through `kanto-5.png`.
+- Each unchanged 1536×1024 PNG contains four 768×512 scenes in reading order.
+- Five sheets cover region IDs 1–4, 5–8, 9–12, 13–16 and 17–20 respectively.
+- The renderer displays one quadrant at its native aspect ratio, using CSS to cover
+  the viewport. No other quadrant is shown in the game.
+- All five sheets are embedded once in `play.html` for offline play.
+- `sources.json` records SHA-256 hashes and the region mapping; it does not assert
+  a third-party asset license for these generated images.

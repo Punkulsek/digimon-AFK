@@ -95,7 +95,21 @@ test('모든 승인 던전 배경을 오프라인 표시하고 일반 지역 배
   await openStandalone(page);
   await pauseBattle(page);
   const scene = page.locator('#scene');
-  const original = await scene.evaluate(el => getComputedStyle(el).backgroundImage);
+  const art = page.locator('.region-art');
+  const original = await art.evaluate(el => [getComputedStyle(el).backgroundImage, getComputedStyle(el).backgroundPosition]);
+  const sheets = await art.evaluate(async el => {
+    const previous=el.dataset.atlas, result=[];
+    try {
+      for(let n=1;n<=5;n++) {
+        el.dataset.atlas=n;
+        const value=getComputedStyle(el).backgroundImage, img=new Image();
+        img.src=value.slice(5,-2);await img.decode();
+        result.push({embedded:img.src.startsWith('data:image/png;base64,'),size:[img.naturalWidth,img.naturalHeight]});
+      }
+    } finally {el.dataset.atlas=previous;}
+    return result;
+  });
+  expect(sheets).toEqual(Array.from({length:5},()=>({embedded:true,size:[1536,1024]})));
   const backgrounds = new Set();
   for (const id of ['coin','candy','evolution-fire','evolution-water','evolution-grass','evolution-electric','evolution-rock','evolution-ice']) {
     await page.getByRole('button',{name:'던전',exact:true}).click();
@@ -103,6 +117,7 @@ test('모든 승인 던전 배경을 오프라인 표시하고 일반 지역 배
     await page.locator(`[data-dungeon="${id}"]`).click();
     await page.getByRole('button',{name:'던전 입장'}).click();
     await expect(scene).toHaveAttribute('data-dungeon',id);
+    await expect(art).toBeHidden();
     await expect(scene).toHaveCSS('filter','none');
     const background = await scene.evaluate(async el => {
       const value = getComputedStyle(el).backgroundImage;
@@ -114,7 +129,8 @@ test('모든 승인 던전 배경을 오프라인 표시하고 일반 지역 배
     backgrounds.add(background);
     await page.locator('.nav-button[data-action="home"]').click();
     await expect(scene).not.toHaveAttribute('data-dungeon');
-    expect(await scene.evaluate(el => getComputedStyle(el).backgroundImage)).toBe(original);
+    await expect(art).toBeVisible();
+    expect(await art.evaluate(el => [getComputedStyle(el).backgroundImage,getComputedStyle(el).backgroundPosition])).toEqual(original);
   }
   expect(backgrounds.size).toBe(8);
 });

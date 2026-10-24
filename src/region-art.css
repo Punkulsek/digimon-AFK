@@ -1,0 +1,19 @@
+/* Five 1536×1024 atlases, four 768×512 scenes each. The image files remain unchanged.
+   This 3:2 plane covers the viewport while keeping each region's native aspect. */
+.scene:not([data-dungeon]) { background:#26483d; filter:none; transition:none; }
+.scene:not([data-dungeon]) > :not(.region-art) { display:none; }
+.region-art {
+  position:absolute;
+  left:50%; top:50%;
+  width:max(100vw,150vh); height:max(100vh,calc(100vw * 2 / 3));
+  width:max(100dvw,150dvh); height:max(100dvh,calc(100dvw * 2 / 3));
+  transform:translate(-50%,-50%);
+  background-size:200% 200%; background-repeat:no-repeat;
+  image-rendering:pixelated;
+}
+.region-art[data-atlas="1"] { background-image:url('/scene/regions/kanto-1.png'); }
+.region-art[data-atlas="2"] { background-image:url('/scene/regions/kanto-2.png'); }
+.region-art[data-atlas="3"] { background-image:url('/scene/regions/kanto-3.png'); }
+.region-art[data-atlas="4"] { background-image:url('/scene/regions/kanto-4.png'); }
+.region-art[data-atlas="5"] { background-image:url('/scene/regions/kanto-5.png'); }
+.scene[data-dungeon] > .region-art { display:none; }

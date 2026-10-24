@@ -1,4 +1,4 @@
-import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
+import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionForStage,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
 import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
   createIcons,
@@ -61,6 +61,7 @@ import "./fullscreen.css";
 import "./collection.css";
 import "./dungeon.css";
 import "./stages.css";
+import "./region-art.css";
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
@@ -198,7 +199,7 @@ $("#app").innerHTML = `
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정">${i("settings")}</button></header>
 <main class="adventure">
 <section class="battlefield" aria-label="자동 전투 화면">
-<div class="scene" id="scene"><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
+<div class="scene" id="scene"><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition">${i("trophy")}<strong>스테이지 클리어!</strong><span>다음 모험을 향해 출발해요</span></div>
@@ -253,8 +254,11 @@ function updateHud() {
   );
   if (battle.dungeon) $("#scene").dataset.dungeon = battle.dungeon.id;
   else delete $("#scene").dataset.dungeon;
-  // New region art remains unassigned until the user's per-region selection.
   $("#scene").dataset.region = regionIndex(state.stage);
+  const artConfig=regionForStage(state.stage).art;
+  const backdrop=$(".region-art");
+  backdrop.dataset.atlas=artConfig.atlas;
+  backdrop.style.backgroundPosition=`${artConfig.column*100}% ${artConfig.row*100}%`;
   $("#boss-progress-ui").hidden = !!battle.dungeon;
   const ready=state.kills>=STAGE_KILLS&&!battle.boss&&!state.campaignCleared;
   $("#boss-gauge").setAttribute("aria-valuenow",state.campaignCleared||battle.boss?STAGE_KILLS:state.kills);

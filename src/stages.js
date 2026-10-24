@@ -23,7 +23,7 @@ export const STAGE_REGIONS = [
  ['챔피언로드',[67,75,95,105],68,146],
  ['석영고원',[91,94,130,148],149,9],
  ['블루시티 동굴',[42,64,82,112],132,150],
-].map(([name,enemies,midBoss,finalBoss],index)=>({id:index+1,name,enemies,midBoss,finalBoss}));
+].map(([name,enemies,midBoss,finalBoss],index)=>({id:index+1,name,enemies,midBoss,finalBoss,art:{atlas:Math.floor(index/4)+1,column:index%2,row:Math.floor(index%4/2)}}));
 export const MAX_STAGE = STAGE_REGIONS.length * STAGES_PER_REGION;
 export const stageNumber = stage => Math.max(1,Math.min(MAX_STAGE,stage));
 export const regionIndex = stage => Math.floor((stageNumber(stage)-1)/STAGES_PER_REGION);

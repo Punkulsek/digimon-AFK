@@ -60,6 +60,11 @@ for (const file of await readdir(resolve(root, "public/scene/dungeons"))) {
   const png = await readFile(resolve(root, "public/scene/dungeons", file));
   offlineCss = offlineCss.replaceAll(`/scene/dungeons/${file}`, `data:image/png;base64,${png.toString("base64")}`);
 }
+for (const file of await readdir(resolve(root, "public/scene/regions"))) {
+  if (!file.endsWith(".png")) continue;
+  const png = await readFile(resolve(root, "public/scene/regions", file));
+  offlineCss = offlineCss.replaceAll(`/scene/regions/${file}`, `data:image/png;base64,${png.toString("base64")}`);
+}
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>
