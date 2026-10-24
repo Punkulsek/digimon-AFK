@@ -60,21 +60,11 @@ test("독립 HTML을 외부 파일·네트워크 없이 실행하고 진행 복�
   await expect(page.locator(".rarity-badge")).toContainText("풀 / 독");
   await page.keyboard.press("Escape");
   await page.locator('.nav-button[data-action="summon"]').click();
-  const summonArt = await page.locator('#summon-page').evaluate(async el => {
-    const image = new Image();
-    image.src = getComputedStyle(el).backgroundImage.slice(5, -2);
-    await image.decode();
-    return {embedded: image.src.startsWith('data:image/png;base64,'), width: image.naturalWidth, height: image.naturalHeight};
-  });
-  expect(summonArt).toEqual({embedded: true, width: 1672, height: 941});
   await page.locator('[data-action="draw"][data-count="10"]').click();
-  await expect(page.locator('.summon-cinematic canvas')).toBeVisible();
-  await expect(page.locator('.summon-cinematic canvas')).toHaveAttribute('data-phase', /arrival|charge|eclipse|stillness|burst|silhouette|reveal/);
-  await page.locator('[data-action="skipSummon"]').click();
   await expect(page.locator(".result-grid .pokemon-card")).toHaveCount(10);
   await page.keyboard.press("Escape");
   await page.reload();
-  await expect(page.locator("#gems")).toHaveText("9,000");
+  await expect(page.locator("#gems")).toHaveText("7,300");
   await page.locator('.nav-button[data-action="collection"]').click();
   await expect(page.locator(".collection-grid .pokemon-card")).toHaveCount(16);
   expect(errors).toEqual([]);

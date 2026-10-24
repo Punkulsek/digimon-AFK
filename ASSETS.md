@@ -67,13 +67,3 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 - All five sheets are embedded once in `play.html` for offline play.
 - `sources.json` records SHA-256 hashes and the region mapping; it does not assert
   a third-party asset license for these generated images.
-
-## Summon sanctuary illustration
-
-`public/scene/summon/summon-sanctuary.png` was newly generated with OpenAI image
-generation at the user's request for a central summon-menu illustration. It depicts
-an original mint-and-cream botanical sanctuary and floating capture ball, without
-creature artwork or UI text. The original image bytes are retained and embedded in
-`play.html`. Pokémon appearing in the cinematic continue to use the existing
-PokeAPI sprites. Cinematic effects and additional summon sound effects are rendered
-and synthesized in code; no external music or video was added.

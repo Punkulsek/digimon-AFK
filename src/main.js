@@ -1,4 +1,3 @@
-import {createSummonCinematic, TIER_COLORS} from "./summon-cinematic.js";
 import {SUMMON_THRESHOLDS,SUMMON_RATES,SUMMON_POOLS,SUMMON_GRADES,summonLevel,summonGrade} from "./summoning.js";
 import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionForStage,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
 import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
@@ -64,7 +63,6 @@ import "./collection.css";
 import "./dungeon.css";
 import "./stages.css";
 import "./region-art.css";
-import "./summon.css";
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
@@ -539,7 +537,6 @@ function detail(uid) {
   );
 }
 let revealSummon=null;
-let summonCinematic=null;
 function summonPage(body){
  dungeonUI.close();leaveCollection();active="summon";sound.setMode("summon");
  $("#modal-root").innerHTML='';
@@ -548,24 +545,14 @@ function summonPage(body){
 }
 function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
- summonPage(`<div class="summon-landing"><div class="summon-topline"><button class="summon-rates-button" data-action="summonRates">ⓘ 확률 정보</button><div class="summon-wallet">${currencyIcon("diamond", "다이아")}<span>보유 다이아 <b>${num(state.gems)}</b></span></div></div><div class="summon-level"><small>새로운 인연이 시작되는 곳</small><h1>포켓몬 소환 <span>Lv.${lv}</span></h1><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><p>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}회`} <span>· 누적 ${num(state.summons)}회</span></p></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button" data-action="draw" data-count="${n}" ${state.gems<n*100?'disabled':''}><strong>${n}회 소환</strong><span>${currencyIcon("diamond", "다이아")} ${num(n*100)}</span></button>`).join('')}<small>소환한 포켓몬은 즉시 보유 목록에 저장됩니다</small></div></div>`);
+ summonPage(`<header><h1>포켓몬 소환 · Lv.${lv}</h1><p>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}회`} · 누적 ${num(state.summons)}회</p><progress max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><p>보유 다이아 ${num(state.gems)}</p><button class="soft-button" data-action="summonRates">확률 정보</button></header><div class="summon-banner"><h3>새로운 인연이 기다려요</h3><div class="big-ball"><span></span></div></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button" data-action="draw" data-count="${n}" ${state.gems<n*100?'disabled':''}>${n}회 소환 · 다이아 ${num(n*100)}</button>`).join('')}</div>`);
 }
 function summonRates(){const lv=summonLevel(state.summons);summonPage(`<h1>확률 정보 · Lv.${lv}</h1><p>각 등급 내 포켓몬은 동일 확률입니다. 분기 진화는 최종 종족값 최댓값으로 등급을 정합니다.</p><div class="summon-scroll"><table><thead><tr><th>레벨</th>${SUMMON_GRADES.map(g=>`<th>${g}</th>`).join('')}</tr></thead><tbody>${SUMMON_RATES.map((r,n)=>`<tr><td>Lv.${n+1}</td>${r.map(v=>`<td>${v}%</td>`).join('')}</tr>`).join('')}</tbody></table>${SUMMON_POOLS.map((pool,g)=>`<h2>${SUMMON_GRADES[g]} · ${SUMMON_RATES[lv-1][g]}%</h2><p>${pool.map(p=>`${p.name} (${SUMMON_RATES[lv-1][g]}/${pool.length}% ≈ ${(SUMMON_RATES[lv-1][g]/pool.length).toFixed(6)}%)`).join(' · ')}</p>`).join('')}</div><button class="primary-button" data-action="summon">돌아가기</button>`);}
 function draw(count){
  if(busy)return;const outcome=summon(state,count);if(outcome.error)return toast(outcome.error);persist();busy=true;
- const grade=Math.max(...outcome.result.map(p=>summonGrade(p.speciesId)));
- const featured=outcome.result.find(p=>summonGrade(p.speciesId)===grade);
- const finish=(skipped=false)=>{
-  if(revealSummon!==finish)return;
-  revealSummon=null;summonCinematic?.dispose();summonCinematic=null;busy=false;
-  let delay=0;
-  summonPage(`<div class="summon-results ${skipped?'summon-skipped':''}" style="--summon-accent:${TIER_COLORS[grade]}"><header><small>새로운 모험의 동료</small><h1>${grade>=2?SUMMON_GRADES[grade]+' 등장!':'소환 완료'} <span>· ${count}마리</span></h1><p>소환 Lv.${summonLevel(state.summons)} · 보유 다이아 ${num(state.gems)}</p></header><div class="summon-scroll"><div class="result-grid ${grade>=2?'legendary-result':''}">${outcome.result.map(p=>{const g=summonGrade(p.speciesId),d=delay;delay+=g===3?180:g===2?120:55;return `<div class="summon-result-card grade-${g}" style="--card-delay:${d}ms;--grade-color:${TIER_COLORS[g]}"><strong>${SUMMON_GRADES[g]}</strong>${card(p)}</div>`;}).join('')}</div></div><button class="primary-button result-confirm" data-action="summon">확인</button></div>`);
- };
- revealSummon=finish;
- summonPage(`<div class="summon-cinematic"><canvas aria-label="포켓몬 소환 연출"></canvas><div class="cinematic-top"><span>새로운 인연을 만나는 순간</span><button data-action="skipSummon">연출 건너뛰기 <span>›</span></button></div><p class="cinematic-caption" aria-live="polite">빛 너머에서, 당신을 기다리고 있어요</p></div>`);
- summonCinematic=createSummonCinematic({canvas:document.querySelector('.summon-cinematic canvas'),grade,sprite:species(featured.speciesId).sprite,sound,onFinish:finish});
+ const finish=()=>{if(revealSummon!==finish)return;revealSummon=null;busy=false;const grade=Math.max(...outcome.result.map(p=>summonGrade(p.speciesId)));sound.effect(grade===3?'legendary':'reveal');summonPage(`<h1>${grade>=2?SUMMON_GRADES[grade]+' 등장!':'소환 완료'} · ${count}마리</h1><p>소환 Lv.${summonLevel(state.summons)} · 보유 다이아 ${num(state.gems)}</p><div class="summon-scroll"><div class="result-grid ${grade>=2?'legendary-result':''}">${outcome.result.map(p=>`<div><strong>${SUMMON_GRADES[summonGrade(p.speciesId)]}</strong>${card(p)}</div>`).join('')}</div></div><button class="primary-button result-confirm" data-action="summon">확인</button>`);};
+ revealSummon=finish;summonPage(`<h1>소환 중 · 다이아 ${num(state.gems)}</h1><div class="summoning"><div class="big-ball"><span></span></div></div><button class="primary-button" data-action="skipSummon">연출 건너뛰기</button>`);setTimeout(finish,1200);
 }
-
 function stages() {
   active = "stages";
   const current = ((state.stage - 1) % 20) + 1,
@@ -601,8 +588,7 @@ function settings() {
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
-  if(btn.dataset.action==="skipSummon"){revealSummon?.(true);return;}
-  if(busy && ["home","collection","dungeons"].includes(btn.dataset.action)) revealSummon?.();
+  if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
   if(busy)return;
   if(["home","collection","dungeons"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;
