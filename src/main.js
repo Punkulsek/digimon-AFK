@@ -301,6 +301,7 @@ function renderBattle() {
     })
     .join("");
   $("#enemy").classList.toggle('enemy-squad',!battle.dungeon);
+  $("#enemy").classList.toggle('boss-formation',battle.boss);
   $("#enemy").innerHTML=(battle.dungeon?[battle.enemy]:battle.enemies).map((e,n)=>{
     const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div><div class="enemy-hp"><span style="width:${e.hp/e.maxHp*100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div></div>`;
   }).join('');
