@@ -70,6 +70,8 @@ for (const file of await readdir(resolve(root, "public/scene/type-dungeons"))) {
   const png=await readFile(resolve(root,"public/scene/type-dungeons",file));
   offlineCss=offlineCss.replaceAll(`/scene/type-dungeons/${file}`,`data:image/png;base64,${png.toString("base64")}`);
 }
+const typeIcons=await readFile(resolve(root,"public/types/type-icons.webp"));
+offlineCss=offlineCss.replaceAll('/types/type-icons.webp',`data:image/webp;base64,${typeIcons.toString('base64')}`);
 const summonArt = await readFile(resolve(root, "public/scene/summon/pokemon-ensemble.png"));
 offlineCss = offlineCss.replaceAll("/scene/summon/pokemon-ensemble.png", `data:image/png;base64,${summonArt.toString("base64")}`);
 const html = `<!doctype html>

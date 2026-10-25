@@ -1,0 +1,24 @@
+.pokemon-type-icon{display:inline-block;flex:0 0 auto;width:22px;height:22px;border-radius:50%;vertical-align:middle;background-image:url('/types/type-icons.webp');background-size:780.487805% 425.609756%;background-repeat:no-repeat}
+.card-type{display:inline-flex;align-items:center;gap:3px}.pokemon-card .card-type .pokemon-type-icon{width:18px;height:18px}
+.rarity-badge .pokemon-type-icon,.growth-panel .pokemon-type-icon{width:20px;height:20px;margin-right:3px}
+.dungeon-emblem:has(.pokemon-type-icon){background:none;border:0;box-shadow:none}.dungeon-emblem .pokemon-type-icon{width:100%;height:100%}
+.challenge-reward .pokemon-type-icon{width:28px;height:28px}
+@media(max-height:540px){.challenge-reward .pokemon-type-icon{width:18px;height:18px}}
+.pokemon-type-icon[data-type="normal"]{background-position:0.17921147% 5.61797753%}
+.pokemon-type-icon[data-type="fighting"]{background-position:20.25089606% 5.61797753%}
+.pokemon-type-icon[data-type="flying"]{background-position:41.93548387% 5.61797753%}
+.pokemon-type-icon[data-type="poison"]{background-position:61.64874552% 5.61797753%}
+.pokemon-type-icon[data-type="ground"]{background-position:81.00358423% 5.61797753%}
+.pokemon-type-icon[data-type="rock"]{background-position:100.00000000% 5.61797753%}
+.pokemon-type-icon[data-type="bug"]{background-position:0.17921147% 52.43445693%}
+.pokemon-type-icon[data-type="ghost"]{background-position:20.25089606% 52.43445693%}
+.pokemon-type-icon[data-type="steel"]{background-position:41.93548387% 52.43445693%}
+.pokemon-type-icon[data-type="fire"]{background-position:61.64874552% 52.43445693%}
+.pokemon-type-icon[data-type="water"]{background-position:81.00358423% 52.43445693%}
+.pokemon-type-icon[data-type="grass"]{background-position:100.00000000% 52.43445693%}
+.pokemon-type-icon[data-type="electric"]{background-position:0.17921147% 93.63295880%}
+.pokemon-type-icon[data-type="psychic"]{background-position:20.25089606% 93.63295880%}
+.pokemon-type-icon[data-type="ice"]{background-position:41.93548387% 93.63295880%}
+.pokemon-type-icon[data-type="dragon"]{background-position:61.64874552% 93.63295880%}
+.pokemon-type-icon[data-type="dark"]{background-position:81.00358423% 93.63295880%}
+.pokemon-type-icon[data-type="fairy"]{background-position:100.00000000% 93.63295880%}

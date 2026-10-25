@@ -73,3 +73,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## 18타입 진화재료 던전 배경
 사용자 요청에 따라 새로 생성한 원본 도트 배경 18종입니다. `public/scene/type-dungeons/types-1.png`~`types-3.png`는 각각 2열×3행으로 구성되며 이미지 원본을 수정하지 않고 CSS로 해당 장면을 표시합니다. 타입 순서는 `src/dungeon-config.js`, 파일 해시와 크기는 같은 폴더의 `sources.json`에 기록했습니다. 타입 선택·도전 화면·실제 던전 전투에 같은 배경을 적용하며 `play.html`에도 내장합니다. 이전 6타입 배경은 보관용이며 새 타입 배경으로 대체했습니다. 포켓코인·이상한사탕 배경과 사용자 BGM은 유지합니다.
+
+## 사용자 제공 타입 아이콘
+`public/types/type-icons.webp`는 첨부 `타입에셋.zip` 안의 `타입 에셋.webp` 원본입니다. 이미지 수정 없이 CSS로 18개 타입 영역을 표시합니다. 복합 타입은 각 아이콘을 함께 표시하며 카드·상세·도감 상세·진화 재료·타입별 던전에 적용합니다. 출처·SHA-256·영역 좌표는 `public/types/source.json`에 기록하며 독립 실행 HTML에도 내장합니다.

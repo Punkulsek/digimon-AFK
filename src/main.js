@@ -1,3 +1,5 @@
+import {typeIcon,typeIcons} from './type-icons.js';
+import './type-icons.css';
 import {EVOLUTION_TYPES} from './dungeon-config.js';
 import {upgradeQuote,buyUpgrade} from './upgrades.js';
 import {SUMMON_THRESHOLDS,SUMMON_RATES,SUMMON_POOLS,SUMMON_GRADES,summonLevel,summonGrade} from "./summoning.js";
@@ -181,7 +183,7 @@ function toast(msg) {
 }
 function art(s, extra = "") {
   const animated = extra.includes("field-art") && !reducedMotion;
-  return `<div class="pokemon-art type-${s.type} ${extra}" title="${s.name} · ${s.types.join(" / ")}"><img src="${animated ? s.animated : s.sprite}" data-still="${s.sprite}" alt="${s.name}" decoding="async" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src=this.dataset.still}else{this.hidden=true;this.nextElementSibling.hidden=false}"><div class="placeholder" hidden><div class="placeholder-ball"><span></span></div><span class="type-emblem">${i(s.icon)}</span><small>No. ${String(s.id).padStart(3, "0")}</small></div></div>`;
+  return `<div class="pokemon-art type-${s.type} ${extra}" title="${s.name} · ${s.types.join(" / ")}"><img src="${animated ? s.animated : s.sprite}" data-still="${s.sprite}" alt="${s.name}" decoding="async" onerror="if(!this.dataset.fallback){this.dataset.fallback='1';this.src=this.dataset.still}else{this.hidden=true;this.nextElementSibling.hidden=false}"><div class="placeholder" hidden><div class="placeholder-ball"><span></span></div><span class="type-emblem">${typeIcons(s.types)}</span><small>No. ${String(s.id).padStart(3, "0")}</small></div></div>`;
 }
 function growthStars(p) {
   const n=p.breakthrough||0;
@@ -190,12 +192,12 @@ function growthStars(p) {
 
 function growthPanel(p) {
  const options=evolutionOptions(p);
- return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li>${evolutionMaterials(e).map(m=>`<li>${(state.materials[m.id]||0)>=m.amount?'✓':'○'} ${m.name} 진화 재료 ${num(m.amount)}개 / 보유 ${num(state.materials[m.id]||0)}개</li>`).join('')}</ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
+ return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li>${evolutionMaterials(e).map(m=>`<li>${(state.materials[m.id]||0)>=m.amount?'✓':'○'} ${typeIcon(m.id)} ${m.name} 진화 재료 ${num(m.amount)}개 / 보유 ${num(state.materials[m.id]||0)}개</li>`).join('')}</ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
 }
 function card(p, action = "detail") {
   const s = species(p.speciesId),
     r = {name:SUMMON_GRADES[summonGrade(s.id)],color:["#87938d","#559bc4","#a078c0","#d6ab4e"][summonGrade(s.id)]};
-  return `<button class="pokemon-card rarity-${[0,2,3,4][summonGrade(s.id)]}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${i(s.icon)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${growthStars(p)}</span></span><span>${i("swords")}${num(power(p,state))}</span></div></button>`;
+  return `<button class="pokemon-card rarity-${[0,2,3,4][summonGrade(s.id)]}" data-action="${action}" data-id="${p.uid}" style="--rarity:${r.color}" aria-label="${s.name} 상세 정보"><div class="card-top"><span>Lv. ${p.level}</span>${state.party.includes(p.uid) ? '<span class="equipped">편성 중</span>' : i("plus")}</div><span class="card-watermark" aria-hidden="true">${String(s.id).padStart(3, "0")}</span>${art(s)}<div class="card-name">${s.name}<span class="card-type">${typeIcons(s.types)}</span></div><div class="card-meta"><span>${r.name}<span class="rarity-stars" aria-hidden="true">${growthStars(p)}</span></span><span>${i("swords")}${num(power(p,state))}</span></div></button>`;
 }
 $("#app").innerHTML = `
 <div class="game-shell">
@@ -540,7 +542,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 방어력 <b>${num(st.def)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p,state))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 방어력 <b>${num(st.def)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p,state))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }
@@ -662,7 +664,7 @@ document.addEventListener("click", (e) => {
     case "dexDetail": {
       const p=species(Number(btn.dataset.species));
       const relations=EVOLUTIONS.filter(e=>evolutionFamily(e.from)===evolutionFamily(p.id));
-      modal(p.name,`관동 도감 No. ${String(p.id).padStart(3,'0')}`,`<p>타입: ${p.types.join(' / ')}</p><h3>진화 관계</h3>${relations.length?relations.map(e=>`<p>${species(e.from).name} → ${species(e.to).name}</p>`).join(''):'<p>관동 도감 내 진화 관계가 없습니다.</p>'}`);
+      modal(p.name,`관동 도감 No. ${String(p.id).padStart(3,'0')}`,`<p>타입: ${typeIcons(p.types)} ${p.types.join(' / ')}</p><h3>진화 관계</h3>${relations.length?relations.map(e=>`<p>${species(e.from).name} → ${species(e.to).name}</p>`).join(''):'<p>관동 도감 내 진화 관계가 없습니다.</p>'}`);
       break;
     }
     case "collection":

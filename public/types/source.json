@@ -1,0 +1,135 @@
+{
+  "source": "User upload: 타입에셋.zip / 타입에셋/타입 에셋.webp",
+  "file": "type-icons.webp",
+  "width": 640,
+  "height": 349,
+  "sha256": "d273d85c4cc3d0e4c7407bf9a067f8b3b233c5b2cb69dee5963869323594481c",
+  "regions": [
+    {
+      "id": "normal",
+      "x": 1,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "fighting",
+      "x": 113,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "flying",
+      "x": 234,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "poison",
+      "x": 344,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "ground",
+      "x": 452,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "rock",
+      "x": 558,
+      "y": 15,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "bug",
+      "x": 1,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "ghost",
+      "x": 113,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "steel",
+      "x": 234,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "fire",
+      "x": 344,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "water",
+      "x": 452,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "grass",
+      "x": 558,
+      "y": 140,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "electric",
+      "x": 1,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "psychic",
+      "x": 113,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "ice",
+      "x": 234,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "dragon",
+      "x": 344,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "dark",
+      "x": 452,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    },
+    {
+      "id": "fairy",
+      "x": 558,
+      "y": 250,
+      "width": 82,
+      "height": 82
+    }
+  ]
+}
