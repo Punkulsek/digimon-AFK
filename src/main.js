@@ -300,10 +300,10 @@ function renderBattle() {
       return `<div class="fighter ${a.hp <= 0 ? "fainted" : ""}" id="fighter-${a.uid}" style="--slot:${n};--delay:${n * -0.33}s"><span class="fighter-level">Lv.${p.level}</span>${art(s, "field-art")}<div class="fighter-shadow"></div><div class="hp-track"><span style="width:${(a.hp / a.maxHp) * 100}%"></span></div><strong>${s.name}</strong></div>`;
     })
     .join("");
-  const e = battle.enemy,
-    s = species(e.speciesId);
-  $("#enemy").innerHTML =
-    `<div class="enemy-heading ${battle.boss ? "is-boss" : ""}">${battle.dungeon ? "던전" : battle.boss ? `${i("crown")} ${BOSS_NAMES[bossTier(state.stage)]}` : "야생"} <strong>${s.name}</strong><span>Lv.${battle.dungeon?.stage || state.stage}</span></div><div class="enemy-hp"><span style="width:${(e.hp / e.maxHp) * 100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${battle.boss ? "boss" : ""}" id="enemy-fighter">${art(s, "field-art")}<div class="fighter-shadow"></div></div>`;
+  $("#enemy").classList.toggle('enemy-squad',!battle.dungeon);
+  $("#enemy").innerHTML=(battle.dungeon?[battle.enemy]:battle.enemies).map((e,n)=>{
+    const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div><div class="enemy-hp"><span style="width:${e.hp/e.maxHp*100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div></div>`;
+  }).join('');
   icons();
 }
 function paintHealth() {
@@ -315,10 +315,7 @@ function paintHealth() {
       el.classList.toggle("fainted", a.hp === 0);
     }
   }
-  $("#enemy .enemy-hp span").style.width =
-    `${(battle.enemy.hp / battle.enemy.maxHp) * 100}%`;
-  $("#enemy .enemy-hp-number").textContent =
-    `${battle.enemy.hp} / ${battle.enemy.maxHp}`;
+  (battle.dungeon?[battle.enemy]:battle.enemies).forEach((e,n)=>{const el=$("#enemy").children[n];if(!el)return;el.querySelector('.enemy-hp span').style.width=`${e.hp/e.maxHp*100}%`;el.querySelector('.enemy-hp-number').textContent=`${e.hp} / ${e.maxHp}`;el.classList.toggle('fainted',e.hp===0);});
 }
 function floatDamage(text, target, cls = "") {
   const el = document.createElement("span");
@@ -412,6 +409,7 @@ function step() {
         e.crit ? "critical" : "",
       );
     }
+    if(e.type === "target") refresh=true;
     if (e.type === "hit") {
       const el = document.getElementById(`fighter-${e.uid}`);
       if (el) floatDamage(`−${e.damage}`, el, "received");

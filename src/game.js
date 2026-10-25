@@ -50,7 +50,7 @@ export class Battle {
  resetParty(){this.allies=this.state.party.map((uid,index)=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p,this.state),maxHp:stats(p,this.state).hp,attackProgress:1-(index+1)/this.state.party.length}});}
  spawn(){
  if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk,def:0};return;}
- this.enemy=stageEnemy(this.state.stage,this.boss,this.state.kills);this.bossTurns=0;
+ this.enemies=Array.from({length:5},(_,n)=>({...stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n),isBoss:this.boss&&n===0}));this.enemy=this.enemies[0];this.bossTurns=0;
  }
  challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
  tick(){this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto))return this.events;
@@ -61,15 +61,16 @@ export class Battle {
  a.attackProgress=Math.min(1,a.attackProgress)+attackRate(a)/this.allies.length;
  while(a.attackProgress>=1&&this.enemy.hp>0){
  a.attackProgress-=1;
- const {damage,crit}=resolveDamage(a,this.enemy,{boss:this.boss||!!this.dungeon,rng:this.rng});
+ const {damage,crit}=resolveDamage(a,this.enemy,{boss:this.enemy.isBoss||!!this.dungeon,rng:this.rng});
  this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
  }
  }
- if(this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=stageGold(this.state.stage,this.boss);this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
- if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}else this.state.kills=Math.min(10,this.state.kills+1);
+ if(this.enemy.hp===0&&!this.dungeon&&this.enemies.some(e=>e.hp>0)){this.state.totalKills++;this.enemy=this.enemies.find(e=>e.hp>0);this.events.push({type:'target'});}
+ if(this.enemies&&!this.dungeon&&this.enemies.every(e=>e.hp===0)||this.dungeon&&this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
+ if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}else this.state.kills=Math.min(10,this.state.kills+5);
  this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
  if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge()){this.events.push({type:'boss'});}else this.spawn();return this.events;}
- if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];const {damage,crit}=resolveDamage({...this.enemy,critChance:5,critDamage:150},target,{rng:this.rng});target.hp=Math.max(0,target.hp-damage);this.events.push({type:'hit',uid:target.uid,damage,crit});}
+ if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];const attackers=this.dungeon?[this.enemy]:this.enemies.filter(e=>e.hp>0);const attacker=attackers[Math.floor(this.turn/2)%attackers.length];const {damage,crit}=resolveDamage({...attacker,critChance:5,critDamage:150},target,{rng:this.rng});target.hp=Math.max(0,target.hp-damage);this.events.push({type:'hit',uid:target.uid,damage,crit});}
  if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=BOSS_TURN_LIMIT){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
  }
  finishDungeon(status){
