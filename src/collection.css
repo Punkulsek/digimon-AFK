@@ -369,3 +369,7 @@
 #enemy.enemy-squad .enemy-hp-number{font-size:8px;line-height:1}
 #enemy.enemy-squad .enemy-hp{height:4px;margin:2px auto}
 @media(max-height:500px){#fighters.fighters,#enemy.enemy-squad{top:22%;bottom:calc(var(--menu-height,52px) + 8px);width:34%;gap:0 5px}#fighters .fighter strong{font-size:7px;margin:0}#fighters .fighter-level{font-size:6px}#enemy.enemy-squad .enemy-hp-number{display:none}}
+/* Bring opposing formations closer; keep the boss prominent in the front center. */
+#fighters.fighters{left:15%}
+#enemy.enemy-squad{right:15%}
+#enemy.enemy-squad .fighter.enemy.boss .field-art{transform:scale(1.3);transform-origin:50% 75%}
