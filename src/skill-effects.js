@@ -37,7 +37,6 @@ export function playSkillEffect(event,find,layer,fieldElement,reduced=false){
  const label=document.createElement('span');label.className='skill-cast-name';label.textContent=event.name;label.style.cssText=`left:${start.x}px;top:${start.y-40}px;--skill-color:${color}`;layer.append(label);animateNode(label,[{transform:'translate(-50%,5px)',opacity:0},{opacity:1,offset:.15},{opacity:1,offset:.75},{transform:'translate(-50%,-18px)',opacity:0}],{duration:1100});
  const targets=(event.targetUids||[]).map(find).filter(Boolean);if(!targets.length)targets.push(actor);
  for(const target of targets){const end=spot(target,field);
-  if(!reduced&&target!==actor){const beam=document.createElement('span'),dx=end.x-start.x,dy=end.y-start.y;beam.className='skill-beam';beam.style.cssText=`left:${start.x}px;top:${start.y}px;width:${Math.hypot(dx,dy)}px;transform:rotate(${Math.atan2(dy,dx)}rad);--skill-color:${color}`;layer.append(beam);animateNode(beam,[{opacity:0,clipPath:'inset(0 100% 0 0)'},{opacity:1,clipPath:'inset(0 0 0 0)',offset:.5},{opacity:0}],{duration:400,easing:'ease-out'});}
   burst(layer,end.x,end.y,kind,reduced);
  }
 }

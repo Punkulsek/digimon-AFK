@@ -311,7 +311,21 @@ function renderBattle() {
   icons();
 }
 const statusLabels={poison:'독',burn:'화상',shock:'감전',sleep:'잠듦',confusion:'혼란'};
-function combatStatus(unit){return [...Object.keys(unit.statuses||{}).filter(key=>statusLabels[key]).map(key=>statusLabels[key]),...(unit.shield>0?[`보호막 ${Math.ceil(unit.shield)}`]:[])].join(' · ');}
+function combatStatus(unit){
+ const chips=[],names={atkPct:'공격',defPct:'방어',attackSpeedPct:'공속',skillHaste:'가속',skillAmplification:'증폭',critChance:'급소',critDamage:'급소피해',penetration:'관통',damageReduction:'피감',gaugeRatePct:'충전'};
+ const chip=(label,kind,title)=>`<span class="effect-badge ${kind}" title="${title}">${label}</span>`;
+ for(const [key,effect] of Object.entries(unit.statuses||{}))if(battle.runtime.has(unit,key)&&statusLabels[key])chips.push(chip(statusLabels[key],'negative',`${statusLabels[key]} · ${Math.ceil(effect.expires-battle.runtime.time)}초`));
+ for(const [key,effect] of Object.entries(unit.buffs||{}))if(battle.runtime.has(unit,key)){
+  const entries=Object.entries(effect.modifiers||{}).filter(([,v])=>v!==0);
+  const kind=entries.some(([,v])=>v<0)?'negative':'positive';
+  const label=entries.length?entries.map(([k,v])=>`${names[k]||k}${v>0?'↑':'↓'}`).join(' '):key;
+  chips.push(chip(label,kind,`${key} · ${Number.isFinite(effect.expires)?Math.ceil(effect.expires-battle.runtime.time)+'초':'다음 공격'}${effect.stacks?' · '+effect.stacks.length+'중첩':''}`));
+ }
+ if(unit.shield>0)chips.push(chip('보호막','positive',`보호막 ${Math.ceil(unit.shield)}`));
+ for(const effect of battle.runtime.periodic.values())if(effect.target===unit)chips.push(chip(effect.key,effect.caster.side===unit.side?'positive':'negative',`${effect.key} · ${Math.ceil(effect.until-battle.runtime.time)}초`));
+ for(const [key,label] of [['futureSight','미래예지'],['perish','멸망'],['yawn','하품']])if(unit.memory?.[key])chips.push(chip(label,'negative',label));
+ return chips.join('');
+}
 function skillGauge(unit){const move=skillForSpecies(unit.speciesId),gauge=Math.min(100,Math.max(0,unit.gauge||0));return `<div class="skill-gauge" role="progressbar" aria-label="${move?.name||'기술'} 충전" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(gauge)}" title="${move?.name||'기술'} · 기본 ${move?.seconds||0}초"><span style="width:${gauge}%"></span></div>`;}
 function combatElement(uid){return [...document.querySelectorAll('[data-unit-id]')].find(el=>el.dataset.unitId===uid);}
 function paintHealth() {
@@ -320,7 +334,7 @@ function paintHealth() {
     const hp=el.querySelector('.hp-track span,.enemy-hp span');if(hp)hp.style.width=`${Math.max(0,unit.hp/unit.maxHp*100)}%`;
     const gauge=el.querySelector('.skill-gauge'),value=Math.min(100,Math.max(0,unit.gauge||0));if(gauge){gauge.querySelector('span').style.width=`${value}%`;gauge.setAttribute('aria-valuenow',Math.round(value));gauge.classList.toggle('ready',value>=100);}
     const number=el.querySelector('.enemy-hp-number');if(number)number.textContent=`${Math.ceil(unit.hp)} / ${Math.ceil(unit.maxHp)}`;
-    const status=el.querySelector('.combat-status');if(status)status.textContent=combatStatus(unit);
+    const status=el.querySelector('.combat-status');if(status)status.innerHTML=combatStatus(unit);
     el.classList.toggle('fainted',unit.hp<=0);
   }
 }

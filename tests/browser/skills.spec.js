@@ -8,6 +8,9 @@ for(const size of [{width:1440,height:810},{width:844,height:390}])test(`skills 
  await expect(page.locator('.skill-gauge')).toHaveCount(10);
  await expect.poll(async()=>Number(await page.locator('#fighters .skill-gauge').first().getAttribute('aria-valuenow'))).toBeGreaterThan(0);
  await expect(page.locator('.skill-cast-name').first()).toBeVisible({timeout:12000});
+ await expect(page.locator('.skill-beam')).toHaveCount(0);
+ const bars=await page.locator('[data-unit-id]').evaluateAll(units=>units.map(u=>{const hp=u.querySelector('.hp-track,.enemy-hp').getBoundingClientRect(),g=u.querySelector('.skill-gauge').getBoundingClientRect();return Math.abs(hp.width-g.width)<1&&Math.abs(hp.height-g.height)<1;}));expect(bars.every(Boolean)).toBe(true);
+ await expect(page.locator('.effect-badge').first()).toBeVisible({timeout:5000});
  await page.screenshot({path:`/tmp/skills-${size.width}.png`});
  await page.locator('.nav-button[data-action="collection"]').click();await page.locator('.collection-grid [data-id="starter-1"]').click();
  await expect(page.locator('.pokemon-skill-detail')).toContainText('불꽃세례');await expect(page.locator('.pokemon-skill-detail')).toContainText('9초');await expect(page.locator('.pokemon-skill-detail')).toContainText('170%');
