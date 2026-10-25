@@ -30,12 +30,12 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
     document.querySelector('.game-shell').classList.remove('in-dungeon');
     onEnter(dungeonInfo(selectedId,selectedStage));
   }
-  function result(){const won=run.status==='won',d=run.info;show(header('던전 결과')+`<div class="dungeon-content"><div class="dungeon-result ${won?'won':''}">${icon(won?'trophy':'heart')}<h2>${won?'던전 클리어!':'다시 도전해 보세요'}</h2><p>${d.name} · ${d.stage}단계</p><strong>${won?`${d.reward} ${n(d.amount)}개 획득`:'획득 보상 없음'}</strong><p>${won?(d.stage<10?`${d.stage+1}단계 도전 가능`:'모든 단계를 클리어했어요!'):'편성과 레벨을 정비하면 더 멀리 도전할 수 있어요.'}</p><div class="dungeon-result-actions"><button class="primary-button" data-action="dungeonEnter">${won?'다시 도전':'재도전'}</button><button class="soft-button" data-action="dungeonStages">단계 선택</button></div></div></div>`);sound.effect(won?'clear':'defeat');}
+
   return {
     isOpen:()=>opened,
     open(){onLeave();opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');menu();},
     close(){onLeave();opened=false;run=null;root.hidden=true;root.innerHTML='';document.querySelector('.game-shell').classList.remove('in-dungeon');},
-    result(combat){run=combat;opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');result();},
+    returnToChallenge(id,stage){onLeave();opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');stages(id,stage);},
     handle(action,btn){
       switch(action){
         case 'dungeonExit':onHome();break;

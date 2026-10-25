@@ -42,3 +42,5 @@
 #stage-transition.visible .clear-ribbon{animation:clear-slam .4s cubic-bezier(.2,.8,.3,1) both}
 @keyframes clear-slam{from{transform:translateX(-100%) rotate(-13deg) scale(1.2)}70%{transform:translateX(2%) rotate(-6deg) scale(1.03)}to{transform:rotate(-7deg)}}
 @media(prefers-reduced-motion:reduce){#stage-transition.visible .clear-ribbon{animation:none}#stage-transition{transition:none}}
+
+#stage-transition .clear-ribbon>.clear-loot{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px auto 0;font-size:clamp(14px,2vw,24px);color:#fff4bb}#stage-transition .clear-loot .pokemon-type-icon{display:inline-block;width:30px;height:30px;margin:0;flex-shrink:0}#stage-transition .clear-loot img{width:30px;height:30px;object-fit:contain}#stage-transition .clear-loot b{font-size:inherit}

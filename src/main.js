@@ -218,6 +218,7 @@ $("#app").innerHTML = `
 let overworldBattle = null;
 function restoreOverworld(){
  if(!overworldBattle)return;
+ const transition=$("#stage-transition");clearTimeout(transition.hideTimer);transition.classList.remove('visible');
  battle=overworldBattle;overworldBattle=null;
  renderBattle();updateHud();
 }
@@ -422,6 +423,8 @@ function step() {
     if (e.type === "stage" || e.type === "campaignComplete") {
       sound.effect("clear");
       const t = $("#stage-transition");
+      t.querySelector("small").textContent="스테이지";
+      t.querySelector(".clear-ribbon > span").classList.remove("clear-loot");
       t.querySelector("strong").textContent=e.type==='campaignComplete'?'관동 정복!':'클리어!';
       t.querySelector("span").textContent=e.type==='campaignComplete'?'400스테이지 완료 · 마지막 지역에서 사냥을 계속합니다':`${regionName(state.stage)} · ${stageLabel(state.stage)}`;
       t.classList.add("visible");
@@ -445,7 +448,18 @@ function step() {
     persist();
   } else paintHealth();
   updateHud();
-  if (dungeonEnded) { $("#modal-root").innerHTML=""; persist(); dungeonUI.result(battle); }
+  if (dungeonEnded) {
+    $("#modal-root").innerHTML="";persist();
+    const completed=battle,d=completed.dungeon,won=completed.status==='won',t=$("#stage-transition");
+    clearTimeout(t.hideTimer);
+    t.querySelector('small').textContent=`${d.name} · ${d.stage}단계`;
+    t.querySelector('strong').textContent=won?'클리어!':'도전 실패';
+    const loot=t.querySelector('.clear-ribbon > span');loot.classList.add('clear-loot');
+    const rewardIcon=d.id==='coin'?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':typeIcon(d.material);
+    loot.innerHTML=won?`${rewardIcon}<b>${d.reward} ${num(d.amount)}개 획득</b>`:'획득 보상 없음';
+    t.classList.add('visible');sound.effect(won?'clear':'defeat');
+    t.hideTimer=setTimeout(()=>{t.classList.remove('visible');if(battle===completed){dungeonUI.returnToChallenge(d.id,d.stage);active='dungeons';updateNavigation();}},2200);
+  }
 }
 let timer;
 function schedule() {
