@@ -40,7 +40,7 @@ test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메�
  await page.reload();
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')));
  expect(s.candies).toBe(9);expect(s.materials.fire).toBe(3);expect(s.dungeonClears['evolution-fire']).toBe(1);expect(s.gold).toBe(10000);expect(s.stage).toBe(1);
- await expect(page.locator('.nav-button')).toHaveText(['포켓몬','홈','던전','소환']);
+ await expect(page.locator('.nav-button')).toHaveText(['포켓몬','✦강화','홈','던전','소환']);
 });
 
 test('작은 가로 화면에서 던전 패배·재도전·이탈 시 보상과 스테이지 보존',async({page})=>{

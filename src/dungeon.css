@@ -67,3 +67,34 @@
 .scene[data-dungeon="evolution-electric"] { background-image: url("/scene/dungeons/evolution-electric.png"); }
 .scene[data-dungeon="evolution-rock"] { background-image: url("/scene/dungeons/evolution-rock.png"); }
 .scene[data-dungeon="evolution-ice"] { background-image: url("/scene/dungeons/evolution-ice.png"); }
+
+/* Stacked illustrated selection banners, fitted to the available landscape viewport. */
+.dungeon-page.dungeon-selection{background:linear-gradient(135deg,#103c4a,#176471);color:#edffff;padding-top:16px}
+.dungeon-selection .dungeon-header{padding-bottom:8px;max-width:980px;width:100%;margin:0 auto}.dungeon-selection .dungeon-header h1{font-size:22px;margin:0}
+.dungeon-selection .dungeon-content{display:flex;overflow:hidden;padding:8px 12px 12px}
+.dungeon-selection .dungeon-cards{width:min(100%,920px);height:100%;margin:auto;display:grid;grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:16px}
+.dungeon-selection .dungeon-types{width:min(100%,1040px);height:100%;margin:auto;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:16px}
+.dungeon-selection .dungeon-banner{--banner-color:#ffd158;position:relative;isolation:isolate;display:block;min-height:0;padding:0;border:0;border-bottom:6px solid var(--banner-color);border-radius:4px;background-size:cover;background-position:center;box-shadow:6px 7px 0 #082e3c;overflow:hidden;text-align:right;transition:filter .15s,transform .15s}
+.dungeon-banner::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#12384b00,#12384b22 40%,#092735dd)}
+.dungeon-selection .dungeon-banner:hover{transform:translateX(3px);filter:brightness(1.1)}.dungeon-selection .dungeon-banner:active{transform:scale(.985)}
+.dungeon-banner-art{position:absolute;left:14%;bottom:0;height:100%;width:36%;display:flex;align-items:center;justify-content:center;filter:drop-shadow(5px 5px 0 #071e3e80)}
+.dungeon-selection .dungeon-banner .pokemon-art{width:100%;height:140%;max-width:210px;flex-shrink:0}.dungeon-banner .pokemon-art img{object-fit:contain}
+.dungeon-banner-title{position:absolute;top:0;right:0;min-width:50%;padding:9px 20px 12px 40px;background:#031720;clip-path:polygon(10% 0,100% 0,100% 100%,0 100%)}
+.dungeon-selection .dungeon-banner h2{color:var(--banner-color);font-size:clamp(18px,2.3vw,30px);font-weight:1000;font-style:italic;letter-spacing:-1px;text-shadow:2px 3px #000;margin:0}
+.dungeon-selection .dungeon-banner small{position:absolute;right:30px;bottom:12px;color:#fff;font-size:clamp(11px,1.3vw,16px);font-weight:900;text-shadow:1px 2px #000}
+.dungeon-emblem{position:absolute;left:16px;bottom:12px;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:3px solid #052333;background:var(--banner-color);color:#fff;box-shadow:3px 3px #082a3c}.dungeon-emblem svg{width:28px;height:28px;filter:drop-shadow(1px 2px #12384b70)}
+.dungeon-banner-arrow{position:absolute;right:10px;bottom:7px;color:#fff;font-size:24px}
+.dungeon-banner[data-dungeon="coin"]{background-image:url('/scene/dungeons/coin.png');--banner-color:#ffc342}
+.dungeon-banner[data-dungeon="evolution"]{background-image:url('/scene/dungeons/evolution-electric.png');--banner-color:#c89aff}
+.dungeon-banner[data-dungeon="candy"]{background-image:url('/scene/dungeons/candy.png');--banner-color:#70dbef}
+.dungeon-selection .type-dungeon{--banner-color:var(--type-color)}
+@media(max-height:540px){.dungeon-page.dungeon-selection{padding-top:7px}.dungeon-selection .dungeon-header h1{font-size:16px}.dungeon-selection .dungeon-header .soft-button{padding:5px 10px;min-height:28px;font-size:11px}.dungeon-selection .dungeon-content{padding:3px 6px 7px}.dungeon-selection .dungeon-cards,.dungeon-selection .dungeon-types{gap:8px}.dungeon-banner-title{padding:3px 12px 4px 24px}.dungeon-selection .dungeon-banner h2{font-size:16px}.dungeon-selection .dungeon-banner small{bottom:4px;right:23px;font-size:10px}.dungeon-emblem{width:28px;height:28px;left:9px;bottom:5px;border-width:2px}.dungeon-emblem svg{width:18px;height:18px}.dungeon-selection .dungeon-banner{border-bottom-width:3px}.dungeon-banner-arrow{bottom:0;font-size:18px}}
+.dungeon-banner[data-dungeon="evolution-fire"]{background-image:url("/scene/dungeons/evolution-fire.png")}
+.dungeon-banner[data-dungeon="evolution-water"]{background-image:url("/scene/dungeons/evolution-water.png")}
+.dungeon-banner[data-dungeon="evolution-grass"]{background-image:url("/scene/dungeons/evolution-grass.png")}
+.dungeon-banner[data-dungeon="evolution-electric"]{background-image:url("/scene/dungeons/evolution-electric.png")}
+.dungeon-banner[data-dungeon="evolution-rock"]{background-image:url("/scene/dungeons/evolution-rock.png")}
+.dungeon-banner[data-dungeon="evolution-ice"]{background-image:url("/scene/dungeons/evolution-ice.png")}
+
+.dungeon-selection .dungeon-header .soft-button{color:#24505b}
+@media(min-height:541px){.dungeon-selection .dungeon-banner .pokemon-art img{transform:scale(2);transform-origin:center}}
