@@ -311,3 +311,36 @@
 #upgrade-page .upgrade-stat h2{font-size:14px;text-align:right;margin:0;color:white}#upgrade-page .upgrade-stat strong{display:block;color:#b9f7f4;font-size:12px;margin-top:3px}
 .upgrade-buy{display:flex;flex-direction:column;align-items:center;width:100%;min-height:51px;border:1px solid #47d7df;border-bottom:4px solid #007e91;border-radius:5px;background:linear-gradient(#20bdc9,#12a6b7);color:white;font-weight:900;padding:4px;box-shadow:0 2px 0 #004d66}.upgrade-buy-label{font-size:14px}.upgrade-cost{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:#fff0a8}.upgrade-cost img{width:23px;height:23px;object-fit:contain}.upgrade-buy:disabled{opacity:.55;filter:saturate(.65)}
 @media(max-height:540px){#upgrade-page{height:155px;padding:5px 4%}#upgrade-page header{padding-bottom:4px}#upgrade-page header h1{font-size:13px}#upgrade-page .upgrade-grid{margin-top:6px;gap:12px;max-width:580px}#upgrade-page .upgrade-grid article{padding:4px}#upgrade-page article h3{font-size:10px;margin:0}.upgrade-stat{padding-bottom:2px}.upgrade-symbol svg{width:24px;height:24px}#upgrade-page .upgrade-stat h2{font-size:11px}#upgrade-page .upgrade-stat strong{font-size:10px;margin:0}.upgrade-buy{min-height:38px;padding:2px}.upgrade-buy-label{font-size:11px}.upgrade-cost img{width:17px;height:17px}.upgrade-cost{font-size:9px}.upgrade-amounts button{padding:4px 7px;font-size:10px}}
+
+/* Landscape growth dossier: large portrait, gold stars and teal growth console. */
+.modal.detail-modal{width:min(1240px,96vw);height:90dvh;max-height:90dvh;border:2px solid #47b7b4;border-radius:16px;background:#086573;color:#fff5cf;box-shadow:0 15px 60px #002c46aa}
+.detail-modal .modal-header{background:#074955;color:#fff5cf;border-bottom:2px solid #39b9ba;padding:12px 22px}
+.detail-modal .modal-header h2{color:#fff5cf}
+.detail-modal .modal-body{padding:12px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:12px 20px;align-items:start}
+.detail-modal .modal-body>.text-button{grid-column:1/-1;color:#b8ffed}
+.detail-modal .detail-layout{display:contents}
+.detail-modal .detail-art{grid-column:1;grid-row:2/4;position:sticky;top:0;min-height:380px;height:calc(90dvh - 150px);max-height:650px;overflow:hidden;border:3px solid #ffe99a;border-radius:12px;gap:16px;background:radial-gradient(ellipse at 50% 38%,#fff9bc 0%,#ffcd55 45%,#f3a336 78%,#ff9346);box-shadow:inset 0 0 55px #fff49b}
+.detail-modal .detail-art::before{content:'';position:absolute;inset:-50%;background:repeating-conic-gradient(from 12deg at center,#fff9c333 0deg 14deg,transparent 14deg 40deg);pointer-events:none}
+.detail-modal .detail-art>*{position:relative;z-index:1}
+.detail-modal .detail-art .pokemon-art{width:min(90%,340px);height:min(44vh,320px);filter:drop-shadow(0 12px 0 #9c63262b);flex-shrink:0}
+.detail-modal .detail-equipped{position:absolute;left:0;top:16px;background:#50d28c;color:white;padding:8px 24px;font-size:15px;font-weight:900;box-shadow:3px 4px #85572040;transform:skew(-5deg)}
+.detail-modal .rarity-badge{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:5px;background:#163c40ed;padding:12px 20px;border:2px solid #fff3a6;border-radius:9px;font-size:19px;font-weight:900;margin:0}
+.detail-modal .detail-art>small{color:#674717;font-weight:700}
+.detail-modal .detail-stars{order:0}.detail-modal .detail-stars .growth-stars{font-size:38px;gap:8px;filter:drop-shadow(0 2px 1px #985b20)}
+.detail-modal .detail-info{grid-column:2;min-width:0;background:#087c89;padding:16px;border-radius:12px;border:1px solid #36b4b6}
+.detail-modal .detail-info h3{color:white;margin:0 0 8px;font-size:32px;font-variant-numeric:tabular-nums}
+.detail-modal .detail-info h3 small{color:#79dce0}
+.detail-power{display:flex;align-items:center;justify-content:space-between;background:#005868;border-radius:7px;padding:9px 12px;font-size:14px;margin-bottom:10px}.detail-power b{font-size:23px;color:#fff5b0}
+.detail-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.detail-modal .stat-row{font-size:12px;padding:8px 10px;border:0;background:#066775;border-radius:6px;color:#aeecef;gap:6px;min-width:0}
+.detail-modal .stat-row b{color:#fff8d8;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat-note{font-size:10px;line-height:1.6;color:#b8e2dc;margin:8px 0}
+.detail-modal .detail-info .primary-button{background:#13afbd;border-color:#51d4d8;box-shadow:0 4px #005465;color:white;margin-top:8px;min-height:44px}
+.detail-modal .detail-info .soft-button{background:#08616e;color:#caffdc;border-color:#299b9a;margin-top:10px}
+.detail-modal .detail-info>.muted{color:#b8f0e2}
+.detail-modal .growth-panel{grid-column:2;margin:0;background:#075b68;color:#d9f7e7;padding:14px;border:1px solid #289c9f}
+.detail-modal .growth-panel h3{color:#fff3b6}.detail-modal .evolution-option{border-color:#258e92;background:#064c59}.detail-modal .growth-panel .muted{color:#9fd9d4}
+@media(max-height:540px){.modal.detail-modal{height:96dvh;max-height:96dvh}.detail-modal .modal-body{gap:8px 12px;padding:8px 12px}.detail-modal .detail-art{height:calc(96dvh - 110px);min-height:220px;gap:8px}.detail-modal .detail-art .pokemon-art{height:110px;width:150px}.detail-modal .detail-stars .growth-stars{font-size:25px}.detail-modal .rarity-badge{font-size:12px;padding:6px}.detail-modal .detail-equipped{font-size:11px;padding:4px 12px;top:6px}.detail-modal .detail-info{padding:10px}.detail-modal .stat-row{font-size:10px;padding:6px}.detail-modal .detail-info h3{font-size:23px}}
+@media(max-width:600px){.detail-modal .modal-body{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}.detail-stats{grid-template-columns:1fr}.detail-modal .detail-art .pokemon-art{max-width:100%}.detail-modal .detail-stars .growth-stars{gap:2px}.detail-modal .detail-info .primary-button{flex-wrap:wrap}.detail-modal .detail-info .primary-button>span{margin-left:0}}
+.detail-modal .modal-body{background:#086573}
+.detail-modal .detail-orbit{display:none}

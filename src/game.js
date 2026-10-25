@@ -1,15 +1,16 @@
+import {pokemonStats,resolveDamage,attackRate,criticalStats} from './combat-stats.js';
 import {upgradeDefaults,UPGRADE_KEYS} from './upgrades.js';
 import {mergeDuplicates} from './duplicates.js';
 import {SUMMON_RATES,SUMMON_POOLS,summonLevel} from "./summoning.js";
-import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,attackDamage,stageGold} from "./stages.js";
+import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,stageGold} from "./stages.js";
 import {recordCollection} from "./collection-record.js";
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES} from './dungeon-config.js';
 import {SPECIES,species,RARITIES} from './data.js';
 export const PARTY_LIMIT=5;
 export const SAVE_KEY='pokemon-days-v1';
-export const stats = (p,state) => {const s=species(p.speciesId), boost=1+(p.breakthrough||0)*.15;const u=state?.upgrades||upgradeDefaults();return {hp:Math.round(s.hp*boost*(1+(p.level-1)*.14)*(1+u.hp*.005)),atk:Math.round(s.atk*boost*(1+(p.level-1)*.16)*(1+u.atk*.005)),def:Math.round(s.baseStats.defense*boost*(1+(p.level-1)*.14)*(1+u.def*.005))}};
-export const power = (p,state) => {const s=stats(p,state);return s.hp+s.atk*5+s.def};
+export const stats = pokemonStats;
+export const power = (p,state) => {const s=stats(p,state),c=criticalStats(s);return Math.round(s.hp+s.def+s.atk*5*attackRate(s)*(1+s.bossDamage/100)*(1+c.chance/100*(c.damage/100-1)))};
 export const levelCost = p => Math.ceil(p.level/5);
 export function initialState(){return {...dungeonDefaults(),version:1,upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
@@ -40,12 +41,13 @@ export function summon(state,count,rng=Math.random){
 export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
- constructor(state,dungeon=null){
+ constructor(state,dungeon=null,rng=Math.random){
+ this.rng=rng;
  if(dungeon&&!canEnterDungeon(state,dungeon.id,dungeon.stage))throw new Error('아직 개방되지 않은 던전입니다.');
  this.dungeon=dungeon?dungeonInfo(dungeon.id,dungeon.stage):null;this.info=this.dungeon;this.status='fighting';
  this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();
  }
- resetParty(){this.allies=this.state.party.map(uid=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p,this.state),maxHp:stats(p,this.state).hp}});}
+ resetParty(){this.allies=this.state.party.map((uid,index)=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p,this.state),maxHp:stats(p,this.state).hp,attackProgress:1-(index+1)/this.state.party.length}});}
  spawn(){
  if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk,def:0};return;}
  this.enemy=stageEnemy(this.state.stage,this.boss,this.state.kills);this.bossTurns=0;
@@ -54,12 +56,20 @@ export class Battle {
  tick(){this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto))return this.events;
  this.turn++;const alive=this.allies.filter(a=>a.hp>0);
  if(!alive.length){this.fail();return this.events;}
- const a=alive[(this.turn-1)%alive.length];const crit=this.turn%7===0;const damage=attackDamage(a.atk,this.enemy.def,crit);this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
+ // Staggered per-Pokémon timers: faster Pokémon attack more frequently.
+ for(const a of alive){
+ a.attackProgress=Math.min(1,a.attackProgress)+attackRate(a)/this.allies.length;
+ while(a.attackProgress>=1&&this.enemy.hp>0){
+ a.attackProgress-=1;
+ const {damage,crit}=resolveDamage(a,this.enemy,{boss:this.boss||!!this.dungeon,rng:this.rng});
+ this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
+ }
+ }
  if(this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=stageGold(this.state.stage,this.boss);this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
  if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}else this.state.kills=Math.min(10,this.state.kills+1);
  this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
  if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge()){this.events.push({type:'boss'});}else this.spawn();return this.events;}
- if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];target.hp=Math.max(0,target.hp-attackDamage(this.enemy.atk,target.def));this.events.push({type:'hit',uid:target.uid,damage:attackDamage(this.enemy.atk,target.def)});}
+ if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];const {damage,crit}=resolveDamage({...this.enemy,critChance:5,critDamage:150},target,{rng:this.rng});target.hp=Math.max(0,target.hp-damage);this.events.push({type:'hit',uid:target.uid,damage,crit});}
  if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=BOSS_TURN_LIMIT){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
  }
  finishDungeon(status){

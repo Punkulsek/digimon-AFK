@@ -43,7 +43,7 @@ export function stageEnemy(stage,boss=false,kills=0) {
  const speciesId=boss?(tier==='final'?region.finalBoss:tier==='mid'?region.midBoss:region.enemies[(localStage(stage)-1)%region.enemies.length]):region.enemies[(localStage(stage)+kills-1)%region.enemies.length];
  return {speciesId,hp,maxHp:hp,atk,def,tier};
 }
-export const attackDamage = (atk,def=0,crit=false) => Math.max(1,Math.round(atk*(crit?1.8:1)*400/(400+def)));
+export const attackDamage = (atk,def=0,crit=false) => Math.max(1,Math.round(atk*(crit?1.5:1)*400/(400+def)));
 export function stageGold(stage,boss=false) {
  const tier=boss?bossTier(stage):'wild';
  const multiplier=tier==='final'?1.5:tier==='mid'?1.2:1;

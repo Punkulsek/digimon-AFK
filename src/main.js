@@ -1,3 +1,4 @@
+import {STAT_FIELDS,formatStat,criticalStats} from './combat-stats.js';
 import {typeIcon,typeIcons} from './type-icons.js';
 import './type-icons.css';
 import {EVOLUTION_TYPES} from './dungeon-config.js';
@@ -556,7 +557,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="stat-row">${i("heart")} HP <b>${num(st.hp)}</b></div><div class="stat-row">${i("swords")} 공격력 <b>${num(st.atk)}</b></div><div class="stat-row">${i("shield")} 방어력 <b>${num(st.def)}</b></div><div class="stat-row">${i("shield")} 전투력 <b>${num(power(p,state))}</b></div><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'||key==='skillAmplification'?'기술 시스템 연동 대기':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속·증폭은 기술 시스템 연동 시 적용</p><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }
@@ -812,8 +813,8 @@ document.addEventListener("click", (e) => {
       const p = state.inventory.find(p => p.uid === btn.dataset.id);
       const st = stats(p,state), info = $(".detail-info");
       info.querySelector("h3").firstChild.textContent = `Lv. ${p.level} `;
-      const values = [st.hp, st.atk, st.def, power(p,state)];
-      info.querySelectorAll(".stat-row b").forEach((el, index) => { el.textContent = num(values[index]); });
+      info.querySelectorAll("[data-stat]").forEach(el => { el.textContent = formatStat(el.dataset.stat,st[el.dataset.stat]); });
+      info.querySelector("[data-detail-power]").textContent = num(power(p,state));
       btn.querySelector("span").textContent = `이상한사탕 ${num(levelCost(p))}개`;
       btn.disabled = p.level >= 100;
       info.querySelector("small.muted").textContent = `보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개`;
