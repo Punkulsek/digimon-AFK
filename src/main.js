@@ -1,7 +1,8 @@
+import {EVOLUTION_TYPES} from './dungeon-config.js';
 import {upgradeQuote,buyUpgrade} from './upgrades.js';
 import {SUMMON_THRESHOLDS,SUMMON_RATES,SUMMON_POOLS,SUMMON_GRADES,summonLevel,summonGrade} from "./summoning.js";
 import {STAGE_REGIONS,MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,regionForStage,regionIndex,localStage,bossTier,BOSS_NAMES,stageGold} from "./stages.js";
-import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
+import {EVOLUTIONS,evolutionFamily,evolutionOptions,evolutionReady,evolutionMaterials,evolve,breakthroughCost,breakthroughCandidates,breakthrough} from "./growth.js";
 import {
   createIcons,
   Leaf,
@@ -64,6 +65,7 @@ import "./collection.css";
 import "./dungeon.css";
 import "./stages.css";
 import "./region-art.css";
+import "./type-art.css";
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
@@ -185,10 +187,10 @@ function growthStars(p) {
   const n=p.breakthrough||0;
   return `<span class="growth-stars" role="img" aria-label="${n}돌파">${Array.from({length:5},(_,j)=>`<span class="${j<n-5?'purple':j<n?'gold':'empty'}">${j<n?'★':'☆'}</span>`).join('')}</span>`;
 }
-const materialNames={fire:'불꽃',water:'물',grass:'풀',electric:'전기',rock:'바위',ice:'얼음'};
+
 function growthPanel(p) {
  const options=evolutionOptions(p);
- return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li><li>${state.materials[e.material]>=e.amount?'✓':'○'} ${materialNames[e.material]} 진화 재료 ${num(e.amount)}개 / 보유 ${num(state.materials[e.material])}개</li></ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
+ return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li>${evolutionMaterials(e).map(m=>`<li>${(state.materials[m.id]||0)>=m.amount?'✓':'○'} ${m.name} 진화 재료 ${num(m.amount)}개 / 보유 ${num(state.materials[m.id]||0)}개</li>`).join('')}</ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
 }
 function card(p, action = "detail") {
   const s = species(p.speciesId),
@@ -201,7 +203,7 @@ $("#app").innerHTML = `
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정">${i("settings")}</button></header>
 <main class="adventure">
 <section class="battlefield" aria-label="자동 전투 화면">
-<div class="scene" id="scene"><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
+<div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition" role="status" aria-live="polite"><div class="clear-ribbon"><small>스테이지</small><strong>클리어!</strong><span>다음 모험을 향해 출발해요</span></div></div>
@@ -258,6 +260,9 @@ function updateHud() {
   if (battle.dungeon) $("#scene").dataset.dungeon = battle.dungeon.id;
   else delete $("#scene").dataset.dungeon;
   $("#scene").dataset.region = regionIndex(state.stage);
+  const typeArt=EVOLUTION_TYPES.find(t=>battle.dungeon?.id===`evolution-${t.id}`)?.art;
+  const typeBackdrop=$("#scene > .type-background");typeBackdrop.hidden=!typeArt;
+  if(typeArt){typeBackdrop.dataset.atlas=typeArt.atlas;typeBackdrop.style.backgroundPosition=`${typeArt.column*100}% ${typeArt.row*50}%`;}
   const artConfig=regionForStage(state.stage).art;
   const backdrop=$(".region-art");
   backdrop.dataset.atlas=artConfig.atlas;
@@ -768,7 +773,7 @@ document.addEventListener("click", (e) => {
       const p=state.inventory.find(p=>p.uid===btn.dataset.id);
       const e=evolutionOptions(p).find(e=>e.to===Number(btn.dataset.target));
       if(!e)break;
-      modal("진화 확인", `${species(p.speciesId).name} → ${species(e.to).name}`, `<p>${materialNames[e.material]} 진화 재료 ${num(e.amount)}개가 소비됩니다. 레벨과 돌파는 유지되며, 진화 후에도 같은 진화 계열의 돌파 재료를 공유합니다.</p><button class="primary-button full" data-action="evolveConfirm" data-id="${p.uid}" data-target="${e.to}">진화 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
+      modal("진화 확인", `${species(p.speciesId).name} → ${species(e.to).name}`, `<p>${evolutionMaterials(e).map(m=>`${m.name} 진화 재료 ${num(m.amount)}개`).join(' + ')}가 소비됩니다. 레벨과 돌파는 유지되며, 진화 후에도 같은 진화 계열의 돌파 재료를 공유합니다.</p><button class="primary-button full" data-action="evolveConfirm" data-id="${p.uid}" data-target="${e.to}">진화 확정</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
       break;
     }
     case "evolveConfirm":

@@ -70,3 +70,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## 소환 포켓몬 일러스트
 사용자 요청에 따라 새로 생성한 만화풍 포켓몬 단체 일러스트: `public/scene/summon/pokemon-ensemble.png`. 포켓몬 캐릭터 권리는 Nintendo / Creatures / GAME FREAK에 있습니다. 독립 실행 HTML에도 포함합니다.
+
+## 18타입 진화재료 던전 배경
+사용자 요청에 따라 새로 생성한 원본 도트 배경 18종입니다. `public/scene/type-dungeons/types-1.png`~`types-3.png`는 각각 2열×3행으로 구성되며 이미지 원본을 수정하지 않고 CSS로 해당 장면을 표시합니다. 타입 순서는 `src/dungeon-config.js`, 파일 해시와 크기는 같은 폴더의 `sources.json`에 기록했습니다. 타입 선택·도전 화면·실제 던전 전투에 같은 배경을 적용하며 `play.html`에도 내장합니다. 이전 6타입 배경은 보관용이며 새 타입 배경으로 대체했습니다. 포켓코인·이상한사탕 배경과 사용자 BGM은 유지합니다.

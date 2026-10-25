@@ -1,0 +1,12 @@
+/* Each square atlas contains six 3:2 scenes. Crop in CSS, preserving original pixels. */
+.scene,.dungeon-selection .type-dungeon,.challenge-hero{container-type:size}
+.type-background{position:absolute;left:50%;top:50%;width:max(100cqw,150cqh);height:max(100cqh,calc(100cqw * 2 / 3));transform:translate(-50%,-50%);background-size:200% 300%;background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none;z-index:-2}
+.type-background[hidden]{display:none!important}
+.scene[data-dungeon]>.type-background:not([hidden]){display:block;z-index:0}
+.type-background[data-atlas="1"]{background-image:url('/scene/type-dungeons/types-1.png')}
+.type-background[data-atlas="2"]{background-image:url('/scene/type-dungeons/types-2.png')}
+.type-background[data-atlas="3"]{background-image:url('/scene/type-dungeons/types-3.png')}
+.dungeon-selection .dungeon-content:has(.dungeon-types){overflow-y:auto;display:block;scrollbar-gutter:stable}
+.dungeon-selection .dungeon-types{height:auto;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:135px;gap:14px;padding-bottom:8px}
+@media(max-width:900px){.dungeon-selection .dungeon-types{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:110px}}
+@media(max-height:540px){.dungeon-selection .dungeon-types{grid-auto-rows:85px;gap:9px}}

@@ -134,3 +134,13 @@ test('모든 승인 던전 배경을 오프라인 표시하고 일반 지역 배
   }
   expect(backgrounds.size).toBe(8);
 });
+
+test('18타입 새 배경을 오프라인 표시하고 마지막 타입까지 선택 가능',async({page,context})=>{
+ await context.setOffline(true);await openStandalone(page);await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));
+ await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator('[data-dungeon="evolution"]').click();await expect(page.locator('.type-dungeon')).toHaveCount(18);
+ const sheets=await page.locator('.type-dungeon .type-background').evaluateAll(async els=>{
+  const unique=[...new Set(els.map(el=>getComputedStyle(el).backgroundImage))];return Promise.all(unique.map(async value=>{const img=new Image();img.src=value.slice(5,-2);await img.decode();return {embedded:img.src.startsWith('data:image/png;base64,'),size:[img.naturalWidth,img.naturalHeight]};}));
+ });expect(sheets).toEqual(Array.from({length:3},()=>({embedded:true,size:[1254,1254]})));
+ await page.screenshot({path:'/tmp/type-dungeons-desktop.png'});
+ await page.setViewportSize({width:568,height:320});await page.locator('[data-dungeon="evolution-fairy"]').scrollIntoViewIfNeeded();await page.screenshot({path:'/tmp/type-dungeons-small.png'});await page.locator('[data-dungeon="evolution-fairy"]').click();await page.locator('[data-action="dungeonEnter"]').click();await expect(page.locator('#scene > .type-background')).toBeVisible();await page.screenshot({path:'/tmp/fairy-dungeon-battle.png'});
+});

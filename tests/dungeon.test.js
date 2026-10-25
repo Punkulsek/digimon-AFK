@@ -31,7 +31,7 @@ test('승리 보상은 한 번만 지급하고 일반 스테이지 진행은 그
  for(const key of ['stage','kills','totalKills','gems','auto','autoBoss','party','inventory'])assert.deepEqual(s[key],before[key]);
  finish(createRun(s,'coin',1));assert.equal(s.gold,before.gold+1000);
 });
-test('6개 타입 재료와 클리어 기록은 서로 독립적',()=>{
+test('18개 타입 재료와 클리어 기록은 서로 독립적',()=>{
  for(const type of EVOLUTION_TYPES){const s=initialState();const run=finish(createRun(s,`evolution-${type.id}`,1));assert.equal(run.status,'won');assert.equal(s.materials[type.id],3);assert.equal(s.dungeonClears[`evolution-${type.id}`],1);for(const other of EVOLUTION_TYPES.filter(t=>t.id!==type.id)){assert.equal(s.materials[other.id],0);assert.equal(s.dungeonClears[`evolution-${other.id}`],0);}}
 });
 test('패배·중도 이탈은 보상과 클리어 기록을 바꾸지 않고 재도전 가능',()=>{

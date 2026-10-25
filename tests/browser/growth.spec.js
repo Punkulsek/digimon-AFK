@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 import {initialState} from '../../src/game.js';
 test('진화 확인·자동 돌파·5개 별 색상 및 새로고침 저장',async({page})=>{
  const s=initialState();s.auto=false;s.stage=61;s.materials.fire=150;s.inventory[1].level=40;s.inventory[1].breakthrough=5;
- s.inventory.push(...Array.from({length:6},(_,j)=>({uid:`copy-${j}`,speciesId:5,level:1,breakthrough:0})));
+ s.shards[4]=6;
  await page.addInitScript(s=>{if(!localStorage.getItem('pokemon-days-v1'))localStorage.setItem('pokemon-days-v1',JSON.stringify(s));},s);
  await page.goto('/');await page.locator('[data-action="collection"]').first().click();
  await page.locator('.collection-grid [data-id="starter-1"]').click();

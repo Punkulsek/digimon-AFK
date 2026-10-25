@@ -8,7 +8,7 @@ test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메�
  await expect(page.locator('#dungeon-page')).toBeVisible();
  await expect(page.locator('.dungeon-cards .dungeon-card')).toHaveCount(3);
  await page.locator('[data-dungeon="evolution"]').click();
- await expect(page.locator('.type-dungeon')).toHaveCount(6);
+ await expect(page.locator('.type-dungeon')).toHaveCount(18);
  await expect(page.locator('.dungeon-arena')).toHaveCount(0);
  await page.locator('[data-dungeon="evolution-fire"]').click();
  await expect(page.locator('[data-stage="2"]')).toBeDisabled();

@@ -1,0 +1,59 @@
+[
+  {
+    "file": "types-1.png",
+    "source": "Original generated pixel art requested by user",
+    "sha256": "c9cac203e96e67de32cdb6198dcb4ec88ebd42ac9ed3f4f72d96c1ea90e780a5",
+    "grid": {
+      "columns": 2,
+      "rows": 3
+    },
+    "types": [
+      "normal",
+      "fire",
+      "water",
+      "grass",
+      "electric",
+      "ice"
+    ],
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "file": "types-2.png",
+    "source": "Original generated pixel art requested by user",
+    "sha256": "0003261b9bf3d239fbb33d98312758c2d747675fe0b353ac93fcf209cd8a37dd",
+    "grid": {
+      "columns": 2,
+      "rows": 3
+    },
+    "types": [
+      "fighting",
+      "poison",
+      "ground",
+      "flying",
+      "psychic",
+      "bug"
+    ],
+    "width": 1254,
+    "height": 1254
+  },
+  {
+    "file": "types-3.png",
+    "source": "Original generated pixel art requested by user",
+    "sha256": "a5101009010d29d27e00f532b337d9ee9aeb7ece0a795e1d36b338b5d5e9f7cd",
+    "grid": {
+      "columns": 2,
+      "rows": 3
+    },
+    "types": [
+      "rock",
+      "ghost",
+      "dragon",
+      "dark",
+      "steel",
+      "fairy"
+    ],
+    "width": 1254,
+    "height": 1254
+  }
+]
