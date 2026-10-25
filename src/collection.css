@@ -373,3 +373,22 @@
 #fighters.fighters{left:15%}
 #enemy.enemy-squad{right:15%}
 #enemy.enemy-squad .fighter.enemy.boss .field-art{transform:scale(1.3);transform-origin:50% 75%}
+/* Compact formations with larger sprites; sizing is independent of hit animation. */
+#fighters.fighters,#enemy.enemy-squad{width:28%;column-gap:8px}
+#fighters.fighters{left:21%}
+#enemy.enemy-squad{right:21%}
+#fighters>.fighter,#enemy.enemy-squad>.enemy-unit{width:min(100%,156px)}
+#fighters .field-art{height:clamp(48px,12vh,114px)}
+#enemy.enemy-squad .fighter.enemy{height:clamp(41px,10.2vh,97px)}
+#enemy.enemy-squad .fighter.enemy.boss{height:clamp(53px,13.26vh,126px)}
+#enemy.enemy-squad .fighter.enemy.boss .field-art{transform:none;transform-origin:center}
+#enemy .hit .pokemon-art{animation:enemy-hit-flash .3s ease}
+@keyframes enemy-hit-flash{50%{filter:brightness(1.7)}}
+#enemy .enemy-unit.fainted{visibility:hidden;opacity:0;transition:none;pointer-events:none}
+#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading{color:#fff4bd;background:linear-gradient(#9b3430,#501e25);border:1px solid #ffd86c;border-radius:5px;padding:3px 5px;font-weight:900;text-shadow:0 1px #2d0b0b;box-shadow:0 2px 5px #0005}
+#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-hp{height:6px;border:1px solid #ffc65c;background:#411d28}
+#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-hp>span{background:linear-gradient(#ffb25c,#e63a42)}
+#enemy.enemy-squad .boss .fighter-shadow{background:#6a163766;box-shadow:0 0 12px 5px #ff71364d,0 0 0 2px #ffd46499}
+@media(max-height:500px){#fighters.fighters,#enemy.enemy-squad{width:28%;column-gap:5px}#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading{padding:1px 3px}}
+@media(prefers-reduced-motion:reduce){#enemy .hit .pokemon-art{animation:none}}
+#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading strong{color:#fff4bd}
