@@ -76,3 +76,8 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## 사용자 제공 타입 아이콘
 `public/types/type-icons.webp`는 첨부 `타입에셋.zip` 안의 `타입 에셋.webp` 원본입니다. 이미지 수정 없이 CSS로 18개 타입 영역을 표시합니다. 복합 타입은 각 아이콘을 함께 표시하며 카드·상세·도감 상세·진화 재료·타입별 던전에 적용합니다. 출처·SHA-256·영역 좌표는 `public/types/source.json`에 기록하며 독립 실행 HTML에도 내장합니다.
+
+### 2단계 기술 이펙트
+사용자가 지정한 [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion)의 `graphics/battle_anims/sprites`에서 원본 PNG 10개를 가져왔습니다. `public/effects/sources.json`에 고정 커밋, 원본 링크, SHA-256 및 이미지 크기를 기록했습니다. PNG 파일은 수정하지 않고 브라우저에서 GBA 팔레트 0번을 투명하게 렌더링합니다. 광선·충격파·기술명·회복 표시와 애니메이션 타임라인은 자체 코드입니다. 노래하기(음표)와 악마의키스(하트)는 서로 다른 원본 그래픽을 사용합니다.
+
+검토한 체크아웃에서 루트 LICENSE 또는 해당 그래픽의 개별 재사용 라이선스를 찾지 못했습니다. 공개 저장소라는 사실만으로 그래픽의 자유로운 재배포/상업 이용 권한이 확인되는 것은 아니며, 포켓몬 원본 그래픽 권리는 해당 권리자에게 있습니다.

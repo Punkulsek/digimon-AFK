@@ -392,3 +392,16 @@
 @media(max-height:500px){#fighters.fighters,#enemy.enemy-squad{width:28%;column-gap:5px}#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading{padding:1px 3px}}
 @media(prefers-reduced-motion:reduce){#enemy .hit .pokemon-art{animation:none}}
 #enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading strong{color:#fff4bd}
+/* Reserve HUD space while fitting three front-line units and their skill bars. */
+@media(max-height:500px){
+ #fighters.fighters,#enemy.enemy-squad{top:104px;bottom:calc(var(--menu-height,52px) + 8px)}
+ #enemy.enemy-squad .enemy-heading{padding:2px 4px;line-height:1.1}
+ #enemy.enemy-squad .enemy-unit:has(.boss) .enemy-heading{padding:2px 3px}
+}
+@media(max-height:360px){
+ #fighters.fighters,#enemy.enemy-squad{top:98px}
+ #fighters .field-art{height:30px}
+ #enemy.enemy-squad .fighter.enemy{height:27px}
+ #enemy.enemy-squad .fighter.enemy.boss{height:35px}
+ #fighters .combat-status,#enemy.enemy-squad .combat-status{font-size:5px;min-height:5px}
+}

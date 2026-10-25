@@ -74,11 +74,13 @@ const typeIcons=await readFile(resolve(root,"public/types/type-icons.webp"));
 offlineCss=offlineCss.replaceAll('/types/type-icons.webp',`data:image/webp;base64,${typeIcons.toString('base64')}`);
 const summonArt = await readFile(resolve(root, "public/scene/summon/pokemon-ensemble.png"));
 offlineCss = offlineCss.replaceAll("/scene/summon/pokemon-ensemble.png", `data:image/png;base64,${summonArt.toString("base64")}`);
+const effectData={};
+for(const file of await readdir(resolve(root,'public/effects'))){if(!file.endsWith('.png'))continue;const bytes=await readFile(resolve(root,'public/effects',file));effectData[file.slice(0,-4)]=`data:image/png;base64,${bytes.toString('base64')}`;}
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>
 <body><div id="app"></div>
-<script>window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
+<script>window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
 <script type="module">${safeScript}</script>
 <!-- PokeAPI data attribution and license:\n${license.replace(/-->/g, "-- >")}-->
 <!-- Asset credits:\n${credits.replace(/-->/g, "-- >")}-->

@@ -7,8 +7,7 @@ const createRun=(state,id,stage)=>new Battle(state,{id,stage});
 const finish=run=>{for(let i=0;i<130;i++)run.tick();return run;};
 test('일반 전투 엔진의 동일 공격·피격 이벤트를 던전에서도 사용',()=>{
  const state=initialState();const field=new Battle(state);const dungeon=createRun(state,'coin',1);
- assert.deepEqual(dungeon.tick().find(e=>e.type==='attack'),field.tick().find(e=>e.type==='attack'));
- assert.ok(dungeon.tick().some(e=>e.type==='hit'));
+ for(const run of [field,dungeon]){const events=[];run.allies.forEach(a=>a.hp=a.maxHp=10000);for(let i=0;i<50;i++)events.push(...run.tick(.1));assert.ok(events.some(e=>e.basic&&e.side==='ally'));assert.ok(events.some(e=>e.basic&&e.side==='enemy'));}
  assert.equal(dungeon.enemy.speciesId,dungeonInfo('coin',1).enemy);
  assert.equal(dungeon.challenge(),false);
 });

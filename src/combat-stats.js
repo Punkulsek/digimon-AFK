@@ -33,7 +33,7 @@ export function resolveDamage(attacker,defender,{boss=false,skill=false,coeffici
  const damage=raw*400/(400+defense)*(boss?1+Math.max(0,finite(attacker.bossDamage))/100:1)*(skill?1+Math.max(0,finite(attacker.skillAmplification))/100:1)*(crit?c.damage/100:1)*(1-clamp(defender.damageReduction,0,100)/100);
  return {damage:damage===0?0:Math.max(1,Math.round(damage)),crit};
 }
-// Integration points only: this patch does not add or activate any skill system.
+// Shared formulas used by skill combat and support calculations.
 export const skillCharge=(base,stats)=>Math.max(0,finite(base))*(1+Math.max(0,finite(stats.skillHaste))/100);
 export const skillSupport=(base,stats)=>Math.max(0,finite(base))*(1+Math.max(0,finite(stats.skillAmplification))/100);
 export const attackRate=stats=>clamp(stats.attackSpeed??100,1,1000)/100;

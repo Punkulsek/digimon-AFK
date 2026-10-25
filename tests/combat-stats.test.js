@@ -27,8 +27,8 @@ test('ordered penetration, boss, skill, critical and final reduction apply exact
  assert.equal(skillCharge(10,{skillHaste:50}),15);assert.equal(skillSupport(100,{skillAmplification:30}),130);
 });
 test('battle timers honor attack speed and damage stats in real combat',()=>{
- function run(speed){const s=initialState();s.party=[s.party[0]];const b=new Battle(s,null,()=>.99);b.enemy.hp=b.enemy.maxHp=1e9;b.enemy.atk=0;b.allies[0].attackSpeed=speed;let count=0;for(let i=0;i<20;i++)count+=b.tick().filter(e=>e.type==='attack').length;return count;}
+ function run(speed){const s=initialState();s.party=[s.party[0]];const b=new Battle(s,null,()=>.99);b.enemies.forEach(e=>{e.hp=e.maxHp=1e9;e.atk=0;e.skill=null;});b.allies[0].attackSpeed=speed;b.allies[0].skill=null;let count=0;for(let i=0;i<200;i++)count+=b.tick(.1).filter(e=>e.basic&&e.side==='ally').length;return count;}
  assert.ok(run(200)>run(100)*1.8);
- const s=initialState();s.party=[s.party[0]];const b=new Battle(s,null,()=>.99);b.allies[0].critChance=200;b.allies[0].penetration=100;b.enemy.hp=1e6;
- const e=b.tick().find(e=>e.type==='attack');assert.equal(e.crit,true);assert.equal(e.damage,b.allies[0].atk*2);
+ const b=new Battle(initialState(),null,()=>.99);b.allies[0].critChance=200;b.allies[0].penetration=100;b.allies[0].attackProgress=1;b.enemy.hp=1e6;
+ const e=b.tick(.1).find(e=>e.basic&&e.side==='ally');assert.equal(e.crit,true);assert.equal(e.damage,b.allies[0].atk*2);
 });

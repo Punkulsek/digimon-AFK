@@ -1,0 +1,138 @@
+{
+  "repository": "rh-hideout/pokeemerald-expansion",
+  "commit": "44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3",
+  "license": "No root LICENSE or individual graphics license found in inspected checkout. Source availability does not establish unrestricted graphics reuse rights. Pokemon original graphics remain subject to respective rights holders.",
+  "rendering": "Original indexed PNG files unchanged. Browser canvas treats palette zero as transparent for GBA sprite rendering.",
+  "assets": [
+    {
+      "name": "blue_flames",
+      "path": "blue_flames.png",
+      "width": 32,
+      "height": 64,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/blue_flames.png",
+      "sha256": "824475ed8cba1ab968dc44a12fc7c64ec0adb01f270619b8257a707154aad9c4",
+      "paletteZero": [
+        172,
+        205,
+        255
+      ]
+    },
+    {
+      "name": "green_sparkle",
+      "path": "green_sparkle.png",
+      "width": 16,
+      "height": 64,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/green_sparkle.png",
+      "sha256": "73ac7cbb49e4fef8b1879befa7ebb8c15cf04bd5a5b113ae0385e90fa5b7a299",
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "magenta_heart",
+      "path": "magenta_heart.png",
+      "width": 16,
+      "height": 16,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/magenta_heart.png",
+      "sha256": "2ce9ca44723f53979525b78384b65c407eabd097747a9946fc10aa723a062db9",
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "music_notes",
+      "path": "music_notes.png",
+      "width": 16,
+      "height": 96,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/music_notes.png",
+      "sha256": "f5c913c23b9ebb3b025782516d5c356741d4877fdb98b4fc029b28156435b5de",
+      "paletteZero": [
+        98,
+        246,
+        246
+      ]
+    },
+    {
+      "name": "poison_bubble",
+      "path": "poison_bubble.png",
+      "width": 16,
+      "height": 48,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/poison_bubble.png",
+      "sha256": "d66d2dfb3b2953f3159044988a87b6328acb524dd169ac84d990a1d116d3ce88",
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "spark_0",
+      "path": "spark_0.png",
+      "width": 8,
+      "height": 64,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/spark_0.png",
+      "sha256": "91c7188c44ac12ed1ea131f9886bd644baf6229e0b8cff734a6e25b3e681620e",
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "water_impact",
+      "path": "water_impact.png",
+      "width": 32,
+      "height": 32,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/water_impact.png",
+      "sha256": "6b3c7506300d794a87bbb618c97bcd9de74b00c6c85168ef689afce2eae820af",
+      "paletteZero": [
+        106,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "hit",
+      "path": "hit.png",
+      "width": 32,
+      "height": 160,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/hit.png",
+      "sha256": "010c3d513af6949065956a285815de26b7df126ad1b4a0990f2c6939cf61e43d",
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "razor_leaf",
+      "path": "razor_leaf.png",
+      "width": 32,
+      "height": 16,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/razor_leaf.png",
+      "sha256": "be3f0557a9c412e809297b8096aa4adfde9c6ccbef241f7414a6c4d6c01aa391",
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "ice_crystals_0",
+      "path": "ice_crystals_0.png",
+      "width": 16,
+      "height": 16,
+      "source": "https://github.com/rh-hideout/pokeemerald-expansion/blob/44bc3e0473b85d8e254c8dbc9004ac2d7b0a5fb3/graphics/battle_anims/sprites/ice_crystals_0.png",
+      "sha256": "79adc6a4936a0f9c47a50982975dd4e3ef3f27d035469cdce2f9dc5673814d53",
+      "paletteZero": [
+        106,
+        148,
+        139
+      ]
+    }
+  ]
+}

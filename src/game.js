@@ -1,4 +1,5 @@
-import {pokemonStats,resolveDamage,attackRate,criticalStats} from './combat-stats.js';
+import {SkillRuntime} from './skill-runtime.js';
+import {pokemonStats,attackRate,criticalStats} from './combat-stats.js';
 import {upgradeDefaults,UPGRADE_KEYS} from './upgrades.js';
 import {mergeDuplicates} from './duplicates.js';
 import {SUMMON_RATES,SUMMON_POOLS,summonLevel} from "./summoning.js";
@@ -42,36 +43,64 @@ export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
  constructor(state,dungeon=null,rng=Math.random){
- this.rng=rng;
- if(dungeon&&!canEnterDungeon(state,dungeon.id,dungeon.stage))throw new Error('아직 개방되지 않은 던전입니다.');
- this.dungeon=dungeon?dungeonInfo(dungeon.id,dungeon.stage):null;this.info=this.dungeon;this.status='fighting';
- this.state=state;this.turn=0;this.boss=false;this.events=[];this.resetParty();this.spawn();
+  this.rng=rng;
+  if(dungeon&&!canEnterDungeon(state,dungeon.id,dungeon.stage))throw new Error('아직 개방되지 않은 던전입니다.');
+  this.dungeon=dungeon?dungeonInfo(dungeon.id,dungeon.stage):null;this.info=this.dungeon;this.status='fighting';
+  this.state=state;this.turn=0;this.elapsed=0;this.wave=0;this.boss=false;this.events=[];this.enemies=[];this.resetParty();this.spawn();
  }
- resetParty(){this.allies=this.state.party.map((uid,index)=>{const p=this.state.inventory.find(p=>p.uid===uid);return {uid,...stats(p,this.state),maxHp:stats(p,this.state).hp,attackProgress:1-(index+1)/this.state.party.length}});}
+ resetParty(){
+  this.allies=this.state.party.map((uid,index)=>{const p=this.state.inventory.find(p=>p.uid===uid),st=stats(p,this.state);return {uid,speciesId:p.speciesId,types:species(p.speciesId).types,level:p.level,...st,maxHp:st.hp,attackProgress:1-(index+1)/PARTY_LIMIT};});
+  if(this.enemies.length)this.resetRuntime();
+ }
+ resetRuntime(preserveGauge=false){
+  this.runtime=new SkillRuntime(this);
+  for(const u of this.allies){const gauge=preserveGauge?u.gauge||0:0;this.runtime.init(u,'ally');u.gauge=gauge;}
+  for(const u of this.enemies)this.runtime.init(u,'enemy');
+ }
  spawn(){
- if(this.dungeon){const d=this.dungeon;this.enemy={speciesId:d.enemy,hp:d.hp,maxHp:d.hp,atk:d.atk,def:0};return;}
- this.enemies=Array.from({length:5},(_,n)=>({...stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n),isBoss:this.boss&&n===0}));this.enemy=this.enemies[0];this.bossTurns=0;
+  this.wave++;this.waveElapsed=0;this.bossTurns=0;
+  this.enemies=Array.from({length:5},(_,n)=>{
+   const level=Math.min(100,this.dungeon?.stage||Math.ceil(this.state.stage/4));
+   let base;
+   if(this.dungeon){const d=this.dungeon;const hp=Math.max(1,Math.round(d.hp*(n===0?.6:.1)));base={speciesId:d.enemy,hp,maxHp:hp,atk:Math.max(1,Math.round(d.atk*(n===0?.4:.15))),def:0};}
+   else base=stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n);
+   return {...stats({speciesId:base.speciesId,level,breakthrough:0}),...base,types:species(base.speciesId).types,level,uid:`enemy-${this.wave}-${n}`,isBoss:!!(this.boss||this.dungeon)&&n===0,attackProgress:1-(n+1)/PARTY_LIMIT,counted:false};
+  });
+  this.enemy=this.enemies[0];this.resetRuntime(true);
  }
  challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
- tick(){this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto))return this.events;
- this.turn++;const alive=this.allies.filter(a=>a.hp>0);
- if(!alive.length){this.fail();return this.events;}
- // Staggered per-Pokémon timers: faster Pokémon attack more frequently.
- for(const a of alive){
- a.attackProgress=Math.min(1,a.attackProgress)+attackRate(a)/this.allies.length;
- while(a.attackProgress>=1&&this.enemy.hp>0){
- a.attackProgress-=1;
- const {damage,crit}=resolveDamage(a,this.enemy,{boss:this.enemy.isBoss||!!this.dungeon,rng:this.rng});
- this.enemy.hp=Math.max(0,this.enemy.hp-damage);this.events.push({type:'attack',uid:a.uid,damage,crit});
+ tick(dt=.85){
+  this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto)||!Number.isFinite(dt)||dt<=0)return this.events;
+  // Small simulation slices keep charge/duration timing independent of rendering speed.
+  let remaining=Math.min(dt,10);const wave=this.wave;
+  while(remaining>1e-9&&this.status==='fighting'&&this.wave===wave){const delta=Math.min(.05,remaining);remaining-=delta;this.advance(delta);}
+  return this.events;
  }
- }
- if(this.enemy.hp===0&&!this.dungeon&&this.enemies.some(e=>e.hp>0)){this.state.totalKills++;this.enemy=this.enemies.find(e=>e.hp>0);this.events.push({type:'target'});}
- if(this.enemies&&!this.dungeon&&this.enemies.every(e=>e.hp===0)||this.dungeon&&this.enemy.hp===0){if(this.dungeon){this.finishDungeon('won');return this.events;}const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.state.totalKills++;this.events.push({type:'reward',gold});
- if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}else this.state.kills=Math.min(STAGE_KILLS,this.state.kills+1);
- this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
- if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge()){this.events.push({type:'boss'});}else this.spawn();return this.events;}
- if(this.turn%2===0){const target=alive[Math.floor(this.turn/2)%alive.length];const attackers=this.dungeon?[this.enemy]:this.enemies.filter(e=>e.hp>0);const attacker=attackers[Math.floor(this.turn/2)%attackers.length];const {damage,crit}=resolveDamage({...attacker,critChance:5,critDamage:150},target,{rng:this.rng});target.hp=Math.max(0,target.hp-damage);this.events.push({type:'hit',uid:target.uid,damage,crit});}
- if(this.dungeon&&this.turn>=120){this.fail();}else if(this.boss&&++this.bossTurns>=BOSS_TURN_LIMIT){this.fail();}else if(this.allies.every(a=>a.hp===0))this.fail();return this.events;
+ advance(dt){
+  this.elapsed+=dt;this.waveElapsed+=dt;this.turn=this.elapsed/.85;this.bossTurns=Math.floor(this.waveElapsed/.85);
+  if(this.allies.every(a=>a.hp<=0)){this.fail();return;}
+  this.runtime.tick(dt);
+  for(const actor of [...this.allies,...this.enemies]){
+   if(this.runtime.isDisabled(actor))continue;
+   actor.attackProgress=Math.min(1,actor.attackProgress)+dt*attackRate(this.runtime.effective(actor))/4.25;
+   while(actor.attackProgress>=1){
+    const target=this.runtime.opponents(actor)[0];if(!target)break;
+    actor.attackProgress-=1;this.runtime.basic(actor,target);
+    if(actor.hp<=0)break;
+   }
+  }
+  for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
+  if(this.enemies.every(e=>e.hp<=0)){
+   if(this.dungeon){this.finishDungeon('won');return;}
+   const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.events.push({type:'reward',gold});
+   if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}
+   else this.state.kills=Math.min(STAGE_KILLS,this.state.kills+1);
+   this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
+   if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge())this.events.push({type:'boss'});else this.spawn();
+   return;
+  }
+  if(this.enemy.hp<=0){this.enemy=this.enemies.find(e=>e.hp>0);this.events.push({type:'target'});}
+  if(this.allies.every(a=>a.hp<=0)||(this.dungeon&&this.waveElapsed>=102)||(this.boss&&this.waveElapsed>=BOSS_TURN_LIMIT*.85))this.fail();
  }
  finishDungeon(status){
  if(this.status!=='fighting')return;

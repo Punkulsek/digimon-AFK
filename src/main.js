@@ -1,3 +1,6 @@
+import {skillForSpecies} from './skills.js';
+import {playSkillEffect} from './skill-effects.js';
+import './skill-effects.css';
 import {STAT_FIELDS,formatStat,criticalStats} from './combat-stats.js';
 import {typeIcon,typeIcons} from './type-icons.js';
 import './type-icons.css';
@@ -297,28 +300,32 @@ function renderBattle() {
     .map((a, n) => {
       const p = state.inventory.find((p) => p.uid === a.uid),
         s = species(p.speciesId);
-      return `<div class="fighter ${a.hp <= 0 ? "fainted" : ""}" id="fighter-${a.uid}" style="--slot:${n};--delay:${n * -0.33}s"><span class="fighter-level">Lv.${p.level}</span>${art(s, "field-art")}<div class="fighter-shadow"></div><div class="hp-track"><span style="width:${(a.hp / a.maxHp) * 100}%"></span></div><strong>${s.name}</strong></div>`;
+      return `<div class="fighter ${a.hp <= 0 ? "fainted" : ""}" id="fighter-${a.uid}" data-unit-id="${a.uid}" style="--slot:${n};--delay:${n * -0.33}s"><span class="fighter-level">Lv.${p.level}</span>${art(s, "field-art")}<div class="fighter-shadow"></div><div class="hp-track"><span style="width:${(a.hp / a.maxHp) * 100}%"></span></div>${skillGauge(a)}<strong>${s.name}</strong><span class="combat-status">${combatStatus(a)}</span></div>`;
     })
     .join("");
-  $("#enemy").classList.toggle('enemy-squad',!battle.dungeon);
-  $("#enemy").classList.toggle('boss-formation',battle.boss);
-  $("#enemy").innerHTML=(battle.dungeon?[battle.enemy]:battle.enemies).map((e,n)=>{
-    const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div><div class="enemy-hp"><span style="width:${e.hp/e.maxHp*100}%"></span></div><span class="enemy-hp-number">${e.hp} / ${e.maxHp}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div></div>`;
+  $("#enemy").classList.add('enemy-squad');
+  $("#enemy").classList.toggle('boss-formation',battle.boss||!!battle.dungeon);
+  $("#enemy").innerHTML=battle.enemies.map((e,n)=>{
+    const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" data-unit-id="${e.uid}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div><div class="enemy-hp"><span style="width:${e.hp/e.maxHp*100}%"></span></div>${skillGauge(e)}<span class="enemy-hp-number">${Math.ceil(e.hp)} / ${Math.ceil(e.maxHp)}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div><span class="combat-status">${combatStatus(e)}</span></div>`;
   }).join('');
   icons();
 }
+const statusLabels={poison:'독',burn:'화상',shock:'감전',sleep:'잠듦',confusion:'혼란'};
+function combatStatus(unit){return [...Object.keys(unit.statuses||{}).filter(key=>statusLabels[key]).map(key=>statusLabels[key]),...(unit.shield>0?[`보호막 ${Math.ceil(unit.shield)}`]:[])].join(' · ');}
+function skillGauge(unit){const move=skillForSpecies(unit.speciesId),gauge=Math.min(100,Math.max(0,unit.gauge||0));return `<div class="skill-gauge" role="progressbar" aria-label="${move?.name||'기술'} 충전" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(gauge)}" title="${move?.name||'기술'} · 기본 ${move?.seconds||0}초"><span style="width:${gauge}%"></span></div>`;}
+function combatElement(uid){return [...document.querySelectorAll('[data-unit-id]')].find(el=>el.dataset.unitId===uid);}
 function paintHealth() {
-  for (const a of battle.allies) {
-    const el = document.getElementById(`fighter-${a.uid}`);
-    if (el) {
-      el.querySelector(".hp-track span").style.width =
-        `${(a.hp / a.maxHp) * 100}%`;
-      el.classList.toggle("fainted", a.hp === 0);
-    }
+  for(const unit of [...battle.allies,...(battle.enemies||[battle.enemy])]){
+    const el=combatElement(unit.uid);if(!el)continue;
+    const hp=el.querySelector('.hp-track span,.enemy-hp span');if(hp)hp.style.width=`${Math.max(0,unit.hp/unit.maxHp*100)}%`;
+    const gauge=el.querySelector('.skill-gauge'),value=Math.min(100,Math.max(0,unit.gauge||0));if(gauge){gauge.querySelector('span').style.width=`${value}%`;gauge.setAttribute('aria-valuenow',Math.round(value));gauge.classList.toggle('ready',value>=100);}
+    const number=el.querySelector('.enemy-hp-number');if(number)number.textContent=`${Math.ceil(unit.hp)} / ${Math.ceil(unit.maxHp)}`;
+    const status=el.querySelector('.combat-status');if(status)status.textContent=combatStatus(unit);
+    el.classList.toggle('fainted',unit.hp<=0);
   }
-  (battle.dungeon?[battle.enemy]:battle.enemies).forEach((e,n)=>{const el=$("#enemy").children[n];if(!el)return;el.querySelector('.enemy-hp span').style.width=`${e.hp/e.maxHp*100}%`;el.querySelector('.enemy-hp-number').textContent=`${e.hp} / ${e.maxHp}`;el.classList.toggle('fainted',e.hp===0);});
 }
 function floatDamage(text, target, cls = "") {
+  if(!target)return;
   const el = document.createElement("span");
   el.className = `damage ${cls}`;
   el.textContent = text;
@@ -329,12 +336,13 @@ function floatDamage(text, target, cls = "") {
   $("#effects").appendChild(el);
   setTimeout(() => el.remove(), 950);
 }
-function attackEffect(uid, critical) {
+function attackEffect(uid, critical, targetUid) {
   if (reducedMotion) return;
-  const origin = document.getElementById(`fighter-${uid}`),
-    target = $("#enemy-fighter");
+  const origin = combatElement(uid),
+    target = combatElement(targetUid);
   if (!origin || !target) return;
-  const s = species(state.inventory.find((p) => p.uid === uid).speciesId);
+  const actor=[...battle.allies,...(battle.enemies||[])].find(unit=>unit.uid===uid);
+  const s = actor?species(actor.speciesId):{type:""};
   const colors = {
     풀: "#aad969",
     불꽃: "#ffb05e",
@@ -385,36 +393,30 @@ function attackEffect(uid, critical) {
     }
   };
 }
+const periodicFloats=new globalThis.Map();
 function step() {
   if (dungeonUI.isOpen()) return;
-  const events = battle.tick();
+  const events = battle.tick(.1);
   let refresh = false;
   let dungeonEnded = false;
   for (const e of events) {
     if (e.type === "dungeonResult") dungeonEnded = true;
-    if (e.type === "attack") {
-      attackEffect(e.uid, e.crit);
-      sound.effect(e.crit ? "critical" : "attack");
-      const el = document.getElementById(`fighter-${e.uid}`);
-      el?.classList.remove("attacking");
-      if (el) {
-        void el.offsetWidth;
-        el.classList.add("attacking");
-      }
-      $("#enemy-fighter").classList.remove("hit");
-      void $("#enemy-fighter").offsetWidth;
-      $("#enemy-fighter").classList.add("hit");
-      floatDamage(
-        `${e.crit ? "치명타 " : ""}${e.damage}`,
-        $("#enemy-fighter"),
-        e.crit ? "critical" : "",
-      );
+    if(e.type==='skill'){
+      playSkillEffect(e,combatElement,$('#effects'),$('.battlefield'),reducedMotion);
+      sound.effect('critical');
     }
-    if(e.type === "target") refresh=true;
-    if (e.type === "hit") {
-      const el = document.getElementById(`fighter-${e.uid}`);
-      if (el) floatDamage(`−${e.damage}`, el, "received");
+    if(e.type==='damage'){
+      if(e.periodic){const now=performance.now(),entry=periodicFloats.get(e.targetUid)||{at:now,damage:0};entry.damage+=e.damage;if(now-entry.at>=700){floatDamage(`${Math.ceil(entry.damage)}`,combatElement(e.targetUid),'received');entry.at=now;entry.damage=0;}periodicFloats.set(e.targetUid,entry);continue;}
+      const target=combatElement(e.targetUid),actor=combatElement(e.uid);
+      if(e.basic){attackEffect(e.uid,e.crit,e.targetUid);actor?.classList.remove('attacking');if(actor){void actor.offsetWidth;actor.classList.add('attacking');}}
+      const sprite=target?.querySelector('.fighter.enemy')||target;
+      if(sprite){sprite.classList.remove('hit');void sprite.offsetWidth;sprite.classList.add('hit');}
+      floatDamage(`${e.crit?'급소 ':''}${Math.ceil(e.damage)}`,target,e.crit?'critical':target?.classList.contains('enemy-unit')?'':'received');
+      if(e.basic)sound.effect(e.crit?'critical':'attack');
     }
+    if(e.type==='heal')floatDamage(`+${Math.ceil(e.amount)}`,combatElement(e.targetUid),'healing');
+    if(e.type==='shield')floatDamage(`보호막 +${Math.ceil(e.amount)}`,combatElement(e.targetUid),'shielding');
+    if(e.type==='target'||e.type==='enemyDefeated')refresh=true;
     if (e.type === "reward") {
       sound.effect("reward");
       floatDamage(`+${e.gold} 포켓코인`, $("#enemy-fighter"), "gold-reward");
@@ -444,6 +446,7 @@ function step() {
     }
   }
   if (refresh) {
+    periodicFloats.clear();
     renderBattle();
     persist();
   } else paintHealth();
@@ -464,7 +467,7 @@ function step() {
 let timer;
 function schedule() {
   clearInterval(timer);
-  timer = setInterval(step, 850 / state.speed);
+  timer = setInterval(step, 100 / state.speed);
 }
 let replaceSlot = null;
 function leaveCollection() {
@@ -546,6 +549,7 @@ function partyChanged() {
   collection();
   toast("탐험대 편성을 저장했어요.");
 }
+function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p><small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
 function detail(uid) {
   replaceSlot = null;
   selected = uid;
@@ -556,7 +560,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'||key==='skillAmplification'?'기술 시스템 연동 대기':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속·증폭은 기술 시스템 연동 시 적용</p><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}">${r.name} · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }

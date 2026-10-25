@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {initialState,Battle} from '../src/game.js';
-function killTarget(b){b.enemy.hp=1;b.allies.forEach(a=>{a.atk=1e9;a.attackProgress=1;});return b.tick();}
+function killTarget(b){b.enemy.hp=0;return b.tick(.001);}
 test('ten five-Pokemon waves required, not two; boss and all escorts required for stage advance',()=>{
  const s=initialState(),b=new Battle(s,null,()=>.99);
  for(let wave=0;wave<10;wave++){

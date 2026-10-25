@@ -5,7 +5,7 @@ import {EVOLUTIONS,evolutionMaterials,evolutionReady,evolve} from '../src/growth
 import {species} from '../src/data.js';
 test('18 types have independent rewards and progression',()=>{
  assert.deepEqual(EVOLUTION_TYPES.map(t=>t.id),['normal','fire','water','grass','electric','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy']);assert.equal(DUNGEONS.length,20);
- for(const t of EVOLUTION_TYPES){const s=initialState();const b=new Battle(s,{id:`evolution-${t.id}`,stage:1});b.enemy.hp=1;b.tick();assert.equal(b.status,'won');assert.equal(s.materials[t.id],3);assert.equal(s.dungeonClears[`evolution-${t.id}`],1);for(const other of EVOLUTION_TYPES.filter(x=>x.id!==t.id)){assert.equal(s.materials[other.id],0);assert.equal(s.dungeonClears[`evolution-${other.id}`],0);}b.tick();assert.equal(s.materials[t.id],3);}
+ for(const t of EVOLUTION_TYPES){const s=initialState();const b=new Battle(s,{id:`evolution-${t.id}`,stage:1});b.enemies.forEach(e=>e.hp=0);b.tick();assert.equal(b.status,'won');assert.equal(s.materials[t.id],3);assert.equal(s.dungeonClears[`evolution-${t.id}`],1);for(const other of EVOLUTION_TYPES.filter(x=>x.id!==t.id)){assert.equal(s.materials[other.id],0);assert.equal(s.dungeonClears[`evolution-${other.id}`],0);}b.tick();assert.equal(s.materials[t.id],3);}
 });
 test('legacy six-type saves retain all existing data and gain twelve zero fields',()=>{
  const original=initialState();const oldIds=['fire','water','grass','electric','rock','ice'];original.gold=32100;original.candies=77;original.materials.fire=901;original.dungeonClears['evolution-fire']=7;
