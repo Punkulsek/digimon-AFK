@@ -74,6 +74,8 @@ const typeIcons=await readFile(resolve(root,"public/types/type-icons.webp"));
 offlineCss=offlineCss.replaceAll('/types/type-icons.webp',`data:image/webp;base64,${typeIcons.toString('base64')}`);
 const summonArt = await readFile(resolve(root, "public/scene/summon/pokemon-ensemble.png"));
 offlineCss = offlineCss.replaceAll("/scene/summon/pokemon-ensemble.png", `data:image/png;base64,${summonArt.toString("base64")}`);
+const statusAtlas=await readFile(resolve(root,'public/ui/status-icons.png'));
+offlineCss=offlineCss.replaceAll('/ui/status-icons.png',`data:image/png;base64,${statusAtlas.toString('base64')}`);
 const effectData={};
 for(const file of await readdir(resolve(root,'public/effects'))){if(!file.endsWith('.png'))continue;const bytes=await readFile(resolve(root,'public/effects',file));effectData[file.slice(0,-4)]=`data:image/png;base64,${bytes.toString('base64')}`;}
 const html = `<!doctype html>

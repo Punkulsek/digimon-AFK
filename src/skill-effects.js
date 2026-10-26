@@ -14,7 +14,7 @@ const sheets={fire:'blue_flames',water:'water_impact',electric:'spark_0',grass:'
 const cache=new Map();
 function sprite(name){if(!cache.has(name)){const img=new Image();img.src=globalThis.POKEMON_EFFECTS?.[name]||`/effects/${name}.png`;cache.set(name,img);}return cache.get(name);}
 function spot(el,field){const r=el.getBoundingClientRect();return {x:r.left-field.left+r.width/2,y:r.top-field.top+r.height/2};}
-function animateNode(node,frames,timing){node.animate(frames,timing).onfinish=()=>node.remove();setTimeout(()=>node.remove(),2000);}
+function animateNode(node,frames,timing){const options={...timing,duration:timing.duration*1.8};node.animate(frames,options).onfinish=()=>node.remove();setTimeout(()=>node.remove(),options.duration+(options.delay||0)+200);}
 function burst(layer,x,y,kind,reduced){
  const color=colors[kind],ring=document.createElement('span');ring.className=`skill-impact skill-impact-${kind}`;ring.style.cssText=`left:${x}px;top:${y}px;--skill-color:${color}`;layer.append(ring);
  animateNode(ring,[{transform:'translate(-50%,-50%) scale(.35)',opacity:.95},{transform:`translate(-50%,-50%) scale(${reduced?1:1.5})`,opacity:0}],{duration:reduced?200:650,easing:'ease-out'});

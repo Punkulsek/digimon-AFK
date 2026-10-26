@@ -412,3 +412,19 @@
 .effect-badge{padding:1px 3px;border-radius:3px;border:1px solid #91e6b1;background:#163f31ed;color:#c7ffdf;text-shadow:none;white-space:nowrap}
 .effect-badge.negative{border-color:#f5a4a5;background:#582635ed;color:#ffd9de}
 @media(max-height:500px){#fighters .hp-track,#fighters .skill-gauge,#enemy.enemy-squad .enemy-hp,#enemy.enemy-squad .skill-gauge{height:4px;margin:1px auto}#enemy.enemy-squad .enemy-unit:has(.boss) .enemy-hp,#enemy.enemy-squad .enemy-unit:has(.boss) .skill-gauge{height:5px}#fighters .combat-status,#enemy.enemy-squad .combat-status{font-size:6px;gap:1px;min-height:8px}.effect-badge{padding:0 2px}}
+/* Approved first concept: original icon art, mint buffs and coral debuffs. */
+#fighters .combat-status,#enemy.enemy-squad .combat-status{gap:2px;min-height:24px;align-items:center}
+.effect-badge.effect-icon{position:relative;display:inline-block;flex:0 0 22px;width:22px;height:24px;padding:0;border-radius:4px;border:1px solid #75e8bf;background:#153e3d;box-sizing:border-box;overflow:visible;cursor:help}
+.effect-icon.negative{border-color:#ff8da3;background:#451429}
+.effect-art{position:absolute;inset:0;background-image:url('/ui/status-icons.png');background-repeat:no-repeat;border-radius:3px;image-rendering:pixelated}
+.effect-seconds,.effect-stacks,.effect-arrow{position:absolute;color:white;text-shadow:0 1px 2px #000,1px 0 2px #000;font-size:9px;line-height:1;font-style:normal;z-index:1}.effect-seconds{bottom:0;right:0}.effect-stacks{top:-2px;left:0}.effect-arrow{top:0;right:0;color:#8affae}.negative .effect-arrow{color:#ff8a9e}
+.effect-icon:hover::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);padding:7px 10px;background:#fff8df;color:#16494b;border:2px solid #bca264;border-radius:6px;box-shadow:0 3px 10px #0004;white-space:nowrap;font-size:11px;font-weight:700;z-index:50;pointer-events:none}
+#fighters>.fighter:has(.effect-icon:hover),#enemy>.enemy-unit:has(.effect-icon:hover){z-index:20}
+.skill-impact{width:84px;height:84px}.skill-impact-shield{height:108px}.skill-pixel{width:77px;height:77px}.skill-symbol{font-size:42px}
+@media(max-height:500px){#fighters .combat-status,#enemy.enemy-squad .combat-status{min-height:17px;gap:1px}.effect-badge.effect-icon{width:16px;height:17px;flex-basis:16px}.effect-seconds,.effect-stacks,.effect-arrow{font-size:7px}.skill-impact{width:54px;height:54px}.skill-pixel{width:48px;height:48px}}
+#fighters .combat-status:empty,#enemy.enemy-squad .combat-status:empty{min-height:10px}
+#fighters .combat-status,#enemy.enemy-squad .combat-status{flex-wrap:nowrap;max-width:100%;overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+.combat-status>.effect-icon:first-child{margin-left:auto}.combat-status>.effect-icon:last-child{margin-right:auto}
+@media(min-height:501px){#enemy.enemy-squad .enemy-heading{padding:3px 5px;line-height:1.2}}
+.effect-icon:hover::after{display:none}
+.combat-effect-tooltip{position:fixed;z-index:2000;max-width:min(260px,90vw);padding:9px 12px;background:#fff8df;color:#16494b;border:2px solid #bca264;border-radius:6px;box-shadow:0 3px 10px #0004;font-size:12px;font-weight:700;pointer-events:none}

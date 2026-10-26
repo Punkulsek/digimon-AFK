@@ -1,3 +1,4 @@
+import {effectIcon} from './status-icons.js';
 import {skillForSpecies} from './skills.js';
 import {playSkillEffect} from './skill-effects.js';
 import './skill-effects.css';
@@ -313,16 +314,16 @@ function renderBattle() {
 const statusLabels={poison:'독',burn:'화상',shock:'감전',sleep:'잠듦',confusion:'혼란'};
 function combatStatus(unit){
  const chips=[],names={atkPct:'공격',defPct:'방어',attackSpeedPct:'공속',skillHaste:'가속',skillAmplification:'증폭',critChance:'급소',critDamage:'급소피해',penetration:'관통',damageReduction:'피감',gaugeRatePct:'충전'};
- const chip=(label,kind,title)=>`<span class="effect-badge ${kind}" title="${title}">${label}</span>`;
- for(const [key,effect] of Object.entries(unit.statuses||{}))if(battle.runtime.has(unit,key)&&statusLabels[key])chips.push(chip(statusLabels[key],'negative',`${statusLabels[key]} · ${Math.ceil(effect.expires-battle.runtime.time)}초`));
+ const chip=(label,kind,title,key,remaining,stacks=0)=>effectIcon(key||label,label,kind,title,remaining,stacks);
+ for(const [key,effect] of Object.entries(unit.statuses||{}))if(battle.runtime.has(unit,key)&&statusLabels[key])chips.push(chip(statusLabels[key],'negative',`${statusLabels[key]} · ${Math.ceil(effect.expires-battle.runtime.time)}초`,key,effect.expires-battle.runtime.time));
  for(const [key,effect] of Object.entries(unit.buffs||{}))if(battle.runtime.has(unit,key)){
   const entries=Object.entries(effect.modifiers||{}).filter(([,v])=>v!==0);
   const kind=entries.some(([,v])=>v<0)?'negative':'positive';
   const label=entries.length?entries.map(([k,v])=>`${names[k]||k}${v>0?'↑':'↓'}`).join(' '):key;
-  chips.push(chip(label,kind,`${key} · ${Number.isFinite(effect.expires)?Math.ceil(effect.expires-battle.runtime.time)+'초':'다음 공격'}${effect.stacks?' · '+effect.stacks.length+'중첩':''}`));
+  chips.push(chip(label,kind,`${key} · ${Number.isFinite(effect.expires)?Math.ceil(effect.expires-battle.runtime.time)+'초':'다음 공격'}${effect.stacks?' · '+effect.stacks.length+'중첩':''}`,entries[0]?.[0]||key,effect.expires-battle.runtime.time,effect.stacks?.length||0));
  }
- if(unit.shield>0)chips.push(chip('보호막','positive',`보호막 ${Math.ceil(unit.shield)}`));
- for(const effect of battle.runtime.periodic.values())if(effect.target===unit)chips.push(chip(effect.key,effect.caster.side===unit.side?'positive':'negative',`${effect.key} · ${Math.ceil(effect.until-battle.runtime.time)}초`));
+ if(unit.shield>0)chips.push(chip('보호막','positive',`보호막 ${Math.ceil(unit.shield)}`,'shield',unit.shieldUntil-battle.runtime.time));
+ for(const effect of battle.runtime.periodic.values())if(effect.target===unit)chips.push(chip(effect.key,effect.caster.side===unit.side?'positive':'negative',`${effect.key} · ${Math.ceil(effect.until-battle.runtime.time)}초`,effect.key,effect.until-battle.runtime.time));
  for(const [key,label] of [['futureSight','미래예지'],['perish','멸망'],['yawn','하품']])if(unit.memory?.[key])chips.push(chip(label,'negative',label));
  return chips.join('');
 }
@@ -334,7 +335,7 @@ function paintHealth() {
     const hp=el.querySelector('.hp-track span,.enemy-hp span');if(hp)hp.style.width=`${Math.max(0,unit.hp/unit.maxHp*100)}%`;
     const gauge=el.querySelector('.skill-gauge'),value=Math.min(100,Math.max(0,unit.gauge||0));if(gauge){gauge.querySelector('span').style.width=`${value}%`;gauge.setAttribute('aria-valuenow',Math.round(value));gauge.classList.toggle('ready',value>=100);}
     const number=el.querySelector('.enemy-hp-number');if(number)number.textContent=`${Math.ceil(unit.hp)} / ${Math.ceil(unit.maxHp)}`;
-    const status=el.querySelector('.combat-status');if(status)status.innerHTML=combatStatus(unit);
+    const status=el.querySelector('.combat-status');if(status){const html=combatStatus(unit);if(status.innerHTML!==html)status.innerHTML=html;};
     el.classList.toggle('fainted',unit.hp<=0);
   }
 }
@@ -930,3 +931,18 @@ if (loaded.status === "invalid")
   toast("저장 데이터를 읽을 수 없어 새 모험을 시작했어요.");
 if (loaded.status === "unavailable")
   toast("브라우저 저장소를 사용할 수 없어요. 저장 설정을 확인해 주세요.");
+
+// Floating tooltip remains outside the horizontally scrollable status-icon strip.
+let effectTooltip;
+document.addEventListener('pointerover',event=>{
+ const badge=event.target.closest?.('.effect-icon');
+ effectTooltip?.remove();effectTooltip=null;
+ if(!badge)return;
+ const box=badge.getBoundingClientRect();effectTooltip=document.createElement('div');
+ effectTooltip.className='combat-effect-tooltip';effectTooltip.textContent=badge.dataset.tooltip;
+ document.body.append(effectTooltip);
+ const width=effectTooltip.offsetWidth,height=effectTooltip.offsetHeight;
+ effectTooltip.style.left=`${Math.max(8,Math.min(innerWidth-width-8,box.left+box.width/2-width/2))}px`;
+ effectTooltip.style.top=`${Math.max(8,box.top-height-8)}px`;
+});
+document.addEventListener('pointerout',event=>{if(event.target.closest?.('.effect-icon')&&!event.relatedTarget?.closest?.('.effect-icon')){effectTooltip?.remove();effectTooltip=null;}});
