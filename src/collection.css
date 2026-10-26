@@ -428,3 +428,5 @@
 @media(min-height:501px){#enemy.enemy-squad .enemy-heading{padding:3px 5px;line-height:1.2}}
 .effect-icon:hover::after{display:none}
 .combat-effect-tooltip{position:fixed;z-index:2000;max-width:min(260px,90vw);padding:9px 12px;background:#fff8df;color:#16494b;border:2px solid #bca264;border-radius:6px;box-shadow:0 3px 10px #0004;font-size:12px;font-weight:700;pointer-events:none}
+
+.reset-confirm{line-height:1.7}.reset-confirm label{display:block;margin:16px 0 6px}.reset-confirm input{width:100%;box-sizing:border-box;border:2px solid #5b9995;border-radius:10px;background:#fffef5;color:#254b49;font:inherit;padding:12px}.reset-confirm input:focus{outline:3px solid #86cfca}.reset-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:18px}#reset-error{color:#a03131}

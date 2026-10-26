@@ -1,3 +1,4 @@
+import {initialState} from './game.js';
 import {effectIcon} from './status-icons.js';
 import {skillForSpecies} from './skills.js';
 import {playSkillEffect,clearSkillEffects} from './skill-effects.js';
@@ -665,7 +666,7 @@ function settings() {
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
     "settings-modal",
   );
 }
@@ -789,6 +790,18 @@ document.addEventListener("click", (e) => {
     case "stages":
       stages();
       break;
+    case "resetPrompt":
+      modal("게임 진행을 초기화할까요?", "새 모험 시작", `<div class="reset-confirm"><p>스테이지, 보유 포켓몬과 성장, 편성, 재화·재료, 소환·도감·던전 기록, 전체 강화가 초기화됩니다. 되돌릴 수 없습니다.</p><p>기본 포켓몬과 5마리 파티, 포켓코인 10,000개·다이아 10,000개로 다시 시작합니다. 음악·효과음 설정은 유지됩니다.</p><label for="reset-confirm-text">계속하려면 <b>초기화</b>를 입력하세요.</label><input id="reset-confirm-text" autocomplete="off" spellcheck="false" placeholder="초기화"><p id="reset-error" role="alert"></p><div class="reset-actions"><button class="soft-button" data-action="settings">취소</button><button class="primary-button" data-action="resetConfirm" disabled>진행 초기화</button></div></div>`, "settings-modal");
+      $('#reset-confirm-text').focus();break;
+    case "resetConfirm": {
+      if($('#reset-confirm-text')?.value.trim()!=='초기화')break;
+      const fresh=initialState();
+      if(!save(storage,fresh)){$('#reset-error').textContent='저장소에 접근할 수 없어 초기화하지 못했습니다. 기존 진행은 유지됩니다.';break;}
+      // pagehide also saves: replace the live state before reloading so it cannot restore the old run.
+      state=fresh;clearInterval(timer);clearSkillEffects();skillPresentations.clear();
+      clearTimeout($('#stage-transition').hideTimer);revealSummon=null;
+      location.reload();break;
+    }
     case "settings":
       settings();
       break;
@@ -901,6 +914,7 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("input", (e) => {
+  if(e.target.id==="reset-confirm-text"){const button=document.querySelector('[data-action="resetConfirm"]');if(button)button.disabled=e.target.value.trim()!=="초기화";}
   const key = e.target.dataset.volume;
   if (!key) return;
   sound.set(key, e.target.value);
