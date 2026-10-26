@@ -23,3 +23,15 @@ test('new stage clears both teams gauges and scheduled skill work',()=>{
  b.enemies.forEach(e=>e.hp=0);b.tick(.01);
  assert.equal(s.stage,2);assert.ok([...b.allies,...b.enemies].every(u=>u.gauge===0));assert.equal(b.runtime.pending.length,0);
 });
+
+test('each enemy formation restores HP and clears temporary combat state, keeping permanent stats',()=>{
+ const s=initialState();s.autoBoss=false;s.upgrades.hp=20;const b=new Battle(s);const original=b.allies.map(u=>({atk:u.atk,maxHp:u.maxHp,uid:u.uid}));
+ for(let wave=0;wave<10;wave++){
+  const a=b.allies[0];a.hp=1;a.gauge=88;b.runtime.buff(a,'성장',30,{atkPct:25});b.runtime.status(a,'burn',30,a);b.runtime.shield(a,a,300,30);b.runtime.dot(a,a,'test',30,1,()=>{throw new Error('old dot');});b.runtime.delay(10,()=>{throw new Error('old delayed cast');},a);
+  b.enemies.forEach(e=>e.hp=0);b.tick(.001);
+  assert.equal(s.stage,1);assert.equal(s.kills,wave+1);
+  for(const u of [...b.allies,...b.enemies]){assert.equal(u.hp,u.maxHp);assert.equal(u.gauge,0);assert.equal(u.shield,0);assert.deepEqual(u.buffs,{});assert.deepEqual(u.statuses,{});assert.deepEqual(u.memory,{});}
+  assert.equal(b.runtime.pending.length,0);assert.equal(b.runtime.periodic.size,0);assert.deepEqual(b.allies.map(u=>({atk:u.atk,maxHp:u.maxHp,uid:u.uid})),original);
+ }
+ b.allies.forEach(u=>{u.hp=1;u.gauge=99;});assert.equal(b.challenge(),true);assert.ok([...b.allies,...b.enemies].every(u=>u.hp===u.maxHp&&u.gauge===0&&u.shield===0));
+});

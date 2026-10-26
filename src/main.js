@@ -297,18 +297,21 @@ function updateHud() {
   );
   if (active !== "summon") sound.setMode(battle.boss ? "boss" : "field");
 }
+function healthBar(unit,cls){return `<div class="${cls}"><span style="width:${Math.max(0,unit.hp/unit.maxHp*100)}%"></span><i class="shield-gauge" role="progressbar" aria-label="보호막" aria-valuemin="0" aria-valuemax="${Math.max(unit.maxHp,unit.shield||0)}" aria-valuenow="${unit.shield||0}" title="보호막 ${Math.ceil(unit.shield||0)}" style="width:${Math.min(100,(unit.shield||0)/unit.maxHp*100)}%" ${unit.shield>0?'':'hidden'}></i></div>`;}
+let displayedBattle=null,displayedWave=-1;
 function renderBattle() {
+  if(displayedBattle!==battle||displayedWave!==battle.wave){clearSkillEffects();skillPresentations.clear();$('#effects').replaceChildren();displayedBattle=battle;displayedWave=battle.wave;}
   $("#fighters").innerHTML = battle.allies
     .map((a, n) => {
       const p = state.inventory.find((p) => p.uid === a.uid),
         s = species(p.speciesId);
-      return `<div class="fighter ${a.hp <= 0 ? "fainted" : ""}" id="fighter-${a.uid}" data-unit-id="${a.uid}" style="--slot:${n};--delay:${n * -0.33}s"><span class="fighter-level">Lv.${p.level}</span>${art(s, "field-art")}<div class="fighter-shadow"></div><div class="hp-track"><span style="width:${(a.hp / a.maxHp) * 100}%"></span></div>${skillGauge(a)}<strong>${s.name}</strong><span class="combat-status">${combatStatus(a)}</span></div>`;
+      return `<div class="fighter ${a.hp <= 0 ? "fainted" : ""}" id="fighter-${a.uid}" data-unit-id="${a.uid}" style="--slot:${n};--delay:${n * -0.33}s"><span class="fighter-level">Lv.${p.level}</span>${art(s, "field-art")}<div class="fighter-shadow"></div>${healthBar(a,"hp-track")}${skillGauge(a)}<strong>${s.name}</strong><span class="combat-status">${combatStatus(a)}</span></div>`;
     })
     .join("");
   $("#enemy").classList.add('enemy-squad');
   $("#enemy").classList.toggle('boss-formation',battle.boss||!!battle.dungeon);
   $("#enemy").innerHTML=battle.enemies.map((e,n)=>{
-    const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" data-unit-id="${e.uid}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div><div class="enemy-hp"><span style="width:${e.hp/e.maxHp*100}%"></span></div>${skillGauge(e)}<span class="enemy-hp-number">${Math.ceil(e.hp)} / ${Math.ceil(e.maxHp)}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div><span class="combat-status">${combatStatus(e)}</span></div>`;
+    const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" data-unit-id="${e.uid}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div>${healthBar(e,"enemy-hp")}${skillGauge(e)}<span class="enemy-hp-number">${Math.ceil(e.hp)} / ${Math.ceil(e.maxHp)}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div><span class="combat-status">${combatStatus(e)}</span></div>`;
   }).join('');
   icons();
 }
@@ -334,6 +337,7 @@ function paintHealth() {
   for(const unit of [...battle.allies,...(battle.enemies||[battle.enemy])]){
     const el=combatElement(unit.uid);if(!el)continue;
     const hp=el.querySelector('.hp-track span,.enemy-hp span');if(hp)hp.style.width=`${Math.max(0,unit.hp/unit.maxHp*100)}%`;
+    const shield=el.querySelector('.shield-gauge');if(shield){const amount=Math.max(0,unit.shield||0);shield.hidden=amount===0;shield.style.width=`${Math.min(100,amount/unit.maxHp*100)}%`;shield.setAttribute('aria-valuenow',amount);shield.setAttribute('aria-valuemax',Math.max(unit.maxHp,amount));shield.title=`보호막 ${Math.ceil(amount)}`;}
     const gauge=el.querySelector('.skill-gauge'),value=Math.min(100,Math.max(0,unit.gauge||0));if(gauge){gauge.querySelector('span').style.width=`${value}%`;gauge.setAttribute('aria-valuenow',Math.round(value));gauge.classList.toggle('ready',value>=100);}
     const number=el.querySelector('.enemy-hp-number');if(number)number.textContent=`${Math.ceil(unit.hp)} / ${Math.ceil(unit.maxHp)}`;
     const status=el.querySelector('.combat-status');if(status){const html=combatStatus(unit);if(status.innerHTML!==html)status.innerHTML=html;};

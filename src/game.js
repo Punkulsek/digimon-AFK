@@ -66,7 +66,9 @@ export class Battle {
    else base=stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n);
    return {...stats({speciesId:base.speciesId,level,breakthrough:0}),...base,types:species(base.speciesId).types,level,uid:`enemy-${this.wave}-${n}`,isBoss:!!(this.boss||this.dungeon)&&n===0,attackProgress:1-(n+1)/PARTY_LIMIT,counted:false};
   });
-  this.enemy=this.enemies[0];this.resetRuntime(this.runtimeStage===this.state.stage);this.runtimeStage=this.state.stage;
+  this.enemy=this.enemies[0];
+  this.allies.forEach((u,index)=>{u.hp=u.maxHp;u.attackProgress=1-(index+1)/PARTY_LIMIT;});
+  this.resetRuntime();
  }
  challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
  tick(dt=.85){
@@ -95,7 +97,6 @@ export class Battle {
    const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.events.push({type:'reward',gold});
    if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}
    else this.state.kills=Math.min(STAGE_KILLS,this.state.kills+1);
-   this.allies.forEach(a=>a.hp=Math.min(a.maxHp,a.hp+Math.round(a.maxHp*.2)));
    if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge())this.events.push({type:'boss'});else this.spawn();
    return;
   }
