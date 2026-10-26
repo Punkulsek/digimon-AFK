@@ -66,7 +66,7 @@ export class Battle {
    else base=stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n);
    return {...stats({speciesId:base.speciesId,level,breakthrough:0}),...base,types:species(base.speciesId).types,level,uid:`enemy-${this.wave}-${n}`,isBoss:!!(this.boss||this.dungeon)&&n===0,attackProgress:1-(n+1)/PARTY_LIMIT,counted:false};
   });
-  this.enemy=this.enemies[0];this.resetRuntime(true);
+  this.enemy=this.enemies[0];this.resetRuntime(this.runtimeStage===this.state.stage);this.runtimeStage=this.state.stage;
  }
  challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
  tick(dt=.85){

@@ -112,7 +112,7 @@ function createStage(layer,field){
   const rect=field.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,1.5),w=Math.round(rect.width*dpr),h=Math.round(rect.height*dpr);
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
-  for(const cast of stage.casts){if(cast.cancelled)continue;const t=Math.max(0,now-cast.start),p=cast.profile;
+  for(const cast of stage.casts){if(cast.cancelled)continue;cast.targets=cast.targetUids.map(cast.find).filter(el=>el&&!el.classList.contains('fainted')).map(el=>point(el,cast.fieldElement.getBoundingClientRect()));const t=Math.max(0,now-cast.start),p=cast.profile;
    cast.label.dataset.phase=t<p.windup?'charge':t<p.impact?'release':'impact';
    if(t>=p.windup&&!cast.released){cast.released=true;cast.onPhase?.('release',p);}
    if(t>=p.impact&&!cast.impacted){cast.impacted=true;cast.onPhase?.('impact',p);for(const callback of cast.callbacks)callback();cast.callbacks=[];}
@@ -137,11 +137,11 @@ export function playSkillEffect(event,find,layer,fieldElement,reduced=false,opti
  const underHud=hud&&origin.x+field.left>=hud.left-50&&origin.x+field.left<=hud.right+50;
  const labelTop=Math.max(8,origin.y-size-22,underHud?hud.bottom-field.top+4:0);
  const label=document.createElement('span');label.className='skill-cast-name skill-vfx-label';label.textContent=event.name;label.dataset.recipe=profile.recipe;label.dataset.phase='charge';label.style.cssText=`left:${origin.x}px;top:${labelTop}px;--skill-color:${profile.color}`;layer.append(label);
- const cast={profile,origin,targets:points,start:performance.now(),size,scale,label,reduced,callbacks:[],onPhase:options.onPhase};
+ const cast={profile,origin,targetUids:targets.map(el=>el.dataset.unitId),find,fieldElement,targets:points,start:performance.now(),size,scale,label,reduced,callbacks:[],onPhase:options.onPhase};
  cast.motion=moveActor(actor,profile,points[0].x>=origin.x?1:-1,reduced,scale,Math.abs(points[0].x-origin.x));
  let stage=stages.get(layer);if(!stage)stage=createStage(layer,fieldElement);
  if(stage.casts.length>=12){const old=stage.casts.shift();old.label.remove();old.motion?.cancel();old.cancelled=true;old.callbacks=[];}
  stage.casts.push(cast);if(!stage.raf)stage.raf=requestAnimationFrame(stage.draw);
  options.onPhase?.('charge',profile);
- return {impactDelay:profile.impact,duration:profile.duration,get cancelled(){return !!cast.cancelled;},onImpact(fn){if(cast.cancelled)return;if(cast.impacted)fn();else cast.callbacks.push(fn);},cancel(){cast.cancelled=true;cast.motion?.cancel();cast.label.remove();}};
+ return {retarget(uid){if(!cast.targetUids.includes(uid))cast.targetUids.push(uid);},impactDelay:profile.impact,duration:profile.duration,get cancelled(){return !!cast.cancelled;},onImpact(fn){if(cast.cancelled)return;if(cast.impacted)fn();else cast.callbacks.push(fn);},cancel(){cast.cancelled=true;cast.motion?.cancel();cast.label.remove();}};
 }

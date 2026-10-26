@@ -20,7 +20,7 @@ export class SkillRuntime {
   unit.uid ||= `${side}-${++this.nextUid}`;unit.level ||=1;unit.skill=SKILL_ASSIGNMENTS[unit.speciesId];return unit;
  }
  alive(side){return (side==='ally'?this.battle.allies:this.battle.enemies).filter(u=>u.hp>0);}
- opponents(caster){return this.alive(caster.side==='ally'?'enemy':'ally');}
+ opponents(caster){const targets=this.alive(caster.side==='ally'?'enemy':'ally');for(let i=targets.length-1;i>0;i--){const j=Math.min(i,Math.floor((this.battle.targetRng||Math.random)()*(i+1)));[targets[i],targets[j]]=[targets[j],targets[i]];}return targets;}
  has(unit,key){key=keyOf(key);const effect=unit.statuses?.[key]||unit.buffs?.[key];return !!effect&&effect.expires>this.time;}
  getBuff(unit,key){return this.has(unit,key)?unit.buffs[keyOf(key)]:null;}
  removeStatus(unit,name){delete unit.statuses[name];}
@@ -72,7 +72,9 @@ export class SkillRuntime {
  }
  recoil(unit,amount){const loss=Math.min(unit.hp,Math.max(0,finite(amount)));unit.hp-=loss;this.emit({type:'damage',uid:unit.uid,targetUid:unit.uid,damage:loss,crit:false,recoil:true,skill:false});return loss;}
  damage(caster,target,coefficient,options={}){
-  if(!target||target.hp<=0)return {damage:0,crit:false};
+  if(!this.units.includes(caster))return {damage:0,crit:false};
+  if((!target||target.hp<=0)&&!options.periodic&&!options.pure&&!options.counter)target=this.opponents(caster)[0];
+  if(!target||target.hp<=0||!this.units.includes(target))return {damage:0,crit:false};
   const skill=options.skill!==false,a=this.effective(caster),d=this.effective(target),ctx=this.context?.caster===caster?this.context:null;
   a.penetration+=finite(options.penetration)+(skill?ctx?.penetration||0:0);a.critChance+=finite(options.critChance);
   if(options.forceCrit)a.critChance=Math.max(100,a.critChance);
@@ -97,6 +99,7 @@ export class SkillRuntime {
  }
  execute(caster,target){if(!target||target.hp<=0||target.isBoss)return false;const damage=target.hp;target.hp=0;target.shield=0;this.emit({type:'damage',uid:caster.uid,targetUid:target.uid,damage,crit:false,skill:true,execute:true});return true;}
  basic(caster,target){
+  if(!target||target.hp<=0)target=this.opponents(caster)[0];
   if(this.isDisabled(caster)||!target||target.hp<=0)return {damage:0,crit:false};
   if(this.has(caster,'confusion')&&this.rng()<.2)return this.damage(caster,caster,.5,{skill:false,noCounter:true});
   const coil=this.getBuff(caster,'coil'),forced=!!caster.memory.coilReady;

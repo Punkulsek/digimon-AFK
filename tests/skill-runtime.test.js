@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {SkillRuntime} from '../src/skill-runtime.js';
 const unit=(uid,speciesId=4)=>({uid,speciesId,level:20,hp:10000,maxHp:10000,atk:100,def:0,attackSpeed:100,penetration:0,damageReduction:0,bossDamage:0,skillHaste:0,skillAmplification:0,critChance:0,critDamage:150});
-function arena(){const a=unit('a'),b=unit('b');const battle={allies:[a],enemies:[b],events:[],rng:()=>.99};const r=new SkillRuntime(battle);r.init(a,'ally');r.init(b,'enemy');a.skill=b.skill=null;return {r,a,b,battle};}
+function arena(){const a=unit('a'),b=unit('b');const battle={allies:[a],enemies:[b],events:[],targetRng:()=>.999,rng:()=>.99};const r=new SkillRuntime(battle);r.init(a,'ally');r.init(b,'enemy');a.skill=b.skill=null;return {r,a,b,battle};}
 test('poison total budget, refresh, boss cap and final tick are independent of reflect',()=>{
  const {r,a,b}=arena();r.buff(b,'리플렉터',10,{});r.status(b,'poison',6,a);for(let i=0;i<60;i++)r.tick(.1);assert.ok(Math.abs(b.hp-9500)<1e-6);
  b.hp=b.maxHp;b.isBoss=true;r.status(b,'poison',6,a);r.tick(6);assert.equal(b.hp,9900);
@@ -46,4 +46,11 @@ test('visual cast metadata selects delayed targets before damage, and excludes s
  }
  const {r,a,b,battle}=arena();r.cast(a,'오버히트');
  const cast=battle.events.find(e=>e.type==='skill');assert.ok(cast.targetUids.includes(a.uid));assert.deepEqual(cast.effectTargetUids,[b.uid]);
+});
+
+test('independent selections allow focus fire, skip dead units and retarget stale basics',()=>{
+ const {r,a,b,battle}=arena();const c=unit('c');battle.enemies.push(c);r.init(c,'enemy');c.skill=null;battle.targetRng=()=>0;
+ assert.equal(r.opponents(a)[0],c);assert.equal(r.opponents(a)[0],c);
+ c.hp=0;assert.deepEqual(r.opponents(a),[b]);r.basic(a,c);assert.ok(b.hp<10000);assert.equal(c.hp,0);
+ b.hp=0;const before=battle.events.length;r.basic(a,c);assert.equal(battle.events.length,before);
 });

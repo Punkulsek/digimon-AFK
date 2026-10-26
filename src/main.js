@@ -387,8 +387,10 @@ function attackEffect(uid, critical, targetUid) {
     ],
     { duration: 180, easing: "ease-in" },
   );
+  const attackBattle=battle,attackWave=battle.wave;
   motion.onfinish = () => {
     orb.remove();
+    if(battle!==attackBattle||battle.wave!==attackWave||!combatElement(targetUid)||combatElement(targetUid).classList.contains("fainted"))return;
     for (let n = 0; n < 7; n++) {
       const particle = document.createElement("span");
       particle.className = "impact-spark";
@@ -414,20 +416,24 @@ function battlefieldVisible(){return !['collection','summon'].includes(active)&&
 function presentSkillImpact(event,present){
   const entry=skillPresentations.get(event.castId);
   if(entry&&performance.now()<entry.until){
-    const currentBattle=battle;
-    entry.effect.onImpact(()=>{if(battle===currentBattle&&battlefieldVisible())present();});
+    entry.effect.retarget(event.targetUid);
+    const currentBattle=battle,currentWave=battle.wave;
+    entry.effect.onImpact(()=>{if(battle===currentBattle&&battle.wave===currentWave&&battlefieldVisible())present();});
   }else if(battlefieldVisible())present();
 }
 
 function step() {
   if (dungeonUI.isOpen()) return;
+  const oldWave=battle.wave;
   const events = battle.tick(.1);
+  if(battle.wave!==oldWave){clearSkillEffects();skillPresentations.clear();$("#effects").replaceChildren();}
   for(const [key,entry] of skillPresentations)if(entry.until<performance.now()||entry.effect.cancelled)skillPresentations.delete(key);
   let refresh = false;
   let dungeonEnded = false;
   for (const e of events) {
+    if(battle.wave!==oldWave&&["skill","damage","heal","shield"].includes(e.type))continue;
     if (e.type === "dungeonResult") dungeonEnded = true;
-    if(e.type==='skill'){
+    if(e.type==='skill'&&battle.wave===oldWave){
       if(battlefieldVisible()){
         const effect=playSkillEffect(e,combatElement,$('#effects'),$('.battlefield'),reducedMotion,{speed:state.speed,onPhase:(phase,profile)=>sound.skillPhase(phase,profile.recipe)});
         if(effect)skillPresentations.set(e.castId,{effect,until:performance.now()+effect.duration});
@@ -441,7 +447,7 @@ function step() {
       const present=()=>{
         const liveTarget=combatElement(e.targetUid),sprite=liveTarget?.querySelector('.fighter.enemy')||liveTarget;
         if(sprite&&!liveTarget.classList.contains('fainted')){sprite.classList.remove('hit');void sprite.offsetWidth;sprite.classList.add('hit');}
-        // The impact anchor survives a removed target; no copy of the defeated sprite is kept.
+        if(!liveTarget||liveTarget.classList.contains('fainted'))return;
         floatDamage(`${e.crit?'급소 ':''}${Math.ceil(e.damage)}`,rect?{getBoundingClientRect:()=>rect}:null,e.crit?'critical':enemy?'':'received');
       };
       if(e.skill&&!e.counter)presentSkillImpact(e,present);else present();

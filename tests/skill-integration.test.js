@@ -8,7 +8,7 @@ import {HANDLED_MOVES} from '../src/skill-moves.js';
 const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<1e-7,`${actual} != ${expected}`);
 function fixture(count=5){
  const unit=(id,index)=>({uid:`${id}-${index}`,speciesId:id,level:10,hp:100000,maxHp:100000,atk:100,def:0,attackSpeed:100,penetration:0,damageReduction:0,bossDamage:0,skillHaste:0,skillAmplification:0,critChance:0,critDamage:150});
- const battle={allies:[unit(4,0)],enemies:Array.from({length:count},(_,i)=>unit(19,i)),events:[],rng:()=>.99};
+ const battle={allies:[unit(4,0)],enemies:Array.from({length:count},(_,i)=>unit(19,i)),events:[],targetRng:()=>.999,rng:()=>.99};
  const runtime=new SkillRuntime(battle);battle.allies.forEach(u=>{runtime.init(u,'ally');u.skill=null;});battle.enemies.forEach(u=>{runtime.init(u,'enemy');u.skill=null;});return {battle,runtime,caster:battle.allies[0],targets:battle.enemies};
 }
 test('catalog covers 151 species and all 131 shared definitions',()=>{

@@ -16,3 +16,10 @@ test('manual challenge waits for ten completed waves and progress saturates',()=
  for(let n=0;n<55;n++){killTarget(b);if(n<49)assert.equal(b.challenge(),false);}
  assert.equal(s.kills,10);assert.equal(b.boss,false);assert.equal(b.challenge(),true);
 });
+
+test('new stage clears both teams gauges and scheduled skill work',()=>{
+ const s=initialState();s.kills=10;const b=new Battle(s);b.challenge();
+ b.allies.forEach(a=>a.gauge=77);b.runtime.pending.push({at:999,fn:()=>{throw new Error('stale cast');}});
+ b.enemies.forEach(e=>e.hp=0);b.tick(.01);
+ assert.equal(s.stage,2);assert.ok([...b.allies,...b.enemies].every(u=>u.gauge===0));assert.equal(b.runtime.pending.length,0);
+});

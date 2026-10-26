@@ -4,7 +4,7 @@ import skillData from '../src/generated/skills.json' with {type:'json'};
 import {HANDLED_MOVES,executeSkill} from '../src/skill-moves.js';
 import {SkillRuntime} from '../src/skill-runtime.js';
 function setup(rng=()=>.99){
- const b={allies:[],enemies:[],events:[],rng};const e=new SkillRuntime(b);
+ const b={allies:[],enemies:[],events:[],targetRng:()=>.999,rng};const e=new SkillRuntime(b);
  const unit=(id,side,n)=>e.init({uid:`${side}-${n}`,speciesId:id,types:side==='ally'?['벌레','드래곤']:['노말'],level:10,hp:10000,maxHp:10000,atk:100,def:0,attackSpeed:100,penetration:0,damageReduction:0,bossDamage:0,skillHaste:0,skillAmplification:0,critChance:0,critDamage:150},side);
  b.allies=Array.from({length:5},(_,n)=>unit(n===0?1:4,'ally',n));b.enemies=Array.from({length:5},(_,n)=>unit(19,'enemy',n));for(const u of e.units)u.skill=null;
  return {e,b,c:b.allies[0],t:b.enemies[0]};
