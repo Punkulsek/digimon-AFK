@@ -435,3 +435,13 @@
 #fighters .hp-track,#enemy.enemy-squad .enemy-hp{position:relative}
 .shield-gauge{position:absolute;left:0;top:0;bottom:0;z-index:2;background:repeating-linear-gradient(120deg,#e5ffffee 0 3px,#55d9f5dd 3px 6px);border-right:1px solid white;box-sizing:border-box;pointer-events:none;transition:width .1s linear}
 .shield-gauge[hidden]{display:none}
+/* Compact teams anchored in the lower left and lower right of the battlefield. */
+#fighters.fighters,#enemy.enemy-squad{top:auto;bottom:calc(var(--menu-height,70px) + 16px);height:min(60vh,480px);width:min(24vw,300px);column-gap:4px}
+#fighters.fighters{left:8%;right:auto}
+#enemy.enemy-squad{right:8%;left:auto}
+@media(max-height:500px){
+ #fighters.fighters,#enemy.enemy-squad{top:110px;bottom:calc(var(--menu-height,52px) + 8px);height:auto;width:25%;column-gap:3px}
+ #fighters.fighters{left:7%}#enemy.enemy-squad{right:7%}
+}
+@media(max-height:360px){#fighters.fighters,#enemy.enemy-squad{top:102px}}
+@media(min-height:501px){#enemy.enemy-squad.boss-formation{height:min(65vh,522px)}}
