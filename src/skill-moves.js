@@ -10,7 +10,7 @@ function context(engine,caster,scale,name){
  return {e:engine,c:caster,s:scale,type:skillData.moves[name].type,enemies,allies,t:enemies[0],
   atk:()=>engine.effective(caster).atk,
   hit:(t,k,o={})=>engine.damage(caster,t,k,{scale,attackType:skillData.moves[name].type,...o}),
-  status:(t,key,seconds,chance=1)=>alive(t)&&!engine.context?.immuneTargets?.has(t.uid)&&engine.rng()<chance*scale?engine.status(t,key,seconds,caster,{scale}):false,
+  status:(t,key,seconds,chance=1)=>alive(t)&&!engine.context?.immuneTargets?.has(t.uid)&&engine.rng()<Math.min(1,chance*scale+(caster.statusChance||0)/100)?engine.status(t,key,seconds,caster,{scale}):false,
   buff:(t,key,seconds,mods={},data={})=>engine.buff(t,key,seconds,Object.fromEntries(Object.entries(mods).map(([k,v])=>[k,v*scale])),{data:{scale,...data}}),
   heal:(t,n)=>engine.heal(caster,t,n,scale),
   shield:(t,n,seconds)=>engine.shield(caster,t,n,seconds,scale),

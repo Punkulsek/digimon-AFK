@@ -49,7 +49,7 @@ test('shared basic and skill damage applies critical overflow and defense/penetr
 });
 
 test('Battle starts five versus five and gauge uses seconds independent of party count',()=>{
- function simulate(size){const s=initialState();s.party=s.party.slice(0,size);s.inventory[0].speciesId=4;const b=new Battle(s,null,()=>.99);assert.equal(b.enemies.length,5);b.allies.forEach(u=>u.hp=u.maxHp=1e7);b.enemies.forEach(u=>{u.hp=u.maxHp=1e7;u.atk=0;});for(let i=0;i<10;i++)b.tick(.1);return b.allies[0].gauge;}
+ function simulate(size){const s=initialState();s.party=s.party.slice(0,size);s.inventory[0].speciesId=4;const b=new Battle(s,null,()=>.99);assert.equal(b.enemies.length,5);b.allies.forEach(u=>u.hp=u.maxHp=1e7);b.enemies.forEach(u=>{u.hp=u.maxHp=1e7;u.atk=0;});for(let i=0;i<10;i++)b.tick(.1);return b.allies[0].gauge/(1+b.allies[0].skillHaste/100); }
  const full=simulate(5),solo=simulate(1);assert.ok(full>0);near(full,solo);
 });
 test('AoE defeat credits each enemy once and advances one wave, without charging new units retroactively',()=>{

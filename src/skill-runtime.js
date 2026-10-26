@@ -73,6 +73,7 @@ export class SkillRuntime {
  }
  recoil(unit,amount){const loss=Math.min(unit.hp,Math.max(0,finite(amount)));unit.hp-=loss;this.emit({type:'damage',uid:unit.uid,targetUid:unit.uid,damage:loss,crit:false,recoil:true,skill:false});return loss;}
  damage(caster,target,coefficient,options={}){
+  if(this.inPeriodic)options={...options,periodic:true};
   if(!this.units.includes(caster))return {damage:0,crit:false};
   if((!target||target.hp<=0)&&!options.periodic&&!options.pure&&!options.counter)target=this.opponents(caster)[0];
   if(!target||target.hp<=0||!this.units.includes(target))return {damage:0,crit:false};
@@ -90,7 +91,7 @@ export class SkillRuntime {
   const harden=this.getBuff(target,'hardening');if(skill&&harden?.stacks?.length>=3){amount*=1-.35*(harden.data.scale??1);harden.stacks.shift();}
   const counter=!skill&&!options.periodic&&!options.noCounter?this.getBuff(target,'counter'):null;
   if(counter)amount*=1-.4*(counter.data.scale??1);
-  amount=Math.min(Math.max(0,amount)*effectiveness,options.maxDamage??Infinity);let shieldLoss=0;
+  amount=Math.min(Math.max(0,amount)*effectiveness*(options.periodic&&!options.pure?1+(caster.statusDamage||0)/100:1),options.maxDamage??Infinity);let shieldLoss=0;
   if(target.shield>0){const multiplier=1+Math.max(0,options.shieldBonus||0)/100;shieldLoss=Math.min(target.shield,amount*multiplier);target.shield-=shieldLoss;amount=Math.max(0,amount-shieldLoss/multiplier);}
   const endure=this.getBuff(target,'endure');let endured=false;
   if(amount>=target.hp&&endure&&(target.memory.endureUses||0)<2){amount=Math.max(0,target.hp-1);target.memory.endureUses=(target.memory.endureUses||0)+1;this.removeBuff(target,'endure');endured=true;}
@@ -137,7 +138,7 @@ export class SkillRuntime {
   if(offensive||delayed||context.offensive){
    this.removeBuff(unit,'helpingHand');delete unit.memory.growthReady;
    if(swords)swords.data.penetration=0;
-   const spikes=this.getBuff(unit,'toxicSpikes');if(spikes){if(this.rng()<(spikes.data.chance??.75))this.status(unit,'poison',6,spikes.data.source||unit,{scale:spikes.data.poisonScale??1});this.removeBuff(unit,'toxicSpikes');}
+   const spikes=this.getBuff(unit,'toxicSpikes');if(spikes){if(this.rng()<Math.min(1,(spikes.data.chance??.75)+(spikes.data.source?.statusChance||0)/100))this.status(unit,'poison',6,spikes.data.source||unit,{scale:spikes.data.poisonScale??1});this.removeBuff(unit,'toxicSpikes');}
   }
   const targets=[...context.targets],enemyTargets=targets.filter(uid=>this.units.some(target=>target.uid===uid&&target.side!==unit.side));
   this.battle.events.splice(start,0,{type:'skill',castId:context.id,uid:unit.uid,side:unit.side,name:moveName,targetUids:targets,effectTargetUids:enemyTargets.length?enemyTargets:targets});return true;
@@ -148,14 +149,14 @@ export class SkillRuntime {
   for(const u of this.units){
    if(u.hp<=0)continue;
    const poison=u.statuses.poison;
-   if(poison){const elapsed=Math.min(this.time,poison.expires)-Math.max(before,poison.appliedAt);if(elapsed>0){const total=u.maxHp*(u.isBoss?.01:.05)*(poison.data.scale??1);const damage=Math.min(total-poison.paid,total*elapsed/poison.duration);poison.paid+=damage;this.damage(poison.source||u,u,0,{fixed:damage,pure:true,skill:false,noCounter:true,periodic:true});}}
+   if(poison){const elapsed=Math.min(this.time,poison.expires)-Math.max(before,poison.appliedAt);if(elapsed>0){const total=u.maxHp*(u.isBoss?.01:.05)*(poison.data.scale??1)*(1+(poison.source?.statusDamage||0)/100);const damage=Math.min(total-poison.paid,total*elapsed/poison.duration);poison.paid+=damage;this.damage(poison.source||u,u,0,{fixed:damage,pure:true,skill:false,noCounter:true,periodic:true});}}
    for(const [key,s] of Object.entries(u.statuses)){if(s.expires<=this.time){delete u.statuses[key];if(key==='sleep'&&s.data.cleanseOnEnd)for(const bad of ['poison','burn','shock','confusion'])delete u.statuses[bad];}}
    for(const [key,b] of Object.entries(u.buffs)){if(b.stacks)b.stacks=b.stacks.filter(t=>t>this.time);if(b.expires<=this.time||b.stacks?.length===0){delete u.buffs[key];if(key==='성장')u.memory.growthHits=0;if(key==='똬리틀기'){u.memory.coilHits=0;u.memory.coilReady=false;}if(key==='록커트')u.memory.rockHits=0;}}
    if(u.shieldUntil<=this.time)u.shield=0;
   }
   for(const [id,e] of this.periodic){
    if(e.target.hp<=0){this.periodic.delete(id);continue;}
-   while(e.next<=this.time+1e-9&&e.next<=e.until+1e-9){e.callback();e.next+=e.interval;if(e.target.hp<=0)break;}
+   while(e.next<=this.time+1e-9&&e.next<=e.until+1e-9){this.inPeriodic=true;try{e.callback();}finally{this.inPeriodic=false;}e.next+=e.interval;if(e.target.hp<=0)break;}
    if(e.next>e.until||e.target.hp<=0)this.periodic.delete(id);
   }
   const due=this.pending.filter(j=>j.at<=this.time);this.pending=this.pending.filter(j=>j.at>this.time);

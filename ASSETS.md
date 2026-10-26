@@ -90,3 +90,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## 타입 상성 데이터
 `src/type-matchups.js`는 페어리 타입을 포함하는 현대 18타입 상성표입니다. `tests/fixtures/type-efficacy.csv`는 https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/type_efficacy.csv 의 검증용 스냅샷이며 테스트에서 18×18 조합을 전부 대조합니다. 일반 공격은 첫 타입, 기술은 기술별 타입을 사용하며 자속 보정은 적용하지 않습니다. 최대 HP 비례 지속 피해와 반사 피해는 타입 배율에서 제외합니다.
+
+## 알그룹 시너지
+`src/generated/egg-groups.json`은 PokeAPI의 `data/v2/csv/pokemon_egg_groups.csv`에서 1~151번 종의 실제 알그룹을 추출했습니다. 두 알그룹이 같은 시너지이면 한 번만 기여합니다. 미발견·알그룹 없음 및 별도 분류인 메타몽 그룹은 초월로 처리합니다. 침식의 피해 보너스는 독 및 지속 피해에 적용하며 회복과 직접 타격에는 적용하지 않습니다.

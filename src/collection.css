@@ -445,3 +445,25 @@
 }
 @media(max-height:360px){#fighters.fighters,#enemy.enemy-squad{top:102px}}
 @media(min-height:501px){#enemy.enemy-squad.boss-formation{height:min(65vh,522px)}}
+
+.formation-toggle{margin-top:5px;background:#12bfa0;color:white}.synergy-badges{display:flex;justify-content:center;gap:3px;flex-wrap:wrap}.synergy-badges>span{font-size:10px;background:#075c66;color:#dcfff0;border:1px solid #51bfa8;border-radius:4px;padding:2px 4px}.synergy-overview{display:flex;justify-content:center;gap:5px;padding:6px;flex-wrap:wrap}.synergy-pill{border:1px solid #588791;border-radius:6px;padding:5px 9px;background:#254f60;color:#bbd4da;font-weight:bold}.synergy-pill small{display:block;font-size:9px}.synergy-pill.enabled,.synergy-effect.enabled{background:#087f70;color:#caffb4;border-color:#8ce2af}.synergy-effect{display:flex;gap:14px;padding:12px;margin:8px 0;border:1px solid #8ebdb5;border-radius:8px}.synergy-card{min-width:0}.synergy-card>.pokemon-card{width:100%}.synergy-card>.synergy-badges{margin-top:3px}.party-slot .synergy-badges{position:relative}.party-header:has(.synergy-overview){flex-shrink:0}
+#fighters.fighters{left:18%}#enemy.enemy-squad{right:18%}
+@media(max-height:500px){#fighters.fighters{left:17%}#enemy.enemy-squad{right:17%}.synergy-pill{padding:3px 5px;font-size:10px}.synergy-badges>span{font-size:8px;padding:1px 3px}.synergy-overview{gap:3px;padding:3px}}
+.party-header:has(.synergy-overview) .slot-caption{height:auto;min-height:34px;flex-wrap:wrap;justify-content:center}.party-header:has(.synergy-overview) .slot-caption .synergy-badges{flex-basis:100%}
+@media(max-height:500px){.party-header:has(.synergy-overview) .slot-caption{min-height:24px;gap:1px}.party-header:has(.synergy-overview) .management-title h1{font-size:16px}.party-header:has(.synergy-overview) .formation-toggle{position:absolute;right:12px;top:5px}.party-header:has(.synergy-overview) .party-total{margin-right:70px}}
+@media(max-height:500px){
+ .collection-page:has(.synergy-overview) .synergy-pill small{display:inline;margin-left:3px;font-size:8px}
+ .collection-page:has(.synergy-overview) .synergy-pill:not(.enabled) small{display:none}
+ .collection-page:has(.synergy-overview)>.collection-toolbar{padding:2px 10px;font-size:11px}
+ .collection-page:has(.synergy-overview) .sort-options button{padding:4px 8px;min-height:26px;font-size:10px}
+ .collection-page:has(.synergy-overview) .collection-scroll{padding-top:6px;padding-bottom:6px}
+ .synergy-card .pokemon-art{height:40px;min-height:0}.synergy-card .pokemon-art img{height:64px;width:64px}
+ .synergy-card .pokemon-card{padding:4px}.synergy-card .card-name{font-size:11px}.synergy-card .card-meta{font-size:8px}
+}
+@media(max-height:500px){
+ .party-header:has(.synergy-overview) .management-title{margin-bottom:0;min-height:0;height:26px}
+ .collection-page:has(.synergy-overview) .collection-grid{padding:0;margin:0}
+ .collection-scroll .synergy-card .pokemon-card{height:82px;min-height:82px;padding:3px}
+ .collection-scroll .synergy-card .pokemon-art{height:28px}.collection-scroll .synergy-card .pokemon-art img{height:44px;width:44px}
+ .collection-scroll .synergy-card .card-meta{padding-top:0;margin-top:0;font-size:8px}.collection-scroll .synergy-card .card-name{margin:0;font-size:10px}
+}
