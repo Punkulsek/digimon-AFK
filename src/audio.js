@@ -163,6 +163,44 @@ export class GameAudio {
     );
     this.lastEffect = now;
   }
+  skillPhase(phase, recipe) {
+    if (!this.started || this.hidden || !this.prefs.effects || this.context?.state !== 'running') return;
+    const now = this.context.currentTime;
+    // Ten simultaneous casts share a short sound budget instead of stacking ten loud hits.
+    this.skillSoundTimes ??= {};
+    if (now - (this.skillSoundTimes[phase] ?? -Infinity) < .09) return;
+    this.skillSoundTimes[phase] = now;
+    const gentle = ['heal','shield','boost','copy','song','sleep','kiss'].includes(recipe);
+    const electric = recipe === 'thunder', water = recipe === 'water';
+    const duration = phase === 'charge' ? .32 : phase === 'release' ? .2 : gentle ? .45 : .28;
+    const oscillator = this.context.createOscillator(), envelope = this.context.createGain();
+    oscillator.type = electric ? 'sawtooth' : gentle || water ? 'sine' : 'triangle';
+    const start = phase === 'charge' ? 180 : phase === 'release' ? 620 : gentle ? 660 : electric ? 480 : 150;
+    oscillator.frequency.setValueAtTime(start, now);
+    oscillator.frequency.exponentialRampToValueAtTime(phase === 'charge' ? 520 : gentle ? 880 : 65, now + duration);
+    envelope.gain.setValueAtTime(0, now);
+    envelope.gain.linearRampToValueAtTime(phase === 'impact' ? .09 : .045, now + .015);
+    envelope.gain.exponentialRampToValueAtTime(.001, now + duration);
+    oscillator.connect(envelope); envelope.connect(this.effects);
+    oscillator.start(now); oscillator.stop(now + duration + .02);
+    oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
+    if (phase === 'impact' && !gentle) {
+      this.skillNoise ??= (() => {
+        const buffer = this.context.createBuffer(1, Math.ceil(this.context.sampleRate * .35), this.context.sampleRate);
+        const samples = buffer.getChannelData(0);
+        for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+        return buffer;
+      })();
+      const burst = this.context.createBufferSource(), filter = this.context.createBiquadFilter(), gain = this.context.createGain();
+      burst.buffer = this.skillNoise; filter.type = water ? 'bandpass' : 'lowpass';
+      filter.frequency.setValueAtTime(electric ? 7000 : water ? 1800 : 900, now);
+      filter.frequency.exponentialRampToValueAtTime(150, now + .26);
+      gain.gain.setValueAtTime(.08, now); gain.gain.exponentialRampToValueAtTime(.001, now + .28);
+      burst.connect(filter); filter.connect(gain); gain.connect(this.effects);
+      burst.start(now); burst.stop(now + .3);
+      burst.onended = () => { burst.disconnect(); filter.disconnect(); gain.disconnect(); };
+    }
+  }
   async visibility(hidden) {
     this.hidden = hidden;
     if (hidden) {

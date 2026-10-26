@@ -1,6 +1,6 @@
 import {effectIcon} from './status-icons.js';
 import {skillForSpecies} from './skills.js';
-import {playSkillEffect} from './skill-effects.js';
+import {playSkillEffect,clearSkillEffects} from './skill-effects.js';
 import './skill-effects.css';
 import {STAT_FIELDS,formatStat,criticalStats} from './combat-stats.js';
 import {typeIcon,typeIcons} from './type-icons.js';
@@ -409,28 +409,45 @@ function attackEffect(uid, critical, targetUid) {
   };
 }
 const periodicFloats=new globalThis.Map();
+const skillPresentations=new globalThis.Map();
+function battlefieldVisible(){return !['collection','summon'].includes(active)&&!dungeonUI.isOpen();}
+function presentSkillImpact(event,present){
+  const entry=skillPresentations.get(event.castId);
+  if(entry&&performance.now()<entry.until){
+    const currentBattle=battle;
+    entry.effect.onImpact(()=>{if(battle===currentBattle&&battlefieldVisible())present();});
+  }else if(battlefieldVisible())present();
+}
+
 function step() {
   if (dungeonUI.isOpen()) return;
   const events = battle.tick(.1);
+  for(const [key,entry] of skillPresentations)if(entry.until<performance.now()||entry.effect.cancelled)skillPresentations.delete(key);
   let refresh = false;
   let dungeonEnded = false;
   for (const e of events) {
     if (e.type === "dungeonResult") dungeonEnded = true;
     if(e.type==='skill'){
-      playSkillEffect(e,combatElement,$('#effects'),$('.battlefield'),reducedMotion);
-      sound.effect('critical');
+      if(battlefieldVisible()){
+        const effect=playSkillEffect(e,combatElement,$('#effects'),$('.battlefield'),reducedMotion,{speed:state.speed,onPhase:(phase,profile)=>sound.skillPhase(phase,profile.recipe)});
+        if(effect)skillPresentations.set(e.castId,{effect,until:performance.now()+effect.duration});
+      }
     }
     if(e.type==='damage'){
       if(e.periodic){const now=performance.now(),entry=periodicFloats.get(e.targetUid)||{at:now,damage:0};entry.damage+=e.damage;if(now-entry.at>=700){floatDamage(`${Math.ceil(entry.damage)}`,combatElement(e.targetUid),'received');entry.at=now;entry.damage=0;}periodicFloats.set(e.targetUid,entry);continue;}
       const target=combatElement(e.targetUid),actor=combatElement(e.uid);
       if(e.basic){attackEffect(e.uid,e.crit,e.targetUid);actor?.classList.remove('attacking');if(actor){void actor.offsetWidth;actor.classList.add('attacking');}}
-      const sprite=target?.querySelector('.fighter.enemy')||target;
-      if(sprite){sprite.classList.remove('hit');void sprite.offsetWidth;sprite.classList.add('hit');}
-      floatDamage(`${e.crit?'급소 ':''}${Math.ceil(e.damage)}`,target,e.crit?'critical':target?.classList.contains('enemy-unit')?'':'received');
+      const rect=target?.getBoundingClientRect(),enemy=target?.classList.contains('enemy-unit');
+      const present=()=>{
+        const liveTarget=combatElement(e.targetUid),sprite=liveTarget?.querySelector('.fighter.enemy')||liveTarget;
+        if(sprite&&!liveTarget.classList.contains('fainted')){sprite.classList.remove('hit');void sprite.offsetWidth;sprite.classList.add('hit');}
+        // The impact anchor survives a removed target; no copy of the defeated sprite is kept.
+        floatDamage(`${e.crit?'급소 ':''}${Math.ceil(e.damage)}`,rect?{getBoundingClientRect:()=>rect}:null,e.crit?'critical':enemy?'':'received');
+      };
+      if(e.skill&&!e.counter)presentSkillImpact(e,present);else present();
       if(e.basic)sound.effect(e.crit?'critical':'attack');
     }
-    if(e.type==='heal')floatDamage(`+${Math.ceil(e.amount)}`,combatElement(e.targetUid),'healing');
-    if(e.type==='shield')floatDamage(`보호막 +${Math.ceil(e.amount)}`,combatElement(e.targetUid),'shielding');
+    if(e.type==='heal'||e.type==='shield')presentSkillImpact(e,()=>floatDamage(e.type==='heal'?`+${Math.ceil(e.amount)}`:`보호막 +${Math.ceil(e.amount)}`,combatElement(e.targetUid),e.type==='heal'?'healing':'shielding'));
     if(e.type==='target'||e.type==='enemyDefeated')refresh=true;
     if (e.type === "reward") {
       sound.effect("reward");
@@ -506,6 +523,7 @@ function closeModal() {
   lastFocus?.focus();
 }
 function updateNavigation() {
+  if(!battlefieldVisible()){clearSkillEffects();skillPresentations.clear();}
   const tab = active === "upgrades" ? "upgrades" : battle.dungeon ? "dungeons" : ["collection","summon","dungeons","upgrades"].includes(active) ? active : "home";
   document.querySelectorAll(".nav-button").forEach((button) => {
     const current = button.dataset.action === tab;

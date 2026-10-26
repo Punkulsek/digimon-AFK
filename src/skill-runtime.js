@@ -8,12 +8,13 @@ const aliases={growth:'성장',coil:'똬리틀기',rockPolish:'록커트',harden
 const keyOf=key=>aliases[key]||key;
 const finite=(v,otherwise=0)=>Number.isFinite(v)?v:otherwise;
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,finite(v)));
+let nextCastId=0;
 const badStatuses=['poison','burn','shock','sleep','confusion'];
 
 export class SkillRuntime {
  constructor(battle){this.battle=battle;this.time=0;this.pending=[];this.periodic=new Map();this.context=null;this.nextUid=0;this.rng=()=>battle.rng();}
  get units(){return [...this.battle.allies,...this.battle.enemies];}
- emit(event){this.battle.events.push(event);if(this.context&&event.targetUid)this.context.targets.add(event.targetUid);}
+ emit(event){if(this.context)event.castId=this.context.id;this.battle.events.push(event);if(this.context&&event.targetUid)this.context.targets.add(event.targetUid);}
  init(unit,side){
   Object.assign(unit,{side,statuses:{},buffs:{},shield:0,shieldUntil:0,gauge:0,memory:{},castingUntil:0,holdUntil:0});
   unit.uid ||= `${side}-${++this.nextUid}`;unit.level ||=1;unit.skill=SKILL_ASSIGNMENTS[unit.speciesId];return unit;
@@ -117,7 +118,7 @@ export class SkillRuntime {
  cast(unit,moveName=unit.skill,scale=1){
   if(this.isDisabled(unit)||unit.holdUntil>this.time||!SKILLS[moveName])return false;
   const previous=this.context,help=this.getBuff(unit,'helpingHand'),swords=this.getBuff(unit,'swordsDance');
-  const context={caster:unit,targets:new Set(),multiplier:1+(help?.data.damageBonus||0)/100+(unit.memory.growthReady||0),penetration:swords?.data.penetration||0};
+  const context={id:++nextCastId,caster:unit,targets:new Set(),multiplier:1+(help?.data.damageBonus||0)/100+(unit.memory.growthReady||0),penetration:swords?.data.penetration||0};
   this.context=context;const start=this.battle.events.length,oldGauge=unit.gauge;unit.gauge=0;
   let done;
   try{done=executeSkill(this,unit,moveName,scale)!==false;}finally{this.context=previous;}
@@ -130,7 +131,8 @@ export class SkillRuntime {
    if(swords)swords.data.penetration=0;
    const spikes=this.getBuff(unit,'toxicSpikes');if(spikes){if(this.rng()<(spikes.data.chance??.75))this.status(unit,'poison',6,spikes.data.source||unit,{scale:spikes.data.poisonScale??1});this.removeBuff(unit,'toxicSpikes');}
   }
-  this.battle.events.splice(start,0,{type:'skill',uid:unit.uid,side:unit.side,name:moveName,targetUids:[...context.targets]});return true;
+  const targets=[...context.targets],enemyTargets=targets.filter(uid=>this.units.some(target=>target.uid===uid&&target.side!==unit.side));
+  this.battle.events.splice(start,0,{type:'skill',castId:context.id,uid:unit.uid,side:unit.side,name:moveName,targetUids:targets,effectTargetUids:enemyTargets.length?enemyTargets:targets});return true;
  }
  tick(dt){
   if(!(dt>0))return;

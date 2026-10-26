@@ -35,3 +35,15 @@ test('basic-triggered growth, coil and rock polish apply only during their buffs
  const {r,a,b}=arena();r.buff(a,'성장',9,{}, {data:{scale:1}});r.buff(a,'똬리틀기',8,{});r.buff(a,'록커트',8,{});
  for(let i=0;i<4;i++)r.basic(a,b);assert.equal(a.memory.growthReady,.25);assert.equal(a.memory.coilReady,true);const hit=r.basic(a,b);assert.equal(hit.crit,true);assert.equal(a.gauge,25);
 });
+
+test('visual cast metadata selects delayed targets before damage, and excludes self debuffs from enemy effects',()=>{
+ for(const name of ['땅파기','솔라빔','미래예지']){
+  const {r,a,b,battle}=arena();r.cast(a,name);
+  const cast=battle.events.find(e=>e.type==='skill');
+  assert.deepEqual(cast.effectTargetUids,[b.uid],name);assert.equal(b.hp,10000,name);
+  r.tick(3);
+  const hit=battle.events.find(e=>e.type==='damage');assert.equal(hit.castId,cast.castId,name);
+ }
+ const {r,a,b,battle}=arena();r.cast(a,'오버히트');
+ const cast=battle.events.find(e=>e.type==='skill');assert.ok(cast.targetUids.includes(a.uid));assert.deepEqual(cast.effectTargetUids,[b.uid]);
+});

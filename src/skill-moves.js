@@ -18,8 +18,8 @@ function context(engine,caster,scale){
   highest:(units,stat)=>[...units].sort((a,b)=>engine.effective(b)[stat]-engine.effective(a)[stat])[0],
  };
 }
-function single(name,fn){handlers[name]=x=>x.t?fn(x,x.t):false;}
-function area(name,n,fn){handlers[name]=x=>{if(!x.t)return false;for(const [i,t] of x.enemies.slice(0,n).entries())fn(x,t,i);};}
+function single(name,fn){handlers[name]=x=>{if(!x.t)return false;x.e.context?.targets.add(x.t.uid);return fn(x,x.t);};}
+function area(name,n,fn){handlers[name]=x=>{if(!x.t)return false;for(const [i,t] of x.enemies.slice(0,n).entries()){x.e.context?.targets.add(t.uid);fn(x,t,i);}};}
 function periodic(x,t,name,seconds,k){x.e.dot(x.c,t,name,seconds,2,()=>x.hit(t,k));}
 function drain(x,t,k,p){const out=x.hit(t,k);x.heal(x.c,out.damage*p);return out;}
 function charged(x,seconds,fn){x.c.castingUntil=x.e.time+seconds;const release=()=>{if(!alive(x.c))return;if(x.e.has(x.c,'sleep')){x.c.castingUntil=x.e.time+.05;x.e.delay(.05,release,x.c);return;}fn();};x.e.delay(seconds,release,x.c);}
@@ -85,7 +85,7 @@ single('집게해머',(x,t)=>{const out=x.hit(t,4.2,{critChance:30*x.s});if(out.
 area('소닉붐',3,(x,t)=>x.hit(t,0,{fixed:x.c.level*10+50}));
 handlers['대폭발']=x=>{if(ratio(x.c)<=.2)return false;x.enemies.slice(0,5).forEach(t=>x.hit(t,4.4));recoil(x,x.c.hp*.6);x.e.hold(x.c,4);};
 area('씨폭탄',3,(x,t)=>{x.hit(t,1.8);x.c.memory.seedBomb??={};const count=(x.c.memory.seedBomb[t.uid]||0)+1;x.c.memory.seedBomb[t.uid]=count%3;if(count%3===0)x.hit(t,1.2);});
-handlers['솔라빔']=x=>{const targets=x.enemies.slice(0,3);charged(x,2,()=>targets.forEach((t,i)=>x.hit(t,i?1.9:4.7)));};
+handlers['솔라빔']=x=>{const targets=x.enemies.slice(0,3);targets.forEach(t=>x.e.context?.targets.add(t.uid));charged(x,2,()=>targets.forEach((t,i)=>x.hit(t,i?1.9:4.7)));};
 single('뼈다귀치기',(x,t)=>{x.hit(t,2.8);x.e.charge(t,-15*x.s);});
 single('뼈다귀부메랑',(x,t)=>{x.hit(t,1.8);x.buff(t,'뼈다귀부메랑',6,{defPct:-15});x.hit(t,1.8);});
 single('무릎차기',(x,t)=>{x.hit(t,4.8);const spent=recoil(x,x.c.maxHp*.12);if(t.hp===0)x.e.heal(x.c,x.c,spent*.5,1,{unamplified:true});});

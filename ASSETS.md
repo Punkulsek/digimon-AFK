@@ -78,9 +78,12 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 `public/types/type-icons.webp`는 첨부 `타입에셋.zip` 안의 `타입 에셋.webp` 원본입니다. 이미지 수정 없이 CSS로 18개 타입 영역을 표시합니다. 복합 타입은 각 아이콘을 함께 표시하며 카드·상세·도감 상세·진화 재료·타입별 던전에 적용합니다. 출처·SHA-256·영역 좌표는 `public/types/source.json`에 기록하며 독립 실행 HTML에도 내장합니다.
 
 ### 2단계 기술 이펙트
-사용자가 지정한 [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion)의 `graphics/battle_anims/sprites`에서 원본 PNG 10개를 가져왔습니다. `public/effects/sources.json`에 고정 커밋, 원본 링크, SHA-256 및 이미지 크기를 기록했습니다. PNG 파일은 수정하지 않고 브라우저에서 GBA 팔레트 0번을 투명하게 렌더링합니다. 광선·충격파·기술명·회복 표시와 애니메이션 타임라인은 자체 코드입니다. 노래하기(음표)와 악마의키스(하트)는 서로 다른 원본 그래픽을 사용합니다.
+사용자가 지정한 [rh-hideout/pokeemerald-expansion](https://github.com/rh-hideout/pokeemerald-expansion)의 `graphics/battle_anims/sprites`에서 원본 PNG 10개를 가져왔습니다. `public/effects/sources.json`에 고정 커밋, 원본 링크, SHA-256 및 이미지 크기를 기록했습니다. PNG 파일은 수정하지 않고 브라우저에서 GBA 팔레트 0번을 투명하게 렌더링합니다. 충격파·기술명·회복 표시와 애니메이션 타임라인은 자체 코드입니다. 직선 연결 광선은 사용하지 않습니다. 노래하기(음표)와 악마의키스(하트)는 서로 다른 원본 그래픽을 사용합니다.
 
 검토한 체크아웃에서 루트 LICENSE 또는 해당 그래픽의 개별 재사용 라이선스를 찾지 못했습니다. 공개 저장소라는 사실만으로 그래픽의 자유로운 재배포/상업 이용 권한이 확인되는 것은 아니며, 포켓몬 원본 그래픽 권리는 해당 권리자에게 있습니다.
 
 ## 승인된 상태이상·버프 아이콘
 `public/ui/status-icons.png`는 사용자가 선택한 첫 번째 생성 시안 원본입니다 (`exec-87175659-a78c-41c3-b406-c2e7e243a080.png`). 이미지 파일을 수정하지 않고 `src/status-icons.js`의 CSS 영역 좌표로 아이콘만 표시합니다. 두 번째 포켓몬 배틀풍 시안은 적용하지 않았습니다. 남은 시간·중첩 수·버프/디버프 색상과 설명은 실제 전투 상태에서 표시하며, 독립 실행 파일에도 원본이 내장됩니다.
+
+### 기술 시전 연출 개편
+`src/skill-choreography.js`의 131개 기술 연출 정의와 `src/skill-effects.js`의 Canvas 타임라인은 이 게임을 위해 직접 작성했습니다. 원작의 GBA 애니메이션 스크립트를 이식한 구현은 아닙니다. 기존 PNG 시트의 프레임을 순차 재생하고, 준비 동작·응축 입자·곡선 투사체·타격·회복·보호막 효과를 결합합니다. 시전/발동/타격 효과음은 Web Audio로 합성하며 BGM은 변경하지 않습니다. 모든 리소스는 `play.html`에도 내장됩니다.

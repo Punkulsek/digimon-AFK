@@ -1,0 +1,114 @@
+{
+  "assets": [
+    {
+      "name": "blue_flames",
+      "path": "blue_flames.png",
+      "width": 32,
+      "height": 64,
+      "paletteZero": [
+        172,
+        205,
+        255
+      ]
+    },
+    {
+      "name": "green_sparkle",
+      "path": "green_sparkle.png",
+      "width": 16,
+      "height": 64,
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "magenta_heart",
+      "path": "magenta_heart.png",
+      "width": 16,
+      "height": 16,
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "music_notes",
+      "path": "music_notes.png",
+      "width": 16,
+      "height": 96,
+      "paletteZero": [
+        98,
+        246,
+        246
+      ]
+    },
+    {
+      "name": "poison_bubble",
+      "path": "poison_bubble.png",
+      "width": 16,
+      "height": 48,
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "spark_0",
+      "path": "spark_0.png",
+      "width": 8,
+      "height": 64,
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "water_impact",
+      "path": "water_impact.png",
+      "width": 32,
+      "height": 32,
+      "paletteZero": [
+        106,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "hit",
+      "path": "hit.png",
+      "width": 32,
+      "height": 160,
+      "paletteZero": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "razor_leaf",
+      "path": "razor_leaf.png",
+      "width": 32,
+      "height": 16,
+      "paletteZero": [
+        164,
+        148,
+        139
+      ]
+    },
+    {
+      "name": "ice_crystals_0",
+      "path": "ice_crystals_0.png",
+      "width": 16,
+      "height": 16,
+      "paletteZero": [
+        106,
+        148,
+        139
+      ]
+    }
+  ]
+}
