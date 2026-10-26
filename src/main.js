@@ -431,7 +431,7 @@ function step() {
   let refresh = false;
   let dungeonEnded = false;
   for (const e of events) {
-    if(battle.wave!==oldWave&&["skill","damage","heal","shield"].includes(e.type))continue;
+    if(battle.wave!==oldWave&&["skill","damage","heal","shield","immune"].includes(e.type))continue;
     if (e.type === "dungeonResult") dungeonEnded = true;
     if(e.type==='skill'&&battle.wave===oldWave){
       if(battlefieldVisible()){
@@ -439,6 +439,7 @@ function step() {
         if(effect)skillPresentations.set(e.castId,{effect,until:performance.now()+effect.duration});
       }
     }
+    if(e.type==='immune')floatDamage('효과 없음',combatElement(e.targetUid));
     if(e.type==='damage'){
       if(e.periodic){const now=performance.now(),entry=periodicFloats.get(e.targetUid)||{at:now,damage:0};entry.damage+=e.damage;if(now-entry.at>=700){floatDamage(`${Math.ceil(entry.damage)}`,combatElement(e.targetUid),'received');entry.at=now;entry.damage=0;}periodicFloats.set(e.targetUid,entry);continue;}
       const target=combatElement(e.targetUid),actor=combatElement(e.uid);
@@ -588,7 +589,7 @@ function partyChanged() {
   collection();
   toast("탐험대 편성을 저장했어요.");
 }
-function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p><small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
+function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.type} · ${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p><small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
 function detail(uid) {
   replaceSlot = null;
   selected = uid;

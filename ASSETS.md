@@ -87,3 +87,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ### 기술 시전 연출 개편
 `src/skill-choreography.js`의 131개 기술 연출 정의와 `src/skill-effects.js`의 Canvas 타임라인은 이 게임을 위해 직접 작성했습니다. 원작의 GBA 애니메이션 스크립트를 이식한 구현은 아닙니다. 기존 PNG 시트의 프레임을 순차 재생하고, 준비 동작·응축 입자·곡선 투사체·타격·회복·보호막 효과를 결합합니다. 시전/발동/타격 효과음은 Web Audio로 합성하며 BGM은 변경하지 않습니다. 모든 리소스는 `play.html`에도 내장됩니다.
+
+## 타입 상성 데이터
+`src/type-matchups.js`는 페어리 타입을 포함하는 현대 18타입 상성표입니다. `tests/fixtures/type-efficacy.csv`는 https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/type_efficacy.csv 의 검증용 스냅샷이며 테스트에서 18×18 조합을 전부 대조합니다. 일반 공격은 첫 타입, 기술은 기술별 타입을 사용하며 자속 보정은 적용하지 않습니다. 최대 HP 비례 지속 피해와 반사 피해는 타입 배율에서 제외합니다.

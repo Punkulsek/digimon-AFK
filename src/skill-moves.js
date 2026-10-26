@@ -5,12 +5,12 @@ const handlers={};
 const alive=u=>u&&u.hp>0;
 const ratio=u=>u.hp/u.maxHp;
 const excludedCopies=new Set(['변신','손가락흔들기','땅가르기','뿔드릴','멸망의노래']);
-function context(engine,caster,scale){
+function context(engine,caster,scale,name){
  const enemies=engine.opponents(caster).filter(alive),allies=engine.alive(caster.side);
- return {e:engine,c:caster,s:scale,enemies,allies,t:enemies[0],
+ return {e:engine,c:caster,s:scale,type:skillData.moves[name].type,enemies,allies,t:enemies[0],
   atk:()=>engine.effective(caster).atk,
-  hit:(t,k,o={})=>engine.damage(caster,t,k,{scale,...o}),
-  status:(t,key,seconds,chance=1)=>alive(t)&&engine.rng()<chance*scale?engine.status(t,key,seconds,caster,{scale}):false,
+  hit:(t,k,o={})=>engine.damage(caster,t,k,{scale,attackType:skillData.moves[name].type,...o}),
+  status:(t,key,seconds,chance=1)=>alive(t)&&!engine.context?.immuneTargets?.has(t.uid)&&engine.rng()<chance*scale?engine.status(t,key,seconds,caster,{scale}):false,
   buff:(t,key,seconds,mods={},data={})=>engine.buff(t,key,seconds,Object.fromEntries(Object.entries(mods).map(([k,v])=>[k,v*scale])),{data:{scale,...data}}),
   heal:(t,n)=>engine.heal(caster,t,n,scale),
   shield:(t,n,seconds)=>engine.shield(caster,t,n,seconds,scale),
@@ -53,7 +53,7 @@ single('흡수',(x,t)=>drain(x,t,1.6,.35));
 handlers['꽃잎댄스']=x=>{const targets=x.enemies.slice(0,5);for(let i=0;i<3;i++)targets.forEach(t=>x.hit(t,1.15));x.status(x.c,'confusion',4);};
 single('기가드레인',(x,t)=>drain(x,t,3.3,.5));
 single('땅파기',(x,t)=>charged(x,1,()=>x.hit(t,3.4,{penetration:20*x.s})));
-single('땅가르기',(x,t)=>{if(!t.isBoss&&ratio(t)<=.18)x.e.execute(x.c,t);else x.hit(t,4.1,{penetration:t.isBoss?35*x.s:0});});
+single('땅가르기',(x,t)=>{if(!t.isBoss&&ratio(t)<=.18)x.e.execute(x.c,t,x.type);else x.hit(t,4.1,{penetration:t.isBoss?35*x.s:0});});
 single('속이기',(x,t)=>{const first=!x.c.memory.fakeOutUsed;x.c.memory.fakeOutUsed=true;x.hit(t,first?3.1:2.1);if(first)x.e.hold(t,2);});
 single('염동력',(x,t)=>{x.hit(t,2);x.status(t,'confusion',5,.5);});
 area('사이코키네시스',3,(x,t)=>{x.hit(t,2.3);if(x.e.rng()<.6*x.s)x.buff(t,'사이코키네시스',6,{defPct:-15});});
@@ -96,7 +96,7 @@ single('뿔찌르기',(x,t)=>x.hit(t,3,{penetration:20*x.s}));
 handlers['암석포']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.85:4.9));x.e.hold(x.c,3);};
 area('용의숨결',3,(x,t)=>{x.hit(t,1.85);x.status(t,'shock',5,.55);});
 single('폭포오르기',(x,t)=>{x.hit(t,2.8);x.e.charge(t,-15*x.s);});
-single('뿔드릴',(x,t)=>{if(!t.isBoss&&ratio(t)<=.2)x.e.execute(x.c,t);else x.hit(t,4.2,{penetration:t.isBoss?35*x.s:0});});
+single('뿔드릴',(x,t)=>{if(!t.isBoss&&ratio(t)<=.2)x.e.execute(x.c,t,x.type);else x.hit(t,4.2,{penetration:t.isBoss?35*x.s:0});});
 handlers['스피드스타']=x=>{x.enemies.slice(0,3).forEach(t=>x.hit(t,1.75));x.buff(x.c,'스피드스타',6,{skillHaste:12});};
 single('시저크로스',(x,t)=>{x.hit(t,2.1);x.hit(t,2.1*(ratio(t)<=.4?1.4:1));});
 single('번개펀치',(x,t)=>statusBonus(x,t,'shock',3.25,.9,.6,6));
@@ -151,7 +151,7 @@ handlers['리플렉터']=x=>x.allies.forEach(a=>x.buff(a,'리플렉터',8,{}, {r
 area('악마의키스',3,(x,t)=>x.status(t,'sleep',3,.65));
 single('튀어오르기',(x,t)=>charged(x,1,()=>x.hit(t,.6)));
 handlers['용의춤']=x=>{x.buff(x.c,'용의춤',9,{atkPct:30,attackSpeedPct:20});const other=x.highest(x.allies.filter(a=>a!==x.c&&a.types?.includes('드래곤')),'atk');if(other)x.buff(other,'용의춤',9,{atkPct:20,attackSpeedPct:15});};
-area('멸망의노래',3,(x,t)=>{const mark={};t.memory.perish=mark;x.e.delay(8,()=>{if(t.memory.perish!==mark)return;delete t.memory.perish;if(!alive(t))return;if(!t.isBoss&&ratio(t)<=.2)x.e.execute(x.c,t);else x.hit(t,3.6);},t);});
+area('멸망의노래',3,(x,t)=>{const mark={};t.memory.perish=mark;x.e.delay(8,()=>{if(t.memory.perish!==mark)return;delete t.memory.perish;if(!alive(t))return;if(!t.isBoss&&ratio(t)<=.2)x.e.execute(x.c,t,x.type);else x.hit(t,3.6);},t);});
 handlers['변신']=x=>{const targets=x.allies.filter(a=>a!==x.c&&!excludedCopies.has(skillData.assignments[a.speciesId]));if(!targets.length)return false;const target=targets[Math.floor(x.e.rng()*targets.length)];return executeSkill(x.e,x.c,skillData.assignments[target.speciesId],x.s*.75);};
 handlers['바톤터치']=x=>{const target=x.highest(x.allies.filter(a=>a!==x.c),'atk');if(!target)return false;const entry=Object.entries(x.c.buffs).find(([key,b])=>Object.values(b.modifiers||{}).some(v=>v>0)&&!['독압정','toxicSpikes'].includes(key));if(!entry){x.e.charge(target,25*x.s);return;}const [key,b]=entry;const mods=Object.fromEntries(Object.entries(b.modifiers||{}).map(([k,v])=>[k,v*x.s]));x.e.buff(target,key,Math.max(0,b.expires-x.e.time),mods,{data:{...b.data}});};
 handlers['아쿠아링']=x=>x.lowest(3).forEach(a=>x.e.dot(x.c,a,'아쿠아링',8,2,()=>x.heal(a,x.atk()*.7)));
@@ -167,5 +167,6 @@ export function executeSkill(engine,caster,name,scale=1){
  const handler=handlers[name];if(!handler)throw new Error(`Unknown skill: ${name}`);
  if(!alive(caster))return false;
  if(engine.context&&offensiveNames.has(name))engine.context.offensive=true;
- return handler(context(engine,caster,scale));
+ const previous=engine.context?.attackType;if(engine.context)engine.context.attackType=skillData.moves[name].type;
+ try{return handler(context(engine,caster,scale,name));}finally{if(engine.context)engine.context.attackType=previous;}
 }
