@@ -572,7 +572,7 @@ function collection() {
   page.innerHTML = `<header class="party-header"><div class="management-title"><div><span class="eyebrow">함께 떠나는 모험</span><h1>포켓몬 탐험대</h1><button class="soft-button formation-toggle" data-action="formation" aria-pressed="${formationMode}">${formationMode?"편성 완료":"편성"}</button></div><div class="party-total">${i("swords")}<span>전체 전투력 <strong id="party-power">${num(partyPower())}</strong></span><small id="party-count">${state.party.length} / 5</small></div></div><div class="party-slots">${Array.from({length:5},(_,index)=>{
     const p=state.inventory.find(p=>p.uid===state.party[index]);
     return `<button class="party-slot ${p ? "occupied" : "empty"} ${replaceSlot === index ? "choosing" : ""}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 파티 슬롯${p ? ` ${species(p.speciesId).name}` : " 비어 있음"}"><span class="slot-number">${index+1}</span>${p ? `${art(species(p.speciesId), "field-art party-sprite")}<span class="slot-caption"><strong>${species(p.speciesId).name}</strong><small>Lv. ${p.level}</small>${formationMode?synergyBadges(p.speciesId):""}</span>` : `${i("plus")}<span>포켓몬 편성</span>`}</button>`;
-  }).join("")}</div>${formationMode?synergyOverview():""}</header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>formationMode?`<div class="synergy-card">${card(p,replaceSlot!==null ? "assignSlot" : "detail")}${synergyBadges(p.speciesId)}</div>`:card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
+  }).join("")}</div>${formationMode?synergyOverview():""}</header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>formationMode?`<div class="synergy-card">${card(p,replaceSlot!==null ? "assignSlot" : "formationPokemon")}${synergyBadges(p.speciesId)}</div>`:card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
   if(collectionTab==='dex') {
     const acquired=new Set(state.discovered||state.inventory.map(p=>p.speciesId));
     page.innerHTML=`<header class="dex-header"><h1>관동 포켓몬 도감</h1><p>수집률 ${((acquired.size/SPECIES.length)*100).toFixed(1)}% · ${acquired.size} / ${SPECIES.length}</p></header><div class="collection-scroll dex-scroll" tabindex="0" aria-label="도감 목록"><div class="collection-grid">${[...SPECIES].sort((a,b)=>a.id-b.id).map(p=>`<button class="dex-card ${acquired.has(p.id)?'':'undiscovered'}" data-action="dexDetail" data-species="${p.id}"><small>No. ${String(p.id).padStart(3,'0')}</small>${art(p)}<strong>${acquired.has(p.id)?p.name:'미획득'}</strong></button>`).join('')}</div></div>`;
@@ -738,10 +738,16 @@ document.addEventListener("click", (e) => {
       collectionTab="pokemon";
       collection();
       break;
+    case "formationPokemon": {
+      const uid=btn.dataset.id;
+      if(!state.party.includes(uid)&&state.party.length>=5){toast("위쪽에서 교체할 슬롯을 선택하세요.");break;}
+      const error=toggleParty(state,uid);if(error)toast(error);else partyChanged();break;
+    }
     case "detail":
       detail(btn.dataset.id);
       break;
     case "slot":
+      if(formationMode){replaceSlot=Number(btn.dataset.slot);collection();break;}
       slotMenu(Number(btn.dataset.slot));
       break;
     case "replaceSlot":
@@ -810,7 +816,7 @@ document.addEventListener("click", (e) => {
       clearTimeout($('#stage-transition').hideTimer);revealSummon=null;
       location.reload();break;
     }
-    case "formation":formationMode=!formationMode;collection();break;
+    case "formation":formationMode=!formationMode;replaceSlot=null;collection();break;
     case "synergyDetail":{
       const key=btn.dataset.synergy,info=SYNERGIES[key],current=partySynergies(state).find(s=>s.key===key);
       modal(`${info.icon} ${key} 시너지`,`${current.count}마리 편성 · ${current.tier?current.tier+'마리 단계 활성':'미활성'}`,`<p>활성 효과는 아군 전체에 적용됩니다. 가장 높은 단계 하나만 적용합니다.</p>${info.labels.map((label,n)=>`<div class="synergy-effect ${current.index===n?'enabled':''}"><b>${[2,3,5][n]}마리</b><span>${label}</span>${current.index===n?' ✓':''}</div>`).join('')}<button class="primary-button full" data-action="collection">편성으로 돌아가기</button>`,'settings-modal');break;
