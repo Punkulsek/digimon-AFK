@@ -497,3 +497,10 @@
 #fighters.fighters,#enemy.enemy-squad{translate:0 -18px}
 @media(max-height:500px){#fighters.fighters,#enemy.enemy-squad{translate:0 -10px}}
 .collection-grid .pokemon-card .card-top {position:static}
+/* Align the two teams with the marked lower battlefield areas. */
+@media(min-height:501px){
+ #fighters.fighters,#enemy.enemy-squad{bottom:calc(var(--menu-height,70px) + 12vh);translate:none}
+}
+@media(max-height:500px){
+ #fighters.fighters,#enemy.enemy-squad{top:90px;bottom:calc(var(--menu-height,52px) + 7vh);translate:none}
+}

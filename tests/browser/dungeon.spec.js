@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {initialState} from '../../src/game.js';
 test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메뉴 유지',async({page})=>{
- const seed=initialState();seed.auto=false;seed.speed=3;seed.inventory.forEach(p=>p.level=5);
+ const seed=initialState();seed.auto=false;seed.speed=3;seed.candies=22;seed.inventory.forEach(p=>p.level=5);
  await page.addInitScript(s=>{if(!localStorage.getItem('pokemon-days-v1'))localStorage.setItem('pokemon-days-v1',JSON.stringify(s));},seed);
  await page.goto('/');
  await page.getByRole('button',{name:'던전',exact:true}).click();
@@ -30,21 +30,21 @@ test('타입 선택·잠금·전투 보상 저장·사탕 성장과 기존 메�
  await page.getByRole('button',{name:'던전',exact:true}).click();
  await page.locator('[data-dungeon="candy"]').click();
  await page.getByRole('button',{name:'던전 입장'}).click();
- await expect(page.locator('#stage-transition.visible')).toContainText('이상한사탕 10개 획득',{timeout:15000});
+ await expect(page.locator('#stage-transition.visible')).toContainText('이상한사탕 100개 획득',{timeout:15000});
  await page.locator('.nav-button[data-action="collection"]').click();
  await page.locator('.collection-grid .pokemon-card').first().click();
- await expect(page.locator('.detail-info')).toContainText('보유 이상한사탕 10개');
+ await expect(page.locator('.detail-info')).toContainText('보유 이상한사탕 122개');
  await page.locator('[data-action="level"]').click();
  await expect(page.getByRole('heading',{name:'Lv. 6 / 100'})).toBeVisible();
- await expect(page.locator('.detail-info')).toContainText('보유 이상한사탕 9개');
+ await expect(page.locator('.detail-info')).toContainText('보유 이상한사탕 0개');
  await page.reload();
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')));
- expect(s.candies).toBe(9);expect(s.materials.fire).toBe(3);expect(s.dungeonClears['evolution-fire']).toBe(1);expect(s.gold).toBe(10000);expect(s.stage).toBe(1);
+ expect(s.candies).toBe(0);expect(s.materials.fire).toBe(3);expect(s.dungeonClears['evolution-fire']).toBe(1);expect(s.gold).toBe(10000);expect(s.stage).toBe(1);
  await expect(page.locator('.nav-button')).toHaveText(['포켓몬','✦강화','홈','던전','소환']);
 });
 
 test('작은 가로 화면에서 던전 패배·재도전·이탈 시 보상과 스테이지 보존',async({page})=>{
- const seed=initialState();seed.auto=false;seed.speed=3;seed.party=[seed.party[0]];seed.dungeonClears.coin=9;
+ const seed=initialState();seed.auto=false;seed.speed=3;seed.candies=22;seed.party=[seed.party[0]];seed.dungeonClears.coin=9;
  await page.setViewportSize({width:568,height:320});
  await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),seed);
  await page.goto('/');await page.getByRole('button',{name:'던전',exact:true}).click();
@@ -68,4 +68,9 @@ test('던전 클리어는 보상 1회 지급 후 연출 중 다른 메뉴로 이
  await expect(page.locator('#stage-transition.visible')).toContainText('포켓코인 500개 획득');await expect(page.locator('.dungeon-result')).toHaveCount(0);await page.screenshot({path:'/tmp/dungeon-clear-loot.png'});
  await page.locator('.nav-button[data-action="home"]').click();await page.waitForTimeout(2500);await expect(page.locator('#dungeon-page')).toBeHidden();await expect(page.locator('#stage-transition')).not.toHaveClass(/visible/);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')).gold)).toBe(10500);
+});
+test('100단계 목록 내부 스크롤과 마지막 단계 선택',async({page})=>{
+ const s=initialState();s.auto=false;s.dungeonClears.candy=99;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);await page.goto('/');await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator('[data-dungeon="candy"]').click();
+ await expect(page.locator('[data-action="dungeonStage"]')).toHaveCount(100);await page.locator('[data-stage="100"]').click();await expect(page.locator('.challenge-reward-caption')).toContainText('20,494');await expect(page.getByRole('button',{name:'던전 입장'})).toBeInViewport();
 });

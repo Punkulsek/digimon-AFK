@@ -13,7 +13,7 @@ export const PARTY_LIMIT=5;
 export const SAVE_KEY='pokemon-days-v1';
 export const stats = pokemonStats;
 export const power = (p,state) => {const s=stats(p,state),c=criticalStats(s);return Math.round(s.hp+s.def+s.atk*5*attackRate(s)*(1+s.bossDamage/100)*(1+c.chance/100*(c.damage/100-1)))};
-export const levelCost = p => Math.ceil(p.level/5);
+export const levelCost = p => Math.round(100*1.05**(Math.min(99,Math.max(1,p.level))-1));
 export function initialState(){return {...dungeonDefaults(),version:1,activePreset:0,partyPresets:Array.from({length:5},()=>[0,1,2,3,4].map(i=>`starter-${i}`)),upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||s.stage>MAX_STAGE||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;

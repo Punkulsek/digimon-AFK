@@ -1,4 +1,4 @@
-export const DUNGEON_STAGES = 10;
+export const DUNGEON_STAGES = 100;
 export const EVOLUTION_TYPES = [
   {id:'normal',name:'노말',icon:'circle',enemy:52,color:'#c6c3af'},
   {id:'fire',name:'불꽃',icon:'flame',enemy:58,color:'#ed9364'},

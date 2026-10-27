@@ -129,3 +129,7 @@
 .challenge-enemy-art .pokemon-art,.challenge-enemy-art .pokemon-art img{max-width:none;max-height:none}
 .challenge-enemy-art .pokemon-art img{width:100%;height:100%;transform:scale(1.15)}
 @media(max-height:540px){.dungeon-challenge .challenge-enter{padding:3px 8px;min-height:38px}.challenge-team-heading svg{width:15px;height:15px}.challenge-party-card .pokemon-art{height:32px}.challenge-party{margin-bottom:4px}.challenge-footer{padding-top:4px}}
+/* Keep all 100 stages scrollable without pushing the challenge button off-screen. */
+.dungeon-challenge .challenge-team{overflow:hidden}
+.dungeon-challenge .challenge-team>*{flex-shrink:0}
+.dungeon-challenge .dungeon-stage-list{flex:1 1 auto;min-height:40px;overflow-y:auto;grid-template-columns:repeat(10,minmax(0,1fr));align-content:start;padding:3px}
