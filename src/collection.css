@@ -528,7 +528,7 @@
 .summon-banner-caption span{width:20px;height:4px;background:#ffc123;transform:skew(-15deg)}
 #summon-page .summon-lobby-footer .summon-actions{width:min(780px,100%);margin:auto;gap:12px}
 #summon-page .summon-actions .summon-buy{display:flex;flex-direction:column;gap:3px;min-height:64px;padding:7px 12px;background:linear-gradient(115deg,#10d5ae,#00ae9c);border:2px solid #3ae1cc;border-bottom:5px solid #006f77;border-radius:8px;box-shadow:3px 3px #064a64;transform:skew(-6deg);color:white}
-#summon-page .summon-actions .summon-buy-1{background:linear-gradient(115deg,#ffbb0a,#ef9000);border-color:#ffd457;border-bottom-color:#ad6505}
+#summon-page .summon-actions .summon-buy:not(:disabled){background:linear-gradient(115deg,#ffbb0a,#ef9000);border-color:#ffd457;border-bottom-color:#ad6505}
 .summon-buy strong{font-size:19px;text-shadow:0 2px #0003}.summon-buy>span{display:flex;align-items:center;gap:8px;color:#fff34d;font-size:14px}.summon-buy img{width:24px;height:24px;object-fit:contain}
 #summon-page .summon-actions .summon-buy:disabled{opacity:.45;filter:saturate(.5)}
 #summon-page .summon-actions .summon-buy:active{transform:skew(-6deg) translateY(2px)}
@@ -594,3 +594,7 @@
  #summon-page .summon-level-track progress{height:14px}
  #summon-page .summon-lobby-title h1{font-size:24px}
 }
+
+/* Reserve the enlarged level strip's full height before the title. */
+#summon-page:has(.summon-lobby-header){grid-template-rows:64px 36px minmax(0,1fr) auto}
+@media(max-height:500px){#summon-page:has(.summon-lobby-header){grid-template-rows:49px 29px minmax(0,1fr) auto}}
