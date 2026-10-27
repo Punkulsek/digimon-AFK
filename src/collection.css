@@ -472,3 +472,9 @@
 #fighters.fighters,#enemy.enemy-squad{bottom:calc(var(--menu-height,70px) + 48px)}
 @media(max-height:500px){#fighters.fighters,#enemy.enemy-squad{top:98px;bottom:calc(var(--menu-height,52px) + 20px)}}
 @media(max-height:360px){#fighters.fighters,#enemy.enemy-squad{top:90px}}
+
+.pokemon-card.formation-selected {
+  outline: 3px solid #35ffe0;
+  outline-offset: -3px;
+  box-shadow: inset 0 0 16px #35ffe066;
+}
