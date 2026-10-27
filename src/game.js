@@ -1,7 +1,8 @@
 import {SkillRuntime} from './skill-runtime.js';
 import {pokemonStats,attackRate,criticalStats} from './combat-stats.js';
 import {upgradeDefaults,UPGRADE_KEYS} from './upgrades.js';
-import {mergeDuplicates} from './duplicates.js';
+import {normalizePresets} from './party-presets.js';
+import {mergeDuplicates,duplicateKey} from './duplicates.js';
 import {SUMMON_RATES,SUMMON_POOLS,summonLevel} from "./summoning.js";
 import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,stageGold} from "./stages.js";
 import {recordCollection} from "./collection-record.js";
@@ -13,7 +14,7 @@ export const SAVE_KEY='pokemon-days-v1';
 export const stats = pokemonStats;
 export const power = (p,state) => {const s=stats(p,state),c=criticalStats(s);return Math.round(s.hp+s.def+s.atk*5*attackRate(s)*(1+s.bossDamage/100)*(1+c.chance/100*(c.damage/100-1)))};
 export const levelCost = p => Math.ceil(p.level/5);
-export function initialState(){return {...dungeonDefaults(),version:1,upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
+export function initialState(){return {...dungeonDefaults(),version:1,activePreset:0,partyPresets:Array.from({length:5},()=>[0,1,2,3,4].map(i=>`starter-${i}`)),upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||s.stage>MAX_STAGE||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
  if(s.upgrades!==undefined&&(!s.upgrades||!UPGRADE_KEYS.every(k=>Number.isSafeInteger(s.upgrades[k])&&s.upgrades[k]>=0&&s.upgrades[k]<=1000)))return false;
@@ -26,8 +27,8 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
  return Array.isArray(s.party)&&s.party.length>0&&s.party.length<=partyLimit&&new Set(s.party).size===s.party.length&&s.party.every(id=>s.inventory.some(p=>p.uid===id))&&typeof s.auto==='boolean'&&typeof s.autoBoss==='boolean'&&[1,2,3].includes(s.speed)&&Number.isSafeInteger(s.totalKills)&&s.totalKills>=0&&typeof s.questClaimed==='boolean'&&Number.isSafeInteger(s.summons)&&s.summons>=0;
 }
-export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];for(const key of ['materials','dungeonClears'])if(s[key]&&typeof s[key]==='object'&&!Array.isArray(s[key]))s[key]={...defaults[key],...s[key]};}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);if(s.inventory.some((p,i)=>s.inventory.findIndex(q=>q.speciesId===p.speciesId)!==i)){try{if(!storage.getItem(SAVE_KEY+'-before-shards'))storage.setItem(SAVE_KEY+'-before-shards',raw);}catch{}}s.upgrades ||= upgradeDefaults();mergeDuplicates(s);save(storage,s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
-export function save(storage,state){try{storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
+export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];for(const key of ['materials','dungeonClears'])if(s[key]&&typeof s[key]==='object'&&!Array.isArray(s[key]))s[key]={...defaults[key],...s[key]};}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);if(s.inventory.some((p,i)=>s.inventory.findIndex(q=>duplicateKey(q)===duplicateKey(p))!==i)){try{if(!storage.getItem(SAVE_KEY+'-before-shards'))storage.setItem(SAVE_KEY+'-before-shards',raw);}catch{}}s.upgrades ||= upgradeDefaults();mergeDuplicates(s);save(storage,s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
+export function save(storage,state){try{normalizePresets(state);storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
 export function summon(state,count,rng=Math.random){
  if(![1,10,30].includes(count))return {error:'잘못된 소환 횟수입니다.'};
  const cost=count*100;

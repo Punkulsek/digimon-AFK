@@ -1,3 +1,4 @@
+import {normalizePresets,selectPreset,PRESET_COUNT} from './party-presets.js';
 import {SYNERGIES,speciesSynergies,partySynergies} from './synergies.js';
 import {initialState} from './game.js';
 import {effectIcon} from './status-icons.js';
@@ -562,6 +563,7 @@ const synergyBadges=id=>`<span class="synergy-badges">${speciesSynergies(id).map
 function synergyOverview(){return `<div class="synergy-overview">${partySynergies(state).map(s=>`<button class="synergy-pill ${s.tier?'enabled':''}" data-action="synergyDetail" data-synergy="${s.key}">${SYNERGIES[s.key].icon} ${s.key} <b>${s.count}/5</b><small>${s.tier?s.tier+'마리 활성':'미활성'}</small></button>`).join('')}</div>`;}
 let collectionTab = "pokemon";
 function collection() {
+  normalizePresets(state);
   dungeonUI.close();
   active = "collection";
   const scroll = $(".collection-scroll")?.scrollTop || 0;
@@ -573,8 +575,12 @@ function collection() {
   page.hidden = false;
   page.innerHTML = `<header class="party-header"><div class="management-title"><div><span class="eyebrow">함께 떠나는 모험</span><h1>포켓몬 탐험대</h1><button class="soft-button formation-toggle" data-action="formation" aria-pressed="${formationMode}">${formationMode?"편성 완료":"편성"}</button></div><div class="party-total">${i("swords")}<span>전체 전투력 <strong id="party-power">${num(partyPower())}</strong></span><small id="party-count">${state.party.length} / 5</small></div></div><div class="party-slots">${Array.from({length:5},(_,index)=>{
     const p=state.inventory.find(p=>p.uid===state.party[index]);
-    return `<button class="party-slot ${p ? "occupied" : "empty"} ${(replaceSlot === index || (formationMode && p && formationSelection === p.uid)) ? "choosing" : ""}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 파티 슬롯${p ? ` ${species(p.speciesId).name}` : " 비어 있음"}"><span class="slot-number">${index+1}</span>${p ? `${art(species(p.speciesId), "field-art party-sprite")}<span class="slot-caption"><strong>${species(p.speciesId).name}</strong><small>Lv. ${p.level}</small>${formationMode?synergyBadges(p.speciesId):""}</span>` : `${i("plus")}<span>포켓몬 편성</span>`}</button>`;
-  }).join("")}</div>${formationMode?synergyOverview():""}</header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${formationMode && formationSelection ? `<div class="selection-notice"><span>${species(state.inventory.find(p=>p.uid===formationSelection).speciesId).name} 선택 · 교환할 포켓몬을 누르세요.</span>${state.party.includes(formationSelection)?`<button class="text-button" data-action="removeSlot" data-id="${formationSelection}">편성 해제</button>`:""}<button class="text-button" data-action="cancelReplace">취소</button></div>` : replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>formationMode?`<div class="synergy-card">${card(p,"formationPokemon")}${synergyBadges(p.speciesId)}</div>`:card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
+    const selectedSlot=replaceSlot===index || (formationMode && p && formationSelection===p.uid);
+    if(p){const cost=breakthroughCost(p),amount=breakthroughCandidates(state,p).length;
+      return `<button class="party-slot occupied party-portrait ${selectedSlot?'choosing':''}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 파티 슬롯 ${species(p.speciesId).name}"><span class="portrait-top">${typeIcons(species(p.speciesId).types)}<b>Lv.${p.level}</b></span>${art(species(p.speciesId),'party-card-art')}<span class="portrait-name">${species(p.speciesId).name}</span><span class="portrait-equipped">편성 중</span>${growthStars(p)}<span class="portrait-progress">${cost?`${amount}/${cost}`:'MAX'}</span>${formationMode?synergyBadges(p.speciesId):''}</button>`;
+    }
+    return `<button class="party-slot empty ${selectedSlot?'choosing':''}" data-action="slot" data-slot="${index}" aria-label="${index+1}번 빈 슬롯">${i('plus')}<span>포켓몬 편성</span></button>`;
+  }).join("")}</div>${formationMode?synergyOverview():""}<nav class="party-presets" aria-label="팀 프리셋"><span>팀 프리셋</span>${Array.from({length:PRESET_COUNT},(_,i)=>`<button data-action="preset" data-preset="${i}" aria-pressed="${state.activePreset===i}" class="${state.activePreset===i?'selected':''}">${i+1}</button>`).join('')}<small>편성 변경 자동 저장</small></nav></header><div class="collection-toolbar"><span>보유 포켓몬 <b>${state.inventory.length}</b></span><div class="sort-options" aria-label="포켓몬 정렬">${[["rarity","등급순"],["level","레벨순"],["power","전투력순"]].map(([key,label])=>`<button class="soft-button ${sort === key ? "selected" : ""}" data-action="sort" data-sort="${key}" aria-pressed="${sort===key}">${label}</button>`).join("")}</div></div>${formationMode && formationSelection ? `<div class="selection-notice"><span>${species(state.inventory.find(p=>p.uid===formationSelection).speciesId).name} 선택 · 교환할 포켓몬을 누르세요.</span>${state.party.includes(formationSelection)?`<button class="text-button" data-action="removeSlot" data-id="${formationSelection}">편성 해제</button>`:""}<button class="text-button" data-action="cancelReplace">취소</button></div>` : replaceSlot!==null ? `<div class="selection-notice"><span>${replaceSlot+1}번 슬롯에 편성할 포켓몬을 선택하세요.</span><button class="text-button" data-action="cancelReplace">취소</button></div>` : ""}<div class="collection-scroll" tabindex="0" aria-label="보유 포켓몬 목록"><div class="collection-grid">${sorted.map(p=>formationMode?`<div class="synergy-card">${card(p,"formationPokemon")}${synergyBadges(p.speciesId)}</div>`:card(p,replaceSlot!==null ? "assignSlot" : "detail")).join("")}</div></div>`;
   if(collectionTab==='dex') {
     const acquired=new Set(state.discovered||state.inventory.map(p=>p.speciesId));
     page.innerHTML=`<header class="dex-header"><h1>관동 포켓몬 도감</h1><p>수집률 ${((acquired.size/SPECIES.length)*100).toFixed(1)}% · ${acquired.size} / ${SPECIES.length}</p></header><div class="collection-scroll dex-scroll" tabindex="0" aria-label="도감 목록"><div class="collection-grid">${[...SPECIES].sort((a,b)=>a.id-b.id).map(p=>`<button class="dex-card ${acquired.has(p.id)?'':'undiscovered'}" data-action="dexDetail" data-species="${p.id}"><small>No. ${String(p.id).padStart(3,'0')}</small>${art(p)}<strong>${acquired.has(p.id)?p.name:'미획득'}</strong></button>`).join('')}</div></div>`;
@@ -845,6 +851,9 @@ document.addEventListener("click", (e) => {
       clearTimeout($('#stage-transition').hideTimer);revealSummon=null;
       location.reload();break;
     }
+    case "preset":
+      if(selectPreset(state,Number(btn.dataset.preset)))partyChanged();
+      break;
     case "formation":formationMode=!formationMode;formationSelection=null;replaceSlot=null;collection();break;
     case "synergyDetail":{
       const key=btn.dataset.synergy,info=SYNERGIES[key],current=partySynergies(state).find(s=>s.key===key);

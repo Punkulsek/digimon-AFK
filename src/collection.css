@@ -478,3 +478,34 @@
   outline-offset: -3px;
   box-shadow: inset 0 0 16px #35ffe066;
 }
+/* Compact equipped cards, with the team anchored closer to the top. */
+.collection-page {padding-top:6px}
+.party-header {padding-top:0}
+.management-title {margin-bottom:5px}
+.party-slots {display:flex;justify-content:center;gap:12px;padding:0 0 4px}
+.party-slots .party-slot {width:112px;height:145px;flex:0 1 112px}
+.party-slots .party-portrait {display:flex;flex-direction:column;gap:0;padding:4px;overflow:hidden;border:2px solid #e6c45b;border-radius:9px;background:linear-gradient(145deg,#315d79,#153d4c 65%,#58638d);color:white;box-shadow:0 3px #093e4b}
+.party-portrait::before {display:none}
+.portrait-top {display:flex;width:100%;justify-content:space-between;align-items:center;font-size:11px;z-index:1}
+.party-portrait .party-card-art {position:absolute;inset:10px 0 30px;display:flex;align-items:center;justify-content:center}
+.party-card-art img {width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.portrait-name {margin-top:auto;z-index:1;font-size:11px;text-shadow:0 1px 3px #000}
+.portrait-equipped {z-index:1;color:#ffe354;font-weight:900;font-size:10px;text-shadow:1px 1px #000}
+.party-portrait .growth-stars {position:relative;z-index:1}
+.portrait-progress {position:relative;z-index:1;background:#d89624;border-radius:3px;width:100%;font-size:10px;font-weight:bold;text-align:center}
+.party-portrait .synergy-badges {z-index:1;flex-wrap:nowrap}
+.party-portrait .synergy-badges>span {font-size:8px;padding:1px}
+.party-slots .party-portrait.choosing {border-color:#38ffe0;box-shadow:0 0 0 2px #38ffe0}
+.party-presets {display:flex;align-items:center;justify-content:center;gap:7px;margin:5px 0;font-size:12px}
+.party-presets button {background:#139dad;border:1px solid #56c8c5;color:white;border-radius:4px;padding:4px 15px;font-weight:900}
+.party-presets button.selected {background:#ffb72a;color:#493813;border-color:#ffe773}
+.party-presets small {opacity:.75}
+@media(max-height:500px){
+ .party-slots{gap:8px}.party-slots .party-slot{width:88px;flex-basis:88px;height:104px}
+ .party-portrait .party-card-art{inset:4px 0 23px}.portrait-name{font-size:9px}
+ .portrait-top{font-size:9px}.party-presets{margin:2px 0;font-size:10px}.party-presets button{padding:2px 12px}
+ .party-header .synergy-overview{padding:2px}
+}
+.party-slots .party-portrait .party-card-art {width:100%;height:90px;min-height:0}
+.party-slots .party-portrait .party-card-art img {width:120px;height:120px;max-width:none;max-height:none;object-fit:contain}
+@media(max-height:500px){.party-slots .party-portrait .party-card-art{height:60px}.party-slots .party-portrait .party-card-art img{width:88px;height:88px}}
