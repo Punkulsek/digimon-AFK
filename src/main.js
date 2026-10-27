@@ -523,6 +523,7 @@ function leaveCollection() {
   replaceSlot = null;
 }
 function closeModal() {
+  if($(".summon-rates-modal")){ $("#modal-root").innerHTML="";lastFocus?.focus();return;}
   if(battle.dungeon && !dungeonUI.isOpen() && $("#modal-root").children.length){
     $("#modal-root").innerHTML="";active="dungeons";updateNavigation();return;
   }
@@ -665,7 +666,12 @@ function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
  summonPage(`<header class="summon-lobby-header"><button class="summon-info-button" data-action="summonRates">${i('circle-help')} 확률 정보</button><div class="summon-wallet" aria-label="보유 다이아">${currencyIcon('diamond','다이아')}<b>${num(state.gems)}</b></div></header><div class="summon-level-strip"><span>포켓몬 소환 레벨</span><div class="summon-level-track"><b>Lv.${lv}</b><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><strong>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}`}</strong></div></div><div class="summon-lobby-title"><h1>관동 포켓몬 소환</h1><span>새로운 모험의 동료를 만나세요!</span></div><div class="summon-banner pokemon-ensemble" role="img" aria-label="피카츄와 관동 포켓몬들이 모인 소환 일러스트"><span class="summon-banner-tag">관동지방 · 1세대 포켓몬</span></div><footer class="summon-lobby-footer"><div class="summon-banner-caption"><span></span> 포켓몬 소환 <span></span></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button summon-buy summon-buy-${n}" data-action="draw" data-count="${n}" ${state.gems<n*100?'disabled':''} aria-label="${n}회 소환 · 다이아 ${num(n*100)}"><strong>${n}회 소환</strong><span>${currencyIcon('diamond','다이아')}<b>${num(n*100)}</b></span></button>`).join('')}</div></footer>`);
 }
-function summonRates(){const lv=summonLevel(state.summons);summonPage(`<h1>확률 정보 · Lv.${lv}</h1><p>각 등급 내 포켓몬은 동일 확률입니다. 분기 진화는 최종 종족값 최댓값으로 등급을 정합니다.</p><div class="summon-scroll"><table><thead><tr><th>레벨</th>${SUMMON_GRADES.map(g=>`<th>${g}</th>`).join('')}</tr></thead><tbody>${SUMMON_RATES.map((r,n)=>`<tr><td>Lv.${n+1}</td>${r.map(v=>`<td>${v}%</td>`).join('')}</tr>`).join('')}</tbody></table>${SUMMON_POOLS.map((pool,g)=>`<h2>${SUMMON_GRADES[g]} · ${SUMMON_RATES[lv-1][g]}%</h2><p>${pool.map(p=>`${p.name} (${SUMMON_RATES[lv-1][g]}/${pool.length}% ≈ ${(SUMMON_RATES[lv-1][g]/pool.length).toFixed(6)}%)`).join(' · ')}</p>`).join('')}</div><button class="primary-button" data-action="summon">돌아가기</button>`);}
+let ratesLevel=1;
+function summonRates(level=summonLevel(state.summons)){
+ ratesLevel=Math.max(1,Math.min(10,level));const rates=SUMMON_RATES[ratesLevel-1];
+ modal('확률 정보','포켓몬 소환',`<div class="rate-grades">${[3,2,1,0].map(g=>`<div><b class="rate-grade grade-${g}">${SUMMON_GRADES[g]}</b><strong>${rates[g].toFixed(2)}%</strong></div>`).join('')}</div><div class="rate-pokemon-list" tabindex="0" aria-label="포켓몬별 소환 확률">${[3,2,1,0].map(g=>SUMMON_POOLS[g].map(p=>`<div class="rate-pokemon-row"><b class="rate-grade grade-${g}">${SUMMON_GRADES[g]}</b>${art(p)}<strong>${p.name}</strong><em>${(rates[g]/SUMMON_POOLS[g].length).toFixed(6)}%</em></div>`).join('')).join('')}</div><div class="rate-level-picker"><span>소환 레벨</span><div><button data-action="ratesLevel" data-delta="-1" aria-label="이전 소환 레벨" ${ratesLevel===1?'disabled':''}>❮</button><b>Lv.${ratesLevel}</b><button data-action="ratesLevel" data-delta="1" aria-label="다음 소환 레벨" ${ratesLevel===10?'disabled':''}>❯</button></div></div><small class="rate-note">개별 확률은 소수점 여섯째 자리까지 반올림해 표시합니다. 같은 등급의 포켓몬은 동일 확률로 등장합니다.</small>`,'summon-rates-modal');
+}
+
 function draw(count){
  if(busy)return;const outcome=summon(state,count);if(outcome.error)return toast(outcome.error);persist();busy=true;
  const finish=()=>{if(revealSummon!==finish)return;revealSummon=null;busy=false;const grade=Math.max(...outcome.result.map(p=>summonGrade(p.speciesId)));sound.effect(grade===3?'legendary':'reveal');summonPage(`<h1>${grade>=2?SUMMON_GRADES[grade]+' 등장!':'소환 완료'} · ${count}마리</h1><p>소환 Lv.${summonLevel(state.summons)}</p><div class="summon-scroll"><div class="result-grid ${grade>=2?'legendary-result':''}">${outcome.result.map(p=>`<div><strong>${SUMMON_GRADES[summonGrade(p.speciesId)]}</strong>${card(p)}</div>`).join('')}</div></div><button class="primary-button result-confirm" data-action="summon">확인</button>`);};
@@ -813,6 +819,7 @@ document.addEventListener("click", (e) => {
       summonScreen();
       break;
     case "summonRates": summonRates();break;
+    case "ratesLevel": summonRates(ratesLevel+Number(btn.dataset.delta));break;
     case "draw":
       draw(Number(btn.dataset.count));
       break;
