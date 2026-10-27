@@ -1,4 +1,4 @@
-import {species} from './data.js';
+import {species,SPECIES} from './data.js';
 import {EVOLUTION_TYPES} from './dungeon-config.js';
 import {recordCollection} from "./collection-record.js";
 // Game-specific long-term requirements, not the main-series evolution rules.
@@ -35,7 +35,18 @@ export const EVOLUTIONS = [
  [147,148,50,4,250],[148,149,90,9,800],
 ].map(([from,to,level,region,amount])=>({from,to,level,region,amount}));
 export const evolutionOptions = p => EVOLUTIONS.filter(e=>e.from===p.speciesId);
-export const breakthroughCost = p => (p.breakthrough||0) >= 10 ? 0 : (p.breakthrough||0)+1;
+export function familyGrade(id){
+ const family=SPECIES.filter(p=>evolutionFamily(p.id)===evolutionFamily(id));
+ const total=Math.max(...family.map(p=>Object.values(p.baseStats).reduce((a,b)=>a+b,0)));
+ return id===150||total>=600?3:total>=500?2:total>=400?1:0;
+}
+export const BREAKTHROUGH_COSTS=[
+ [10,50,100,200,300,400,500,800,1000,1500],
+ [5,10,20,30,50,70,100,150,200,300],
+ [1,2,2,3,5,7,9,10,12,15],
+ [1,2,3,4,5,6,7,8,9,10],
+];
+export const breakthroughCost=p=>(p.breakthrough||0)>=10?0:BREAKTHROUGH_COSTS[familyGrade(p.speciesId)][p.breakthrough||0];
 export function evolutionMaterials(e) {
  return species(e.to).types.map(name=>{
   const type=EVOLUTION_TYPES.find(t=>t.name===name);

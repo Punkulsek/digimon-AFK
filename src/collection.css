@@ -598,3 +598,6 @@
 /* Reserve the enlarged level strip's full height before the title. */
 #summon-page:has(.summon-lobby-header){grid-template-rows:64px 36px minmax(0,1fr) auto}
 @media(max-height:500px){#summon-page:has(.summon-lobby-header){grid-template-rows:49px 29px minmax(0,1fr) auto}}
+.pokemon-card .card-meta .rate-grade{display:inline-block;font-size:19px;line-height:1.15}
+.detail-art .rarity-badge .rate-grade{font-size:30px}
+@media(max-height:500px){.pokemon-card .card-meta .rate-grade{font-size:14px}}

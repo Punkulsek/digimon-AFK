@@ -17,8 +17,8 @@ test('진화의 세 조건과 지역 클리어 경계, UID·레벨·돌파·편�
 test('돌파 1~10 비용·능력치 증가, 최대 제한 및 저장 복원',()=>{
  const s=initialState(),p=s.inventory[0];let prev=stats(p);
  for(let n=1;n<=10;n++){
- s.shards[1]=(s.shards[1]||0)+n;const count=s.inventory.length;
- assert.equal(breakthroughCost(p),n);assert.equal(breakthrough(s,p.uid),null);assert.equal(p.breakthrough,n);assert.ok(stats(p).hp>prev.hp&&stats(p).atk>prev.atk);prev=stats(p);assert.equal(s.shards[1],0);assert.equal(s.inventory.length,count);
+ const cost=[1,2,2,3,5,7,9,10,12,15][n-1];s.shards[1]=(s.shards[1]||0)+cost;const count=s.inventory.length;
+ assert.equal(breakthroughCost(p),cost);assert.equal(breakthrough(s,p.uid),null);assert.equal(p.breakthrough,n);assert.ok(stats(p).hp>prev.hp&&stats(p).atk>prev.atk);prev=stats(p);assert.equal(s.shards[1],0);assert.equal(s.inventory.length,count);
  }
  assert.ok(breakthrough(s,p.uid));assert.equal(load({getItem:()=>JSON.stringify(s)}).state.inventory[0].breakthrough,10);
 });
