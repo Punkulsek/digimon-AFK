@@ -1,3 +1,4 @@
+import {dexBody,dexStatRows} from './dex.js';
 import {normalizePresets,selectPreset,PRESET_COUNT} from './party-presets.js';
 import {SYNERGIES,speciesSynergies,partySynergies} from './synergies.js';
 import {initialState} from './game.js';
@@ -760,10 +761,12 @@ document.addEventListener("click", (e) => {
     case "collectionTab":
       formationSelection=null;collectionTab=btn.dataset.tab;replaceSlot=null;collection();break;
     case "dexDetail": {
-      const p=species(Number(btn.dataset.species));
-      const relations=EVOLUTIONS.filter(e=>evolutionFamily(e.from)===evolutionFamily(p.id));
-      modal(p.name,`관동 도감 No. ${String(p.id).padStart(3,'0')}`,`<p>타입: ${typeIcons(p.types)} ${p.types.join(' / ')}</p><h3>진화 관계</h3>${relations.length?relations.map(e=>`<p>${species(e.from).name} → ${species(e.to).name}</p>`).join(''):'<p>관동 도감 내 진화 관계가 없습니다.</p>'}`);
-      break;
+      const id=Number(btn.dataset.species);dexSelected=id;
+      modal(species(id).name,'관동 포켓몬 도감',dexBody(id,{art,typeIcons}),'dex-detail-modal');break;
+    }
+    case "dexTab": {
+      document.querySelectorAll('[data-dex-panel]').forEach(p=>p.hidden=p.dataset.dexPanel!==btn.dataset.tab);
+      document.querySelectorAll('[data-action="dexTab"]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));break;
     }
     case "collection":
       collectionTab="pokemon";
@@ -1045,3 +1048,13 @@ document.addEventListener('pointerover',event=>{
  effectTooltip.style.top=`${Math.max(8,box.top-height-8)}px`;
 });
 document.addEventListener('pointerout',event=>{if(event.target.closest?.('.effect-icon')&&!event.relatedTarget?.closest?.('.effect-icon')){effectTooltip?.remove();effectTooltip=null;}});
+
+let dexSelected=null;
+document.addEventListener('input',e=>{
+ if(!['dex-level','dex-compare'].includes(e.target.id)||!dexSelected)return;
+ const level=Math.max(1,Math.min(100,Math.round(Number($('#dex-level').value)||1)));
+ const compare=Math.max(1,Math.min(100,Math.round(Number($('#dex-compare').value)||1)));
+ $('#dex-level-label').textContent=`Lv.${level}`;
+ $('#dex-current-heading').textContent=`Lv.${level}`;$('#dex-compare-heading').textContent=`Lv.${compare}`;
+ $('#dex-stat-rows').innerHTML=dexStatRows(dexSelected,level,compare);
+});

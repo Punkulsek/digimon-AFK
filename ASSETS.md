@@ -93,3 +93,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## 알그룹 시너지
 `src/generated/egg-groups.json`은 PokeAPI의 `data/v2/csv/pokemon_egg_groups.csv`에서 1~151번 종의 실제 알그룹을 추출했습니다. 두 알그룹이 같은 시너지이면 한 번만 기여합니다. 미발견·알그룹 없음 및 별도 분류인 메타몽 그룹은 초월로 처리합니다. 침식의 피해 보너스는 독 및 지속 피해에 적용하며 회복과 직접 타격에는 적용하지 않습니다.
+
+## Korean Pokédex descriptions
+`src/generated/dex-flavor.json`: Korean flavor text for all 151 Kanto species, sourced from PokeAPI's `data/v2/csv/pokemon_species_flavor_text.csv` (language_id 3). Each entry records the source version ID; selected the last available Korean version in the source. Descriptions are reproduced without invented lore; whitespace normalized. Source: https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_species_flavor_text.csv . Pokémon text remains the property of its respective rights holders.

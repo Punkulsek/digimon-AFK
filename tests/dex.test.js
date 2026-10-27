@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {dexStats,dexBody} from '../src/dex.js';import {SPECIES} from '../src/data.js';import {pokemonStats} from '../src/combat-stats.js';import flavor from '../src/generated/dex-flavor.json' with {type:'json'};
+test('151 official descriptions and previews match live stat formulas at every level',()=>{assert.equal(Object.keys(flavor).length,151);for(const p of SPECIES){assert.ok(flavor[p.id].text.length>10);for(let l=1;l<=100;l++)assert.deepEqual(dexStats(p.id,l),pokemonStats({speciesId:p.id,level:l,breakthrough:0}));assert.ok(dexBody(p.id,{art:()=>'',typeIcons:()=>''}).includes('data-dex-panel="3"'));}});

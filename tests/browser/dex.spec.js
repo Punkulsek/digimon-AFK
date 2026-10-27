@@ -1,5 +1,9 @@
-import {test,expect} from '@playwright/test';
-import {initialState} from '../../src/game.js';
+import {test,expect} from '@playwright/test';import {initialState} from '../../src/game.js';
+for(const [width,height] of [[1920,1080],[844,390]])test(`도감 상세와 읽기 전용 레벨 비교 ${width}`,async({page})=>{
+ const s=initialState();s.auto=false;await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);await page.setViewportSize({width,height});await page.goto('/');await page.locator('.nav-button[data-action="collection"]').click();await page.locator('[data-action="collectionTab"][data-tab="dex"]').click();await expect(page.locator('.dex-card')).toHaveCount(151);await page.locator('[data-action="dexDetail"][data-species="1"]').click();await expect(page.locator('.dex-flavor').first()).not.toBeEmpty();await page.locator('[data-action="dexTab"][data-tab="1"]').click();await expect(page.locator('.dex-stat-grid>div')).toHaveCount(11);await page.locator('[data-action="dexTab"][data-tab="2"]').click();await expect(page.locator('[data-dex-panel="2"]')).toContainText('초');await page.locator('[data-action="dexTab"][data-tab="3"]').click();
+ await page.locator('#dex-level').fill('100');await page.locator('#dex-compare').fill('50');await expect(page.locator('#dex-current-heading')).toHaveText('Lv.100');await expect(page.locator('#dex-compare-heading')).toHaveText('Lv.50');await expect(page.locator('#dex-stat-rows tr')).toHaveCount(11);await expect(page.locator('#dex-stat-rows .increase').first()).toBeVisible();expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1')).inventory)).toEqual(s.inventory);await page.screenshot({path:`/tmp/dex-${width}.png`});await page.getByRole('button',{name:'닫기',exact:true}).click();await expect(page.locator('.dex-card')).toHaveCount(151);
+});
+
 test('포켓몬 하위 메뉴와 도감 번호·실루엣·관계·내부 스크롤',async({page})=>{
  const s=initialState();s.auto=false;
  await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
@@ -18,5 +22,5 @@ test('포켓몬 하위 메뉴와 도감 번호·실루엣·관계·내부 스크
  const last=await page.locator('.dex-card').last().boundingBox(),bar=await sub.boundingBox();expect(last.y+last.height).toBeLessThanOrEqual(bar.y);
  }
  await page.setViewportSize({width:1440,height:810});await sub.getByRole('button',{name:'포켓몬',exact:true}).click();expect(await page.locator('.party-header').boundingBox()).toEqual(party);
- await page.locator('.nav-button[data-action="home"]').click();await expect(sub).toBeHidden();await expect(page.locator('.nav-button')).toHaveText(['포켓몬','홈','던전','소환']);
+ await page.locator('.nav-button[data-action="home"]').click();await expect(sub).toBeHidden();await expect(page.locator('.nav-button')).toHaveText(['포켓몬','✦강화','홈','던전','소환']);
 });
