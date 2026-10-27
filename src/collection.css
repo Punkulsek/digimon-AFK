@@ -573,3 +573,24 @@
 #summon-page:has(.summon-lobby-header){grid-template-rows:44px 28px minmax(0,1fr) auto}
 .summon-rates-modal .modal-header,.summon-rates-modal .modal-body{background:transparent}
 @media(max-height:500px){#summon-page:has(.summon-lobby-header){grid-template-rows:38px 23px minmax(0,1fr) auto}}
+/* A smaller, unframed illustration; keep the existing heading anchors. */
+#summon-page:has(.summon-lobby-header) .pokemon-ensemble {
+ width:78%;height:82%;justify-self:center;align-self:start;
+ margin-top:18px;border:0;border-radius:0;box-shadow:none;
+ background-color:transparent;background-size:contain;background-position:center top;
+}
+#summon-page .pokemon-ensemble .summon-banner-tag{display:none}
+#summon-page .summon-level-strip{width:min(540px,45%)}
+#summon-page .summon-level-strip>span{font-size:13px}
+#summon-page .summon-level-track>b{font-size:25px}
+#summon-page .summon-level-track strong{font-size:14px}
+#summon-page .summon-level-track progress{height:17px}
+#summon-page .summon-lobby-title h1{font-size:30px}
+@media(max-height:500px){
+ #summon-page:has(.summon-lobby-header) .pokemon-ensemble{width:82%;height:85%;margin-top:12px}
+ #summon-page .summon-level-strip>span{font-size:11px}
+ #summon-page .summon-level-track>b{font-size:19px}
+ #summon-page .summon-level-track strong{font-size:12px}
+ #summon-page .summon-level-track progress{height:14px}
+ #summon-page .summon-lobby-title h1{font-size:24px}
+}
