@@ -504,3 +504,46 @@
 @media(max-height:500px){
  #fighters.fighters,#enemy.enemy-squad{top:90px;bottom:calc(var(--menu-height,52px) + 7vh);translate:none}
 }
+/* Comic-banner summon lobby. The existing Pokémon illustration stays intact. */
+#summon-page:has(.summon-lobby-header){padding:12px 5% 0;gap:7px;background:repeating-linear-gradient(115deg,#10355918 0 35px,#153e6318 35px 70px),radial-gradient(ellipse at top,#205a85,#09233e);color:#fff;justify-content:flex-start}
+.summon-lobby-header{display:flex;justify-content:space-between;align-items:center;z-index:2}
+.summon-info-button{display:flex;align-items:center;gap:6px;background:#163e69;border:2px solid #b5e8ff;color:white;padding:5px 10px;border-radius:5px;font-weight:900;box-shadow:0 3px #041c35}
+.summon-info-button svg{width:20px;height:20px}
+.summon-wallet{display:flex;align-items:center;gap:9px;background:#071e37cc;padding:4px 14px;border-radius:5px;min-width:110px;justify-content:flex-end}
+.summon-wallet img{width:27px;height:27px;object-fit:contain}
+.summon-level-strip{width:min(460px,65%);align-self:center;text-align:center;margin-top:-32px;z-index:1;color:#39e9eb;font-weight:900;font-size:12px}
+.summon-level-track{position:relative;display:flex;align-items:center;gap:8px;padding:7px 12px;background:#031c2a;transform:skew(-5deg);border-radius:5px}
+.summon-level-track>b{font-size:20px;white-space:nowrap}
+#summon-page .summon-level-track progress{height:14px;flex:1;width:0;appearance:none;border:0;background:#174c5b;border-radius:2px;overflow:hidden}
+.summon-level-track progress::-webkit-progress-bar{background:#174c5b}.summon-level-track progress::-webkit-progress-value{background:linear-gradient(#49f3d9,#04b8c6)}
+.summon-level-track progress::-moz-progress-bar{background:#04c9ce}
+.summon-level-track strong{position:absolute;left:75px;right:12px;color:white;font-size:11px;text-shadow:0 1px 2px #002933}
+.summon-lobby-title{text-align:center;flex-shrink:0;padding:2px 0 5px}
+#summon-page .summon-lobby-title h1{font-size:clamp(22px,3vw,38px);font-weight:1000;font-style:italic;color:#58e9eb;text-shadow:3px 3px #020f22,-2px -2px #020f22,2px -2px #020f22,-2px 2px #020f22}
+.summon-lobby-title>span{font-size:11px;color:#b9d8e7}
+#summon-page:has(.summon-lobby-header) .pokemon-ensemble{flex:1;min-height:70px;max-height:none;width:min(100%,1000px);aspect-ratio:auto;border:0;border-top:5px solid #31dae0;border-bottom:5px solid #31dae0;border-radius:0;background-color:#0b2744;background-size:contain;box-shadow:0 8px 0 #04172c;position:relative}
+.summon-banner-tag{position:absolute;bottom:0;right:0;background:#061b31e8;color:#ecfbff;padding:5px 18px;transform:skew(-8deg);font-size:11px;font-weight:900;border-left:4px solid #f9c33a}
+.summon-lobby-footer{flex-shrink:0;background:linear-gradient(#058b9b,#057086);border-top:4px solid #34b5c5;margin:5px -5.56% 0;padding:6px 5% 12px}
+.summon-banner-caption{display:flex;justify-content:center;align-items:center;gap:8px;font-size:12px;font-weight:900;margin-bottom:7px}
+.summon-banner-caption span{width:20px;height:4px;background:#ffc123;transform:skew(-15deg)}
+#summon-page .summon-lobby-footer .summon-actions{width:min(780px,100%);margin:auto;gap:12px}
+#summon-page .summon-actions .summon-buy{display:flex;flex-direction:column;gap:3px;min-height:64px;padding:7px 12px;background:linear-gradient(115deg,#10d5ae,#00ae9c);border:2px solid #3ae1cc;border-bottom:5px solid #006f77;border-radius:8px;box-shadow:3px 3px #064a64;transform:skew(-6deg);color:white}
+#summon-page .summon-actions .summon-buy-1{background:linear-gradient(115deg,#ffbb0a,#ef9000);border-color:#ffd457;border-bottom-color:#ad6505}
+.summon-buy strong{font-size:19px;text-shadow:0 2px #0003}.summon-buy>span{display:flex;align-items:center;gap:8px;color:#fff34d;font-size:14px}.summon-buy img{width:24px;height:24px;object-fit:contain}
+#summon-page .summon-actions .summon-buy:disabled{opacity:.45;filter:saturate(.5)}
+#summon-page .summon-actions .summon-buy:active{transform:skew(-6deg) translateY(2px)}
+@media(max-height:500px){
+ #summon-page:has(.summon-lobby-header){padding-top:5px;gap:3px}
+ .summon-level-strip{width:40%;font-size:9px;margin-top:-30px}.summon-level-track{padding:3px 8px}.summon-level-track>b{font-size:16px}
+ #summon-page .summon-lobby-title h1{font-size:21px}.summon-lobby-title>span{display:none}.summon-lobby-title{padding:0}
+ .summon-lobby-footer{padding-top:3px;padding-bottom:5px;margin-top:2px}.summon-banner-caption{font-size:9px;margin-bottom:3px}
+ #summon-page .summon-actions .summon-buy{min-height:45px;padding:3px 7px;gap:0}.summon-buy strong{font-size:14px}.summon-buy>span{font-size:11px}.summon-buy img{width:18px;height:18px}
+ .summon-banner-tag{font-size:9px;padding:2px 9px}.summon-wallet{font-size:12px;min-width:80px}.summon-info-button{font-size:11px}
+}
+#summon-page:has(.summon-lobby-header) .pokemon-ensemble{background-size:cover;background-position:center 46%}
+#summon-page:has(.summon-lobby-header) .summon-lobby-header{margin:0;min-height:32px}
+@media(max-height:500px){
+ #summon-page:has(.summon-lobby-header){padding-top:5px}
+ #summon-page .summon-level-strip{margin-top:-33px}
+ #summon-page .summon-lobby-title{padding:0;margin:0}
+}
