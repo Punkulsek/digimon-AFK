@@ -33,7 +33,7 @@ export const EVOLUTIONS = [
  [133,134,60,5,350],[133,135,60,5,350],[133,136,60,5,350],
  [138,139,65,6,400],[140,141,65,6,400],
  [147,148,50,4,250],[148,149,90,9,800],
-].map(([from,to,level,region,amount])=>({from,to,level,region,amount}));
+].map(([from,to,level,region,amount])=>({from,to,level:Math.min(50,Math.round(level/2)),region,amount}));
 export const evolutionOptions = p => EVOLUTIONS.filter(e=>e.from===p.speciesId);
 export function familyGrade(id){
  const family=SPECIES.filter(p=>evolutionFamily(p.id)===evolutionFamily(id));
@@ -46,6 +46,9 @@ export const BREAKTHROUGH_COSTS=[
  [1,2,2,3,5,7,9,10,12,15],
  [1,2,3,4,5,6,7,8,9,10],
 ];
+export const maxLevel=p=>50+Math.min(10,p.breakthrough||0)*5;
+export const isFinalEvolution=p=>!evolutionOptions(p).length;
+export const canBreakthrough=(state,p)=>(p.breakthrough||0)<10&&p.level>=maxLevel(p)&&isFinalEvolution(p)&&breakthroughCandidates(state,p).length>=breakthroughCost(p);
 export const breakthroughCost=p=>(p.breakthrough||0)>=10?0:BREAKTHROUGH_COSTS[familyGrade(p.speciesId)][p.breakthrough||0];
 export function evolutionMaterials(e) {
  return species(e.to).types.map(name=>{
@@ -77,6 +80,8 @@ export function breakthrough(state,uid) {
  const p=state.inventory.find(p=>p.uid===uid);
  if(!p)return '포켓몬을 찾을 수 없어요.';
  if((p.breakthrough||0)>=10)return '최대 10돌파에 도달했어요.';
+ if(!isFinalEvolution(p))return '최종 진화형만 돌파할 수 있어요.';
+ if(p.level<maxLevel(p))return `현재 최대 레벨 Lv.${maxLevel(p)}을 달성해야 해요.`;
  const family=evolutionFamily(p.speciesId),cost=breakthroughCost(p);
  if((state.shards?.[family]||0)<cost)return '같은 진화 계열의 돌파 조각이 부족해요.';
  state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;return null;

@@ -1,3 +1,5 @@
+import {summonPayment} from './missions.js';
+import {maxLevel,canBreakthrough,isFinalEvolution} from './growth.js';
 import {dexBody,dexStatRows} from './dex.js';
 import {normalizePresets,selectPreset,PRESET_COUNT} from './party-presets.js';
 import {SYNERGIES,speciesSynergies,partySynergies} from './synergies.js';
@@ -201,7 +203,7 @@ function growthStars(p) {
 
 function growthPanel(p) {
  const options=evolutionOptions(p);
- return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li>${evolutionMaterials(e).map(m=>`<li>${(state.materials[m.id]||0)>=m.amount?'✓':'○'} ${typeIcon(m.id)} ${m.name} 진화 재료 ${num(m.amount)}개 / 보유 ${num(state.materials[m.id]||0)}개</li>`).join('')}</ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${breakthroughCandidates(state,p).length<breakthroughCost(p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
+ return `<section class="growth-panel"><h3>진화</h3>${options.length?options.map(e=>`<div class="evolution-option"><b>${species(e.to).name}</b><ul><li>${p.level>=e.level?'✓':'○'} Lv.${e.level} / 현재 ${p.level}</li><li>${state.stage>e.region*20?'✓':'○'} 지역 ${e.region} 클리어 (${e.region}-20) / 현재 ${stageLabel(state.stage)}</li>${evolutionMaterials(e).map(m=>`<li>${(state.materials[m.id]||0)>=m.amount?'✓':'○'} ${typeIcon(m.id)} ${m.name} 진화 재료 ${num(m.amount)}개 / 보유 ${num(state.materials[m.id]||0)}개</li>`).join('')}</ul><button class="primary-button full" data-action="evolvePreview" data-id="${p.uid}" data-target="${e.to}" ${evolutionReady(state,p,e)?'':'disabled'}>${species(e.to).name}(으)로 진화</button></div>`).join(''):'<p>관동 도감 내 다음 진화가 없습니다.</p>'}<h3>돌파 ${p.breakthrough||0} / 10</h3>${growthStars(p)}<p>HP·공격력 +${(p.breakthrough||0)*15}% · 진화 후에도 유지</p>${(p.breakthrough||0)<10?`<p>계열 공유 돌파 조각 ${breakthroughCandidates(state,p).length}/${breakthroughCost(p)} · 성공률 100%</p><p>${p.level>=maxLevel(p)?'✓':'○'} 최대 레벨 ${p.level} / ${maxLevel(p)} · ${isFinalEvolution(p)?'✓ 최종 진화형':'○ 최종 진화 필요'}</p><button class="soft-button full" data-action="breakthroughConfirm" data-id="${p.uid}" ${!canBreakthrough(state,p)?'disabled':''}>돌파</button><small>중복 획득은 돌파 조각으로 자동 전환되며 같은 진화 계열이 공유합니다.</small>`:'<p>최대 돌파 달성</p>'}</section>`;
 }
 function card(p, action = "detail") {
   const s = species(p.speciesId),
@@ -212,7 +214,7 @@ $("#app").innerHTML = `
 <div class="game-shell">
 <header class="topbar"><button class="profile" data-action="profile"><div class="avatar">${i("compass")}<span>01</span></div><div><small>오늘도, 새로운 모험</small><strong>새싹 트레이너 ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정">${i("settings")}</button></header>
-<main class="adventure">
+<main class="adventure"><button class="mission-button soft-button" data-action="missions">반복 미션 <span id="mission-progress"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
@@ -250,6 +252,9 @@ function updateHud() {
   ).padStart(2, "0");
   $("#gold").textContent = num(state.gold);
   $("#gems").textContent = num(state.gems);
+  hudText("#mission-progress",`${state.missionKills||0} / 50`);
+  hudText("#mission-live",`${state.missionKills||0} / 50`);
+  hudText("#mission-balls",num(state.pokeballs||0));
   hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
   $("#region-name").textContent = battle.dungeon ? battle.dungeon.name : regionName(state.stage);
   $(".stage-banner").dataset.action = battle.dungeon ? "dungeonStatus" : "stages";
@@ -486,6 +491,7 @@ function step() {
       toast("보스가 나타났어요! 탐험대, 준비!");
       refresh = true;
     }
+    if(e.type==="missionReward"){persist();toast(`반복 미션 완료! 몬스터볼 ${e.balls}개 획득`);}
     if (e.type === "defeat") {
       sound.effect("defeat");
       toast("탐험대가 회복했어요. 레벨을 올린 후 보스에 다시 도전하세요.");
@@ -636,7 +642,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ 100</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= 100 ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ ${maxLevel(p)}</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= maxLevel(p) ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></div></div>${growthPanel(p)}`,
     "detail-modal",
   );
 }
@@ -665,7 +671,7 @@ function upgradeScreen(){
 }
 function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
- summonPage(`<header class="summon-lobby-header"><button class="summon-info-button" data-action="summonRates">${i('circle-help')} 확률 정보</button><div class="summon-wallet" aria-label="보유 다이아">${currencyIcon('diamond','다이아')}<b>${num(state.gems)}</b></div></header><div class="summon-level-strip"><span>포켓몬 소환 레벨</span><div class="summon-level-track"><b>Lv.${lv}</b><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><strong>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}`}</strong></div></div><div class="summon-lobby-title"><h1>관동 포켓몬 소환</h1><span>새로운 모험의 동료를 만나세요!</span></div><div class="summon-banner pokemon-ensemble" role="img" aria-label="피카츄와 관동 포켓몬들이 모인 소환 일러스트"><span class="summon-banner-tag">관동지방 · 1세대 포켓몬</span></div><footer class="summon-lobby-footer"><div class="summon-banner-caption"><span></span> 포켓몬 소환 <span></span></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button summon-buy summon-buy-${n}" data-action="draw" data-count="${n}" ${state.gems<n*100?'disabled':''} aria-label="${n}회 소환 · 다이아 ${num(n*100)}"><strong>${n}회 소환</strong><span>${currencyIcon('diamond','다이아')}<b>${num(n*100)}</b></span></button>`).join('')}</div></footer>`);
+ summonPage(`<header class="summon-lobby-header"><button class="summon-info-button" data-action="summonRates">${i('circle-help')} 확률 정보</button><div class="summon-wallet" aria-label="보유 다이아">${currencyIcon('diamond','다이아')}<b>${num(state.gems)}</b><span class="pokeball-count">◉ 몬스터볼 ${num(state.pokeballs||0)}</span></div></header><div class="summon-level-strip"><span>포켓몬 소환 레벨</span><div class="summon-level-track"><b>Lv.${lv}</b><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><strong>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}`}</strong></div></div><div class="summon-lobby-title"><h1>관동 포켓몬 소환</h1><span>새로운 모험의 동료를 만나세요!</span></div><div class="summon-banner pokemon-ensemble" role="img" aria-label="피카츄와 관동 포켓몬들이 모인 소환 일러스트"><span class="summon-banner-tag">관동지방 · 1세대 포켓몬</span></div><footer class="summon-lobby-footer"><div class="summon-banner-caption"><span></span> 포켓몬 소환 <span></span></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button summon-buy summon-buy-${n}" data-action="draw" data-count="${n}" ${state.gems<summonPayment(state,n).gems?'disabled':''} aria-label="${n}회 소환 · 몬스터볼 ${summonPayment(state,n).balls} · 다이아 ${num(summonPayment(state,n).gems)}"><strong>${n}회 소환</strong><span>${currencyIcon('diamond','다이아')}<b>${summonPayment(state,n).balls?`몬스터볼 ${summonPayment(state,n).balls} + `:''}${num(summonPayment(state,n).gems)}</b></span></button>`).join('')}</div></footer>`);
 }
 let ratesLevel=1;
 function summonRates(level=summonLevel(state.summons)){
@@ -683,12 +689,12 @@ function draw(count){
   sound.setVideoExclusive(false);
   const video=$('#summon-video');if(video){video.pause();video.removeAttribute('src');video.load();}
   revealSummon=null;
-  summonPage(`<header class="summon-result-heading"><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 다이아 1,000</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 다이아 3,000</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
+  summonPage(`<header class="summon-result-heading"><p>몬스터볼 ${num(state.pokeballs||0)} · 다이아 ${num(state.gems)}</p><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 몬스터볼 ${summonPayment(state,10).balls} + 다이아 ${num(summonPayment(state,10).gems)}</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 몬스터볼 ${summonPayment(state,30).balls} + 다이아 ${num(summonPayment(state,30).gems)}</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
   const revealAll=()=>{
    if(revealSummon!==revealAll)return;
    clearTimeout(revealTimer);revealSummon=null;busy=false;
    document.querySelectorAll('.summon-result-card').forEach(c=>c.classList.add('revealed'));
-   document.querySelectorAll('.summon-result-footer button').forEach(b=>{b.disabled=b.dataset.action==='draw'&&state.gems<Number(b.dataset.count)*100;});
+   document.querySelectorAll('.summon-result-footer button').forEach(b=>{b.disabled=b.dataset.action==='draw'&&state.gems<summonPayment(state,Number(b.dataset.count)).gems;});
    $('.reveal-all')?.remove();
   };
   revealSummon=revealAll;const revealTimer=setTimeout(revealAll,(count-1)*180+450);
@@ -893,6 +899,8 @@ document.addEventListener("click", (e) => {
     case "settings":
       settings();
       break;
+    case "missions":
+      modal('반복 미션','포켓몬 처치',`<h3>포켓몬 50마리 처치</h3><p id="mission-live">${state.missionKills||0} / 50</p><p>보상: 몬스터볼 10개 · 달성 시 자동 지급</p><p>일반 스테이지·던전의 적 모두 포함됩니다.</p><p>보유 몬스터볼 <b id="mission-balls">${num(state.pokeballs||0)}</b></p>`,'settings-modal');break;
     case "profile":
       modal(
         "새싹 트레이너",
@@ -960,7 +968,7 @@ document.addEventListener("click", (e) => {
       info.querySelectorAll("[data-stat]").forEach(el => { el.textContent = formatStat(el.dataset.stat,st[el.dataset.stat]); });
       info.querySelector("[data-detail-power]").textContent = num(power(p,state));
       btn.querySelector("span").textContent = `이상한사탕 ${num(levelCost(p))}개`;
-      btn.disabled = p.level >= 100;
+      btn.disabled = p.level >= maxLevel(p);
       info.querySelector("small.muted").textContent = `보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개`;
       // Refresh evolution eligibility without replacing the dialog, sprite or level button.
       const panel = $(".growth-panel"), template = document.createElement("template");

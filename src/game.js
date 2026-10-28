@@ -1,3 +1,5 @@
+import {maxLevel} from './growth.js';
+import {recordMissionKill,summonPayment} from './missions.js';
 import {SkillRuntime} from './skill-runtime.js';
 import {pokemonStats,attackRate,criticalStats} from './combat-stats.js';
 import {upgradeDefaults,UPGRADE_KEYS} from './upgrades.js';
@@ -14,9 +16,10 @@ export const SAVE_KEY='pokemon-days-v1';
 export const stats = pokemonStats;
 export const power = (p,state) => {const s=stats(p,state),c=criticalStats(s);return Math.round(s.hp+s.def+s.atk*5*attackRate(s)*(1+s.bossDamage/100)*(1+c.chance/100*(c.damage/100-1)))};
 export const levelCost = p => Math.round(100*1.05**(Math.min(99,Math.max(1,p.level))-1));
-export function initialState(){return {...dungeonDefaults(),version:1,activePreset:0,partyPresets:Array.from({length:5},()=>[0,1,2,3,4].map(i=>`starter-${i}`)),upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
+export function initialState(){return {...dungeonDefaults(),version:1,pokeballs:0,missionKills:0,missionsCompleted:0,activePreset:0,partyPresets:Array.from({length:5},()=>[0,1,2,3,4].map(i=>`starter-${i}`)),upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||s.stage>MAX_STAGE||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
+ if(['pokeballs','missionsCompleted'].some(k=>s[k]!==undefined&&(!Number.isSafeInteger(s[k])||s[k]<0))||(s.missionKills!==undefined&&(!Number.isInteger(s.missionKills)||s.missionKills<0||s.missionKills>=50)))return false;
  if(s.upgrades!==undefined&&(!s.upgrades||!UPGRADE_KEYS.every(k=>Number.isSafeInteger(s.upgrades[k])&&s.upgrades[k]>=0&&s.upgrades[k]<=1000)))return false;
  if(s.shards!==undefined&&(!s.shards||typeof s.shards!=='object'||Array.isArray(s.shards)||!Object.entries(s.shards).every(([id,n])=>species(Number(id))&&Number.isSafeInteger(n)&&n>=0)))return false;
  if(s.campaignCleared!==undefined&&(typeof s.campaignCleared!=='boolean'||(s.campaignCleared&&s.stage!==MAX_STAGE)))return false;
@@ -27,20 +30,20 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
  return Array.isArray(s.party)&&s.party.length>0&&s.party.length<=partyLimit&&new Set(s.party).size===s.party.length&&s.party.every(id=>s.inventory.some(p=>p.uid===id))&&typeof s.auto==='boolean'&&typeof s.autoBoss==='boolean'&&[1,2,3].includes(s.speed)&&Number.isSafeInteger(s.totalKills)&&s.totalKills>=0&&typeof s.questClaimed==='boolean'&&Number.isSafeInteger(s.summons)&&s.summons>=0;
 }
-export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];for(const key of ['materials','dungeonClears'])if(s[key]&&typeof s[key]==='object'&&!Array.isArray(s[key]))s[key]={...defaults[key],...s[key]};}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);if(s.inventory.some((p,i)=>s.inventory.findIndex(q=>duplicateKey(q)===duplicateKey(p))!==i)){try{if(!storage.getItem(SAVE_KEY+'-before-shards'))storage.setItem(SAVE_KEY+'-before-shards',raw);}catch{}}s.upgrades ||= upgradeDefaults();mergeDuplicates(s);save(storage,s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
+export function load(storage){try{const raw=storage.getItem(SAVE_KEY);if(!raw)return {state:initialState(),status:'new'};const s=JSON.parse(raw);if(s&&typeof s==='object'&&!Array.isArray(s)){if(Number.isSafeInteger(s.stage)&&s.stage>MAX_STAGE){s.stage=MAX_STAGE;s.campaignCleared=true;}for(const key of ['pokeballs','missionKills','missionsCompleted'])if(s[key]===undefined)s[key]=0;if(s.campaignCleared===undefined)s.campaignCleared=false;const defaults=dungeonDefaults();for(const key of Object.keys(defaults))if(s[key]===undefined)s[key]=defaults[key];for(const key of ['materials','dungeonClears'])if(s[key]&&typeof s[key]==='object'&&!Array.isArray(s[key]))s[key]={...defaults[key],...s[key]};}if(Array.isArray(s?.party)&&s.party.length===6&&validateState(s,6)){s.party=s.party.slice(0,PARTY_LIMIT);save(storage,s);}if(validateState(s)){recordCollection(s);if(s.inventory.some((p,i)=>s.inventory.findIndex(q=>duplicateKey(q)===duplicateKey(p))!==i)){try{if(!storage.getItem(SAVE_KEY+'-before-shards'))storage.setItem(SAVE_KEY+'-before-shards',raw);}catch{}}s.upgrades ||= upgradeDefaults();mergeDuplicates(s);save(storage,s);return {state:s,status:'loaded'};}return {state:initialState(),status:'invalid'};}catch{return {state:initialState(),status:'unavailable'}}}
 export function save(storage,state){try{normalizePresets(state);storage.setItem(SAVE_KEY,JSON.stringify(state));return true;}catch{return false;}}
 export function summon(state,count,rng=Math.random){
  if(![1,10,30].includes(count))return {error:'잘못된 소환 횟수입니다.'};
- const cost=count*100;
+ const payment=summonPayment(state,count),cost=payment.gems;
  if(state.gems<cost)return {error:'다이아가 부족해요. 퀘스트와 보스를 통해 모아 보세요.'};
  if(state.inventory.length+count>10000)return {error:'보유 한도에 도달했어요.'};
- state.gems-=cost;const result=[];
+ state.gems-=cost;state.pokeballs=(state.pokeballs||0)-payment.balls;const result=[];
  for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;const rates=SUMMON_RATES[summonLevel(state.summons)-1];for(let r=0;r<rates.length;r++){roll-=rates[r];if(roll<0){rarity=r;break;}}
  const pool=SUMMON_POOLS[rarity];const s=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
  const p={uid:`summon-${++state.summons}`,speciesId:s.id,level:1,breakthrough:0};state.inventory.push(p);result.push(p);}
  recordCollection(state);mergeDuplicates(state);return {result,cost};
 }
-export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=100)return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
+export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=maxLevel(p))return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
  constructor(state,dungeon=null,rng=Math.random){
@@ -92,7 +95,7 @@ export class Battle {
     if(actor.hp<=0)break;
    }
   }
-  for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
+  for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;const balls=recordMissionKill(this.state);if(balls)this.events.push({type:'missionReward',balls});if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
   if(this.enemies.every(e=>e.hp<=0)){
    if(this.dungeon){this.finishDungeon('won');return;}
    const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.events.push({type:'reward',gold});
