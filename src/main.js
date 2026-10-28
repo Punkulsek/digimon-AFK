@@ -253,7 +253,7 @@ function updateHud() {
   hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
   $("#region-name").textContent = battle.dungeon ? battle.dungeon.name : regionName(state.stage);
   $(".stage-banner").dataset.action = battle.dungeon ? "dungeonStatus" : "stages";
-  $("#stage-number").textContent = battle.dungeon ? `${battle.dungeon.stage}단계` : stageLabel(state.stage);
+  $("#stage-number").textContent = battle.dungeon ? `${battle.dungeon.stage}${battle.dungeon.id==='tower'?'층':'단계'}` : stageLabel(state.stage);
   hudText("#kills", `${state.kills} / 10`);
   if ($("#stage-progress"))
     $("#stage-progress").style.width = `${state.kills * 10}%`;
@@ -502,7 +502,7 @@ function step() {
     $("#modal-root").innerHTML="";persist();
     const completed=battle,d=completed.dungeon,won=completed.status==='won',t=$("#stage-transition");
     clearTimeout(t.hideTimer);
-    t.querySelector('small').textContent=`${d.name} · ${d.stage}단계`;
+    t.querySelector('small').textContent=`${d.name} · ${d.stage}${d.id==='tower'?'층':'단계'}`;
     t.querySelector('strong').textContent=won?'클리어!':'도전 실패';
     const loot=t.querySelector('.clear-ribbon > span');loot.classList.add('clear-loot');
     const rewardIcon=(d.id==='coin'||d.id==='tower')?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':typeIcon(d.material);
@@ -759,7 +759,7 @@ document.addEventListener("click", (e) => {
       persist();renderBattle();updateHud();upgradeScreen();sound.effect('level');break;
     }
     case "dungeonStatus":
-      modal(battle.dungeon.name, `${battle.dungeon.stage}단계`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="dungeons">도전 종료 · 던전 선택</button>`);
+      modal(battle.dungeon.name, `${battle.dungeon.stage}${battle.dungeon.id==='tower'?'층':'단계'}`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="dungeons">도전 종료 · 던전 선택</button>`);
       break;
     case "dungeons":
       leaveCollection();

@@ -138,3 +138,14 @@
 .dungeon-subtabs button[aria-pressed=true]{background:#12a895;color:white}
 .dungeon-banner[data-dungeon=tower]{background:linear-gradient(135deg,#1b786c,#163955);border-color:#68c7b6}
 @media(max-height:500px){.dungeon-subtabs{margin-bottom:5px}.dungeon-subtabs button{padding:5px;font-size:13px}}
+.dungeon-page{--subnav-height:42px;padding-bottom:calc(var(--menu-height) + var(--subnav-height) + env(safe-area-inset-bottom,0px) + 12px)}
+.dungeon-page .dungeon-bottom-tabs{z-index:3}
+.tower-layout{display:grid;grid-template-columns:minmax(220px,42%) minmax(0,1fr);gap:20px;flex:1;min-height:0}
+.tower-floors{overflow-y:auto;min-height:0;background:linear-gradient(90deg,#253e3b,#6c7657,#253e3b);padding:12px 20px;border:3px solid #8b9978;border-radius:14px}
+.tower-roof{text-align:center;background:#123d41;color:#fff3ba;padding:20px;font-size:22px;font-weight:900;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
+.tower-floor{width:100%;display:flex;align-items:center;gap:12px;padding:18px 10px;margin:5px 0;background:#c4c49a;border:2px solid #70795e;border-bottom:7px solid #465746;color:#24453b;min-height:70px;border-radius:4px;font-weight:800}
+.tower-floor.boss-floor{background:#dfbd79;border-color:#a7793e}.tower-floor.selected{outline:3px solid #5cffe0;outline-offset:-3px}.tower-floor:disabled{opacity:.55}.tower-floor>b{font-size:21px;white-space:nowrap}.tower-floor>span:nth-child(2){font-size:11px}.tower-reward{display:flex;align-items:center;justify-content:center;gap:6px}.tower-reward svg{width:22px;height:22px;color:#e3a600;flex-shrink:0}.tower-floor .tower-reward{margin-left:auto;font-size:11px}
+.tower-details{overflow:auto;background:#0a5967;color:#e7ffef;border:2px solid #3fabb0;border-radius:14px;text-align:center;padding:22px}.tower-enemies{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:25px 0}.tower-enemies>div{min-width:0;background:#064653;border-radius:8px;padding:5px;display:flex;flex-direction:column;align-items:center}.tower-enemies .pokemon-art{width:100%;height:90px;min-height:0}.tower-enemies img{width:100px;height:100px;object-fit:contain}.tower-enemies strong{font-size:12px}.tower-enemies .tower-boss{outline:2px solid #ffd06a}.tower-boss small{color:#ffd06a}.tower-details .primary-button{width:80%;margin:16px auto}
+#scene.scene[data-dungeon=tower]{background:#354639 url('/scene/tower/bellsprout-tower.svg') center/cover no-repeat;filter:none}
+#scene.scene[data-dungeon=tower]>*{display:none}
+@media(max-height:500px){.tower-layout{gap:8px}.tower-details{padding:9px}.tower-enemies{margin:8px 0}.tower-enemies .pokemon-art{height:55px}.tower-enemies img{width:65px;height:65px}.tower-floor{padding:10px 6px;gap:5px}.tower-details h2{font-size:19px}.tower-details p{font-size:12px}}

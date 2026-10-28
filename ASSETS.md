@@ -99,3 +99,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## Summon video
 `public/video/summon.mp4`: user-provided 1280×720 H.264/AAC video (6.04 seconds), supplied for the summon animation. Included unchanged and embedded in the offline build.
+
+## Bellsprout Tower battle background
+`public/scene/tower/bellsprout-tower.svg`: original vector scenery drawn for this game, featuring wooden columns, arched windows, vines, lanterns and a perspective floor. Embedded in the standalone build.
