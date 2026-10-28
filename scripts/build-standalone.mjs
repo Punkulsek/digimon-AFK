@@ -39,7 +39,7 @@ for (let id = 1; id <= 151; id++) {
   };
 }
 const currencyData = {};
-for (const name of ["pokecoin", "diamond"]) {
+for (const name of ["pokecoin", "diamond", "pokeball"]) {
   const png = await readFile(resolve(root, `public/currency/${name}.png`));
   currencyData[name] = `data:image/png;base64,${png.toString("base64")}`;
 }

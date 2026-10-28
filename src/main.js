@@ -1,4 +1,4 @@
-import {summonPayment} from './missions.js';
+import {summonPayment,missionInfo,claimMission,syncMissions} from './missions.js';
 import {maxLevel,canBreakthrough,isFinalEvolution} from './growth.js';
 import {dexBody,dexStatRows} from './dex.js';
 import {normalizePresets,selectPreset,PRESET_COUNT} from './party-presets.js';
@@ -214,7 +214,7 @@ $("#app").innerHTML = `
 <div class="game-shell">
 <header class="topbar"><button class="profile" data-action="profile"><div class="avatar">${i("compass")}<span>01</span></div><div><small>오늘도, 새로운 모험</small><strong>새싹 트레이너 ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정">${i("settings")}</button></header>
-<main class="adventure"><button class="mission-button soft-button" data-action="missions">반복 미션 <span id="mission-progress"></span></button>
+<main class="adventure"><button class="mission-button soft-button" data-action="missions">미션 <span id="mission-progress"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
@@ -255,6 +255,7 @@ function updateHud() {
   hudText("#mission-progress",`${state.missionKills||0} / 50`);
   hudText("#mission-live",`${state.missionKills||0} / 50`);
   hudText("#mission-balls",num(state.pokeballs||0));
+  if($('.mission-modal')){const info=missionInfo(state,missionTab);hudText('#mission-status',`${num(info.count)} / ${num(info.target)}`);hudText('#mission-reward',num(info.reward));$('.mission-modal [data-action="claimMission"]').disabled=!info.ready;}
   hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
   $("#region-name").textContent = battle.dungeon ? battle.dungeon.name : regionName(state.stage);
   $(".stage-banner").dataset.action = battle.dungeon ? "dungeonStatus" : "stages";
@@ -671,7 +672,7 @@ function upgradeScreen(){
 }
 function summonScreen(){
  const lv=summonLevel(state.summons),start=SUMMON_THRESHOLDS[lv-1],need=SUMMON_THRESHOLDS[lv]-start;
- summonPage(`<header class="summon-lobby-header"><button class="summon-info-button" data-action="summonRates">${i('circle-help')} 확률 정보</button><div class="summon-wallet" aria-label="보유 다이아">${currencyIcon('diamond','다이아')}<b>${num(state.gems)}</b><span class="pokeball-count">◉ 몬스터볼 ${num(state.pokeballs||0)}</span></div></header><div class="summon-level-strip"><span>포켓몬 소환 레벨</span><div class="summon-level-track"><b>Lv.${lv}</b><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><strong>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}`}</strong></div></div><div class="summon-lobby-title"><h1>관동 포켓몬 소환</h1><span>새로운 모험의 동료를 만나세요!</span></div><div class="summon-banner pokemon-ensemble" role="img" aria-label="피카츄와 관동 포켓몬들이 모인 소환 일러스트"><span class="summon-banner-tag">관동지방 · 1세대 포켓몬</span></div><footer class="summon-lobby-footer"><div class="summon-banner-caption"><span></span> 포켓몬 소환 <span></span></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button summon-buy summon-buy-${n}" data-action="draw" data-count="${n}" ${state.gems<summonPayment(state,n).gems?'disabled':''} aria-label="${n}회 소환 · 몬스터볼 ${summonPayment(state,n).balls} · 다이아 ${num(summonPayment(state,n).gems)}"><strong>${n}회 소환</strong><span>${currencyIcon('diamond','다이아')}<b>${summonPayment(state,n).balls?`몬스터볼 ${summonPayment(state,n).balls} + `:''}${num(summonPayment(state,n).gems)}</b></span></button>`).join('')}</div></footer>`);
+ summonPage(`<header class="summon-lobby-header"><button class="summon-info-button" data-action="summonRates">${i('circle-help')} 확률 정보</button><div class="summon-wallet" aria-label="보유 다이아">${currencyIcon('diamond','다이아')}<b>${num(state.gems)}</b><span class="pokeball-count">${currencyIcon('pokeball','몬스터볼')} ${num(state.pokeballs||0)}</span></div></header><div class="summon-level-strip"><span>포켓몬 소환 레벨</span><div class="summon-level-track"><b>Lv.${lv}</b><progress aria-label="소환 레벨 경험치" max="${lv===10?1:need}" value="${lv===10?1:state.summons-start}"></progress><strong>${lv===10?'MAX':`${num(state.summons-start)} / ${num(need)}`}</strong></div></div><div class="summon-lobby-title"><h1>관동 포켓몬 소환</h1><span>새로운 모험의 동료를 만나세요!</span></div><div class="summon-banner pokemon-ensemble" role="img" aria-label="피카츄와 관동 포켓몬들이 모인 소환 일러스트"><span class="summon-banner-tag">관동지방 · 1세대 포켓몬</span></div><footer class="summon-lobby-footer"><div class="summon-banner-caption"><span></span> 포켓몬 소환 <span></span></div><div class="summon-actions">${[1,10,30].map(n=>`<button class="primary-button summon-buy summon-buy-${n}" data-action="draw" data-count="${n}" ${(state.pokeballs||0)<n?'disabled':''} aria-label="${n}회 소환 · 몬스터볼 ${summonPayment(state,n).balls}"><strong>${n}회 소환</strong><span>${currencyIcon('pokeball','몬스터볼')}<b>${n}</b></span></button>`).join('')}</div></footer>`);
 }
 let ratesLevel=1;
 function summonRates(level=summonLevel(state.summons)){
@@ -689,12 +690,12 @@ function draw(count){
   sound.setVideoExclusive(false);
   const video=$('#summon-video');if(video){video.pause();video.removeAttribute('src');video.load();}
   revealSummon=null;
-  summonPage(`<header class="summon-result-heading"><p>몬스터볼 ${num(state.pokeballs||0)} · 다이아 ${num(state.gems)}</p><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 몬스터볼 ${summonPayment(state,10).balls} + 다이아 ${num(summonPayment(state,10).gems)}</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 몬스터볼 ${summonPayment(state,30).balls} + 다이아 ${num(summonPayment(state,30).gems)}</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
+  summonPage(`<header class="summon-result-heading"><p>몬스터볼 ${num(state.pokeballs||0)} · 다이아 ${num(state.gems)}</p><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 몬스터볼 ${summonPayment(state,10).balls}</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 몬스터볼 ${summonPayment(state,30).balls}</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
   const revealAll=()=>{
    if(revealSummon!==revealAll)return;
    clearTimeout(revealTimer);revealSummon=null;busy=false;
    document.querySelectorAll('.summon-result-card').forEach(c=>c.classList.add('revealed'));
-   document.querySelectorAll('.summon-result-footer button').forEach(b=>{b.disabled=b.dataset.action==='draw'&&state.gems<summonPayment(state,Number(b.dataset.count)).gems;});
+   document.querySelectorAll('.summon-result-footer button').forEach(b=>{b.disabled=b.dataset.action==='draw'&&(state.pokeballs||0)<Number(b.dataset.count);});
    $('.reveal-all')?.remove();
   };
   revealSummon=revealAll;const revealTimer=setTimeout(revealAll,(count-1)*180+450);
@@ -899,8 +900,9 @@ document.addEventListener("click", (e) => {
     case "settings":
       settings();
       break;
-    case "missions":
-      modal('반복 미션','포켓몬 처치',`<h3>포켓몬 50마리 처치</h3><p id="mission-live">${state.missionKills||0} / 50</p><p>보상: 몬스터볼 10개 · 달성 시 자동 지급</p><p>일반 스테이지·던전의 적 모두 포함됩니다.</p><p>보유 몬스터볼 <b id="mission-balls">${num(state.pokeballs||0)}</b></p>`,'settings-modal');break;
+    case "missions":missionScreen();break;
+    case "missionTab":missionTab=btn.dataset.tab;missionScreen();break;
+    case "claimMission":{const reward=claimMission(state,missionTab);persist();missionScreen();if(reward)toast(`몬스터볼 ${reward}개 획득!`);break;}
     case "profile":
       modal(
         "새싹 트레이너",
@@ -1091,3 +1093,6 @@ document.addEventListener('input',e=>{
  $('#dex-current-heading').textContent=`Lv.${level}`;$('#dex-compare-heading').textContent=`Lv.${compare}`;
  $('#dex-stat-rows').innerHTML=dexStatRows(dexSelected,level,compare);
 });
+
+let missionTab='repeat';
+function missionScreen(){const info=missionInfo(state,missionTab);persist();modal('미션','보상 받기',`<nav class="mission-tabs">${[['daily','일일 미션'],['weekly','주간 미션'],['challenge','도전 미션'],['repeat','반복 미션']].map(([key,name])=>`<button class="soft-button ${missionTab===key?'selected':''}" data-action="missionTab" data-tab="${key}">${name}</button>`).join('')}</nav><h3>${info.title}</h3><p id="mission-status">${num(info.count)} / ${num(info.target)}</p><p>${currencyIcon('pokeball','몬스터볼')} 보상 <b id="mission-reward">${num(info.reward)}</b>개</p><button class="primary-button full" data-action="claimMission" ${info.ready?'':'disabled'}>${info.claimed?'수령 완료':missionTab==='repeat'?'누적 보상 한 번에 받기':'보상 받기'}</button><p>보유 몬스터볼 ${num(state.pokeballs||0)}개</p><small>일일: 한국 시간 자정 · 주간: 월요일 자정 초기화<br>반복 미션은 50마리마다 10개, 남은 처치 수는 유지됩니다.</small>`,'mission-modal');}

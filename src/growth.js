@@ -34,7 +34,7 @@ export const EVOLUTIONS = [
  [138,139,65,6,400],[140,141,65,6,400],
  [147,148,50,4,250],[148,149,90,9,800],
 ].map(([from,to,level,region,amount])=>({from,to,level:Math.min(50,Math.round(level/2)),region,amount}));
-export const evolutionOptions = p => EVOLUTIONS.filter(e=>e.from===p.speciesId);
+export const evolutionOptions = p => EVOLUTIONS.filter(e=>e.from===p.speciesId).map(e=>({...e,level:Math.min(maxLevel(p),e.level+(p.breakthrough||0)*3),region:Math.min(19,e.region+(p.breakthrough||0)),amount:Math.ceil(e.amount*(1+.5*(p.breakthrough||0)))}));
 export function familyGrade(id){
  const family=SPECIES.filter(p=>evolutionFamily(p.id)===evolutionFamily(id));
  const total=Math.max(...family.map(p=>Object.values(p.baseStats).reduce((a,b)=>a+b,0)));
@@ -84,5 +84,5 @@ export function breakthrough(state,uid) {
  if(p.level<maxLevel(p))return `현재 최대 레벨 Lv.${maxLevel(p)}을 달성해야 해요.`;
  const family=evolutionFamily(p.speciesId),cost=breakthroughCost(p);
  if((state.shards?.[family]||0)<cost)return '같은 진화 계열의 돌파 조각이 부족해요.';
- state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;return null;
+ state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;p.level=1;p.speciesId=family;return null;
 }

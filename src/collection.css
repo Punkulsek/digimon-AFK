@@ -671,3 +671,5 @@
 .mission-button{position:absolute;left:18px;top:105px;z-index:13;display:flex;flex-direction:column;padding:9px 14px}.mission-button span{font-size:12px}
 .summon-wallet .pokeball-count{font-size:12px;white-space:nowrap;color:#fff4b0}
 @media(max-height:500px){.mission-button{top:80px;padding:5px 9px;font-size:11px}.summon-wallet .pokeball-count{font-size:9px}}
+.mission-button{left:auto;right:20px;top:90px}.mission-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.mission-tabs .selected{background:#13a895;color:white}.mission-modal .modal-body img,.pokeball-count img{width:28px;height:28px;object-fit:contain;image-rendering:pixelated;vertical-align:middle}.pokeball-count{display:inline-flex;align-items:center;gap:3px}
+@media(max-height:500px){.mission-button{top:78px;right:12px}}

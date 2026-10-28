@@ -19,7 +19,7 @@ export const levelCost = p => Math.round(100*1.05**(Math.min(99,Math.max(1,p.lev
 export function initialState(){return {...dungeonDefaults(),version:1,pokeballs:0,missionKills:0,missionsCompleted:0,activePreset:0,partyPresets:Array.from({length:5},()=>[0,1,2,3,4].map(i=>`starter-${i}`)),upgrades:upgradeDefaults(),shards:{},discovered:[1,4,7,25,39,133],stage:1,campaignCleared:false,kills:0,gold:10000,gems:10000,inventory:[1,4,7,25,39,133].map((id,i)=>({uid:`starter-${i}`,speciesId:id,level:1,breakthrough:0})),party:[0,1,2,3,4].map(i=>`starter-${i}`),auto:true,autoBoss:true,speed:1,totalKills:0,questClaimed:false,summons:0};}
 export function validateState(s,partyLimit=PARTY_LIMIT){
  if(!s||s.version!==1||!Number.isSafeInteger(s.stage)||s.stage<1||s.stage>MAX_STAGE||!Number.isSafeInteger(s.kills)||s.kills<0||s.kills>10||!Number.isSafeInteger(s.gold)||s.gold<0||!Number.isSafeInteger(s.gems)||s.gems<0||!Array.isArray(s.inventory)||!s.inventory.length||s.inventory.length>10000)return false;
- if(['pokeballs','missionsCompleted'].some(k=>s[k]!==undefined&&(!Number.isSafeInteger(s[k])||s[k]<0))||(s.missionKills!==undefined&&(!Number.isInteger(s.missionKills)||s.missionKills<0||s.missionKills>=50)))return false;
+ if(['pokeballs','missionsCompleted'].some(k=>s[k]!==undefined&&(!Number.isSafeInteger(s[k])||s[k]<0))||(s.missionKills!==undefined&&(!Number.isSafeInteger(s.missionKills)||s.missionKills<0||s.missionKills>Number.MAX_SAFE_INTEGER)))return false;
  if(s.upgrades!==undefined&&(!s.upgrades||!UPGRADE_KEYS.every(k=>Number.isSafeInteger(s.upgrades[k])&&s.upgrades[k]>=0&&s.upgrades[k]<=1000)))return false;
  if(s.shards!==undefined&&(!s.shards||typeof s.shards!=='object'||Array.isArray(s.shards)||!Object.entries(s.shards).every(([id,n])=>species(Number(id))&&Number.isSafeInteger(n)&&n>=0)))return false;
  if(s.campaignCleared!==undefined&&(typeof s.campaignCleared!=='boolean'||(s.campaignCleared&&s.stage!==MAX_STAGE)))return false;
@@ -35,7 +35,7 @@ export function save(storage,state){try{normalizePresets(state);storage.setItem(
 export function summon(state,count,rng=Math.random){
  if(![1,10,30].includes(count))return {error:'잘못된 소환 횟수입니다.'};
  const payment=summonPayment(state,count),cost=payment.gems;
- if(state.gems<cost)return {error:'다이아가 부족해요. 퀘스트와 보스를 통해 모아 보세요.'};
+ if((state.pokeballs||0)<count)return {error:'몬스터볼이 부족해요. 미션 보상을 받아 주세요.'};
  if(state.inventory.length+count>10000)return {error:'보유 한도에 도달했어요.'};
  state.gems-=cost;state.pokeballs=(state.pokeballs||0)-payment.balls;const result=[];
  for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;const rates=SUMMON_RATES[summonLevel(state.summons)-1];for(let r=0;r<rates.length;r++){roll-=rates[r];if(roll<0){rarity=r;break;}}

@@ -102,3 +102,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## Bellsprout Tower battle background
 `public/scene/tower/bellsprout-tower.svg`: original vector scenery drawn for this game, featuring wooden columns, arched windows, vines, lanterns and a perspective floor. Embedded in the standalone build.
+
+## Poké Ball currency icon
+`public/currency/pokeball.png`: `poke-ball.png` extracted unchanged from the user-provided `PokeAPI_Pokeball_Sprites.zip`. Used for summon currency and mission rewards, with pixelated rendering; embedded in the offline build.
