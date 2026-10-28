@@ -663,3 +663,8 @@
 #summon-page .summon-result-footer{justify-content:center;align-items:center;gap:16px}
 #summon-page .summon-result-footer .primary-button{flex:0 1 220px;height:52px;margin:0;padding:8px 16px;min-height:0}
 @media(max-height:500px){#summon-page .summon-result-footer .primary-button{height:36px;flex-basis:160px}}
+/* Cinematic covers the complete game viewport, including the navigation bar. */
+#summon-page:has(.summon-video-stage){position:fixed;inset:0;width:100vw;height:100dvh;z-index:1000;margin:0;padding:0}
+.summon-video-stage video{object-fit:contain;background:#000}
+.video-audio{position:absolute;left:24px;bottom:20px;z-index:2;background:#073b4cdd;color:white;border:1px solid #7ad2d4}
+.video-audio.needs-play{left:50%;bottom:50%;transform:translate(-50%,50%);background:#008b9b}

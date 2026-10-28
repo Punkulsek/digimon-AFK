@@ -694,10 +694,10 @@ function draw(count){
   sound.effect(entries.some(({p})=>summonGrade(p.speciesId)===3)?'legendary':'reveal');
  };
  revealSummon=finish;
- summonPage(`<div class="summon-video-stage"><video id="summon-video" playsinline preload="auto" aria-label="포켓몬 소환 영상"></video><button class="primary-button video-skip" data-action="skipSummon">연출 건너뛰기</button></div>`);
- const video=$('#summon-video');video.src=window.POKEMON_SUMMON_VIDEO||'/video/summon.mp4';video.volume=sound.prefs.effectsVolume/100;video.muted=!sound.prefs.effects;
+ summonPage(`<div class="summon-video-stage"><video id="summon-video" playsinline preload="auto" aria-label="포켓몬 소환 영상"></video><button class="primary-button video-audio" data-action="videoAudio">영상 소리 켜기</button><button class="primary-button video-skip" data-action="skipSummon">연출 건너뛰기</button></div>`);
+ const video=$('#summon-video');video.src=window.POKEMON_SUMMON_VIDEO||'/video/summon.mp4';video.volume=sound.prefs.effectsVolume/100;video.muted=!sound.prefs.effects;const audioButton=$('.video-audio');audioButton.textContent=video.muted||!video.volume?'영상 소리 켜기':'영상 소리 끄기';
  video.addEventListener('ended',finish,{once:true});video.addEventListener('error',()=>{toast('영상을 재생할 수 없어 결과를 표시합니다.');finish();},{once:true});
- video.play().catch(()=>{if(revealSummon!==finish)return;video.muted=true;video.play().catch(finish);});
+ video.play().catch(()=>{if(revealSummon!==finish)return;audioButton.textContent='소리와 함께 재생';audioButton.classList.add('needs-play');});
 }
 
 function stages() {
@@ -736,6 +736,11 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
   if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
+  if(btn.dataset.action==="videoAudio"){
+    const video=$('#summon-video');if(!video)return;
+    if(video.paused||video.muted||video.volume===0){video.muted=false;video.volume=Math.max(.38,sound.prefs.effectsVolume/100);video.play().then(()=>{btn.textContent='영상 소리 끄기';btn.classList.remove('needs-play');}).catch(()=>{btn.textContent='소리와 함께 재생';});}
+    else{video.muted=true;btn.textContent='영상 소리 켜기';}return;
+  }
   if(busy)return;
   if(["home","collection","dungeons","upgrades"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;
