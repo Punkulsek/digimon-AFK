@@ -7,7 +7,7 @@ import {SUMMON_RATES,SUMMON_POOLS,summonLevel} from "./summoning.js";
 import {MAX_STAGE,STAGE_KILLS,BOSS_TURN_LIMIT,stageEnemy,stageGold} from "./stages.js";
 import {recordCollection} from "./collection-record.js";
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
-import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES} from './dungeon-config.js';
+import {dungeonDefaults, DUNGEONS, EVOLUTION_TYPES, DUNGEON_STAGES,dungeonLimit} from './dungeon-config.js';
 import {SPECIES,species,RARITIES} from './data.js';
 export const PARTY_LIMIT=5;
 export const SAVE_KEY='pokemon-days-v1';
@@ -23,7 +23,7 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
  if(s.discovered!==undefined&&(!Array.isArray(s.discovered)||s.discovered.length>151||new Set(s.discovered).size!==s.discovered.length||!s.discovered.every(id=>species(id))))return false;
  if(!s.inventory.every(p=>p&&typeof p.uid==='string'&&species(p.speciesId)&&Number.isSafeInteger(p.level)&&p.level>=1&&p.level<=100&&(p.breakthrough===undefined||(Number.isInteger(p.breakthrough)&&p.breakthrough>=0&&p.breakthrough<=10))))return false;
  if(!Number.isSafeInteger(s.candies)||s.candies<0||!s.materials||!s.dungeonClears)return false;
- if(!EVOLUTION_TYPES.every(t=>Number.isSafeInteger(s.materials[t.id])&&s.materials[t.id]>=0)||!DUNGEONS.every(d=>Number.isInteger(s.dungeonClears[d.id])&&s.dungeonClears[d.id]>=0&&s.dungeonClears[d.id]<=DUNGEON_STAGES))return false;
+ if(!EVOLUTION_TYPES.every(t=>Number.isSafeInteger(s.materials[t.id])&&s.materials[t.id]>=0)||!DUNGEONS.every(d=>Number.isInteger(s.dungeonClears[d.id])&&s.dungeonClears[d.id]>=0&&s.dungeonClears[d.id]<=dungeonLimit(d.id)))return false;
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
  return Array.isArray(s.party)&&s.party.length>0&&s.party.length<=partyLimit&&new Set(s.party).size===s.party.length&&s.party.every(id=>s.inventory.some(p=>p.uid===id))&&typeof s.auto==='boolean'&&typeof s.autoBoss==='boolean'&&[1,2,3].includes(s.speed)&&Number.isSafeInteger(s.totalKills)&&s.totalKills>=0&&typeof s.questClaimed==='boolean'&&Number.isSafeInteger(s.summons)&&s.summons>=0;
 }
@@ -63,9 +63,9 @@ export class Battle {
   this.enemies=Array.from({length:5},(_,n)=>{
    const level=Math.min(100,this.dungeon?.stage||Math.ceil(this.state.stage/4));
    let base;
-   if(this.dungeon){const d=this.dungeon;const hp=Math.max(1,Math.round(d.hp*(n===0?.6:.1)));base={speciesId:d.enemy,hp,maxHp:hp,atk:Math.max(1,Math.round(d.atk*(n===0?.4:.15))),def:0};}
+   if(this.dungeon){const d=this.dungeon;const hp=Math.max(1,Math.round(d.hp*(d.boss===false?.2:n===0?.6:.1)));base={speciesId:d.enemies?.[n]||d.enemy,hp,maxHp:hp,atk:Math.max(1,Math.round(d.atk*(d.boss===false?.2:n===0?.4:.15))),def:0};}
    else base=stageEnemy(this.state.stage,this.boss&&n===0,this.state.kills+n);
-   return {...stats({speciesId:base.speciesId,level,breakthrough:0}),...base,types:species(base.speciesId).types,level,uid:`enemy-${this.wave}-${n}`,isBoss:!!(this.boss||this.dungeon)&&n===0,attackProgress:1-(n+1)/PARTY_LIMIT,counted:false};
+   return {...stats({speciesId:base.speciesId,level,breakthrough:0}),...base,types:species(base.speciesId).types,level,uid:`enemy-${this.wave}-${n}`,isBoss:!!(this.boss||(this.dungeon&&this.dungeon.boss!==false))&&n===0,attackProgress:1-(n+1)/PARTY_LIMIT,counted:false};
   });
   this.enemy=this.enemies[0];
   this.allies.forEach((u,index)=>{u.hp=u.maxHp;u.attackProgress=1-(index+1)/PARTY_LIMIT;});
@@ -109,7 +109,7 @@ export class Battle {
  this.status=status;
  if(status==='won'){
  const d=this.dungeon;
- if(d.id==='coin')this.state.gold+=d.amount;
+ if(d.id==='coin'||d.id==='tower')this.state.gold+=d.amount;
  else if(d.id==='candy')this.state.candies+=d.amount;
  else this.state.materials[d.material]+=d.amount;
  this.state.dungeonClears[d.id]=Math.max(this.state.dungeonClears[d.id],d.stage);

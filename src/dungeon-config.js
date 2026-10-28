@@ -1,4 +1,6 @@
 export const DUNGEON_STAGES = 100;
+export const TOWER_FLOORS=200;
+export const dungeonLimit=id=>id==='tower'?TOWER_FLOORS:DUNGEON_STAGES;
 export const EVOLUTION_TYPES = [
   {id:'normal',name:'노말',icon:'circle',enemy:52,color:'#c6c3af'},
   {id:'fire',name:'불꽃',icon:'flame',enemy:58,color:'#ed9364'},
@@ -20,6 +22,7 @@ export const EVOLUTION_TYPES = [
   {id:'fairy',name:'페어리',icon:'heart',enemy:35,color:'#f2b3d6'},
 ].map((type,index)=>({...type,art:{atlas:Math.floor(index/6)+1,column:index%2,row:Math.floor(index%6/2)}}));
 export const DUNGEONS = [
+  {id:'tower',name:'모다피의 탑',reward:'포켓코인',enemy:69,icon:'swords'},
   {id:'coin',name:'포켓코인 던전',reward:'포켓코인',enemy:52,icon:'coins'},
   {id:'candy',name:'이상한사탕 던전',reward:'이상한사탕',enemy:113,icon:'sparkles'},
   ...EVOLUTION_TYPES.map(t=>({...t,id:`evolution-${t.id}`,name:`${t.name}타입 진화재료 던전`,reward:`${t.name} 진화 재료`,material:t.id})),

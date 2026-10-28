@@ -312,7 +312,7 @@ function renderBattle() {
     })
     .join("");
   $("#enemy").classList.add('enemy-squad');
-  $("#enemy").classList.toggle('boss-formation',battle.boss||!!battle.dungeon);
+  $("#enemy").classList.toggle('boss-formation',battle.boss||!!(battle.dungeon&&battle.dungeon.boss!==false));
   $("#enemy").innerHTML=battle.enemies.map((e,n)=>{
     const s=species(e.speciesId);return `<div class="enemy-unit ${e.hp===0?'fainted':''}" data-unit-id="${e.uid}" style="--enemy-slot:${n}"><div class="enemy-heading">${e.isBoss?'👑 보스':'야생'} <strong>${s.name}</strong></div>${healthBar(e,"enemy-hp")}${skillGauge(e)}<span class="enemy-hp-number">${Math.ceil(e.hp)} / ${Math.ceil(e.maxHp)}</span><div class="fighter enemy ${e.isBoss?'boss':''}" ${e===battle.enemy?'id="enemy-fighter"':''}>${art(s,"field-art")}<div class="fighter-shadow"></div></div><span class="combat-status">${combatStatus(e)}</span></div>`;
   }).join('');
@@ -505,10 +505,10 @@ function step() {
     t.querySelector('small').textContent=`${d.name} · ${d.stage}단계`;
     t.querySelector('strong').textContent=won?'클리어!':'도전 실패';
     const loot=t.querySelector('.clear-ribbon > span');loot.classList.add('clear-loot');
-    const rewardIcon=d.id==='coin'?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':typeIcon(d.material);
+    const rewardIcon=(d.id==='coin'||d.id==='tower')?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':typeIcon(d.material);
     loot.innerHTML=won?`${rewardIcon}<b>${d.reward} ${num(d.amount)}개 획득</b>`:'획득 보상 없음';
     t.classList.add('visible');sound.effect(won?'clear':'defeat');
-    t.hideTimer=setTimeout(()=>{t.classList.remove('visible');if(battle===completed){dungeonUI.returnToChallenge(d.id,d.stage);active='dungeons';updateNavigation();}},2200);
+    t.hideTimer=setTimeout(()=>{t.classList.remove('visible');if(battle===completed){dungeonUI.returnToChallenge(d.id,d.id==='tower'&&won?Math.min(200,d.stage+1):d.stage);active='dungeons';updateNavigation();}},2200);
   }
 }
 let timer;
@@ -680,6 +680,7 @@ function draw(count){
  const entries=outcome.result.map(p=>{const family=evolutionFamily(p.speciesId),duplicate=owned.has(family);owned.add(family);return {p,duplicate};});
  const finish=()=>{
   if(revealSummon!==finish)return;
+  sound.setVideoExclusive(false);
   const video=$('#summon-video');if(video){video.pause();video.removeAttribute('src');video.load();}
   revealSummon=null;
   summonPage(`<header class="summon-result-heading"><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 다이아 1,000</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 다이아 3,000</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
@@ -694,10 +695,12 @@ function draw(count){
   sound.effect(entries.some(({p})=>summonGrade(p.speciesId)===3)?'legendary':'reveal');
  };
  revealSummon=finish;
- summonPage(`<div class="summon-video-stage"><video id="summon-video" playsinline preload="auto" aria-label="포켓몬 소환 영상"></video><button class="primary-button video-audio" data-action="videoAudio">영상 소리 켜기</button><button class="primary-button video-skip" data-action="skipSummon">연출 건너뛰기</button></div>`);
- const video=$('#summon-video');video.src=window.POKEMON_SUMMON_VIDEO||'/video/summon.mp4';video.volume=sound.prefs.effectsVolume/100;video.muted=!sound.prefs.effects;const audioButton=$('.video-audio');audioButton.textContent=video.muted||!video.volume?'영상 소리 켜기':'영상 소리 끄기';
- video.addEventListener('ended',finish,{once:true});video.addEventListener('error',()=>{toast('영상을 재생할 수 없어 결과를 표시합니다.');finish();},{once:true});
- video.play().catch(()=>{if(revealSummon!==finish)return;audioButton.textContent='소리와 함께 재생';audioButton.classList.add('needs-play');});
+ summonPage(`<div class="summon-video-stage"><video id="summon-video" playsinline preload="auto" aria-label="포켓몬 소환 영상"></video><button class="primary-button video-skip" data-action="skipSummon">연출 건너뛰기</button></div>`);
+ const video=$('#summon-video');sound.setVideoExclusive(true);
+ video.src=window.POKEMON_SUMMON_VIDEO||'/video/summon.mp4';video.volume=1;video.muted=false;
+ video.addEventListener('ended',finish,{once:true});video.addEventListener('error',()=>{toast('영상 재생 오류로 결과를 표시합니다.');finish();},{once:true});
+ video.play().catch(()=>{toast('브라우저의 사이트 소리 재생을 허용해 주세요.');finish();});
+
 }
 
 function stages() {
@@ -736,11 +739,6 @@ document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
   if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
-  if(btn.dataset.action==="videoAudio"){
-    const video=$('#summon-video');if(!video)return;
-    if(video.paused||video.muted||video.volume===0){video.muted=false;video.volume=Math.max(.38,sound.prefs.effectsVolume/100);video.play().then(()=>{btn.textContent='영상 소리 끄기';btn.classList.remove('needs-play');}).catch(()=>{btn.textContent='소리와 함께 재생';});}
-    else{video.muted=true;btn.textContent='영상 소리 켜기';}return;
-  }
   if(busy)return;
   if(["home","collection","dungeons","upgrades"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;

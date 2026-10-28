@@ -133,3 +133,8 @@
 .dungeon-challenge .challenge-team{overflow:hidden}
 .dungeon-challenge .challenge-team>*{flex-shrink:0}
 .dungeon-challenge .dungeon-stage-list{flex:1 1 auto;min-height:40px;overflow-y:auto;grid-template-columns:repeat(10,minmax(0,1fr));align-content:start;padding:3px}
+.dungeon-subtabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;flex-shrink:0;margin:0 5% 12px}
+.dungeon-subtabs button{background:#074857;color:#d0faff;border:1px solid #3caebb;border-radius:7px;padding:12px;font-size:17px;font-weight:900}
+.dungeon-subtabs button[aria-pressed=true]{background:#12a895;color:white}
+.dungeon-banner[data-dungeon=tower]{background:linear-gradient(135deg,#1b786c,#163955);border-color:#68c7b6}
+@media(max-height:500px){.dungeon-subtabs{margin-bottom:5px}.dungeon-subtabs button{padding:5px;font-size:13px}}

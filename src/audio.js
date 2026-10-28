@@ -60,12 +60,12 @@ export class GameAudio {
     if (!this.context) return;
     const t = this.context.currentTime;
     this.music.gain.setTargetAtTime(
-      this.prefs.music ? (this.prefs.musicVolume / 100) * 0.42 : 0,
+      !this.exclusiveVideo && this.prefs.music ? (this.prefs.musicVolume / 100) * 0.42 : 0,
       t,
       0.04,
     );
     this.effects.gain.setTargetAtTime(
-      this.prefs.effects ? (this.prefs.effectsVolume / 100) * 0.5 : 0,
+      !this.exclusiveVideo && this.prefs.effects ? (this.prefs.effectsVolume / 100) * 0.5 : 0,
       t,
       0.025,
     );
@@ -87,6 +87,10 @@ export class GameAudio {
       this.set("music", true);
       await this.unlock();
     } else this.set("music", !this.prefs.music);
+  }
+  setVideoExclusive(value) {
+    this.exclusiveVideo=value;this.applyVolume();
+    if(value&&this.context){for(const bus of [this.music,this.effects]){bus.gain.cancelScheduledValues(this.context.currentTime);bus.gain.setValueAtTime(0,this.context.currentTime);}}
   }
   setMode(mode) {
     this.mode = mode;
@@ -129,7 +133,7 @@ export class GameAudio {
   }
   effect(kind) {
     if (
-      !this.started ||
+      this.exclusiveVideo || !this.started ||
       this.hidden ||
       !this.prefs.effects ||
       this.context.state !== "running"
@@ -164,7 +168,7 @@ export class GameAudio {
     this.lastEffect = now;
   }
   skillPhase(phase, recipe) {
-    if (!this.started || this.hidden || !this.prefs.effects || this.context?.state !== 'running') return;
+    if (this.exclusiveVideo || !this.started || this.hidden || !this.prefs.effects || this.context?.state !== 'running') return;
     const now = this.context.currentTime;
     // Ten simultaneous casts share a short sound budget instead of stacking ten loud hits.
     this.skillSoundTimes ??= {};
