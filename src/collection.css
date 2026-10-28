@@ -643,3 +643,23 @@
  .dex-detail-modal .dex-detail-hero h3{font-size:18px;margin:4px 0}.dex-detail-modal .dex-detail-hero small{font-size:10px}
  .dex-detail-modal .dex-detail-tabs button{font-size:11px;padding:6px 3px}
 }
+#summon-page:has(.summon-video-stage){padding:0;background:#030d15}
+.summon-video-stage{position:absolute;inset:0;background:#030d15}.summon-video-stage video{width:100%;height:100%;object-fit:contain}.video-skip{position:absolute;right:24px;bottom:20px;z-index:2;background:#073b4cdd;color:white;border:1px solid #7ad2d4}
+#summon-page:has(.summon-result-grid){background:repeating-linear-gradient(65deg,#0e4c59 0 12px,#104f5c 12px 24px);color:#e4ffff;padding:14px 6%;gap:10px}
+.summon-result-heading{text-align:center}.summon-result-heading h1{font-size:24px}.summon-result-heading p{font-size:12px}
+#summon-page .summon-result-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:12px;padding:10px 5px 20px;max-width:1400px;margin:auto}
+#summon-page .summon-result-card{position:relative;min-width:0;min-height:0;height:160px;padding:4px;display:flex;flex-direction:column;align-items:center;overflow:hidden;border:3px solid #5b9fae;border-radius:9px;background:linear-gradient(135deg,#0b3345,#226979);box-shadow:0 4px #052c3d;animation:result-card-enter .4s both;animation-delay:var(--reveal-delay)}
+#summon-page .summon-result-card.grade-border-1{border-color:#ef69bc}#summon-page .summon-result-card.grade-border-2{border-color:#fbd34d}#summon-page .summon-result-card.grade-border-3{border-color:#c599ff;box-shadow:0 0 12px #ac7aff}
+.summon-result-card>.rate-grade{position:absolute;left:4px;top:4px;z-index:1;font-size:18px}
+#summon-page .summon-result-card .pokemon-art{width:100%;height:100px;min-height:0;flex:1;display:flex;align-items:center;justify-content:center}
+#summon-page .summon-result-card img{width:120px;height:120px;max-width:140%;object-fit:contain;image-rendering:pixelated}
+.summon-result-card>strong{font-size:12px;color:white;text-shadow:1px 1px #000}.result-shard{width:100%;background:#1675a5;color:#b9fff0;font-size:10px;text-align:center;border-radius:3px;padding:3px 0}
+.summon-result-footer{flex-shrink:0;display:flex;justify-content:center;gap:15px;flex-wrap:wrap;background:#043d4c;padding:12px;border-radius:8px}.summon-result-footer .primary-button{background:#ffae00;color:white;border-bottom:4px solid #a46604;min-width:150px}.summon-result-footer button:disabled{opacity:.4}.summon-result-footer .reveal-all{color:#b9ffff}
+.summon-result-card.revealed{animation:none!important;opacity:1;transform:none}
+@keyframes result-card-enter{from{opacity:0;transform:translateY(20px) scale(.7) rotateY(80deg)}to{opacity:1;transform:none}}
+@media(max-width:1100px){#summon-page .summon-result-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}}
+@media(max-height:500px){#summon-page:has(.summon-result-grid){padding:5px 5%;gap:4px}.summon-result-heading h1{font-size:18px}.summon-result-heading p{margin:0!important}#summon-page .summon-result-card{height:120px}#summon-page .summon-result-card img{width:90px;height:90px}.summon-result-footer{padding:5px;gap:8px}.summon-result-footer .primary-button{padding:6px;font-size:12px;min-width:120px}}
+#summon-page .summon-result-grid{grid-template-columns:repeat(5,minmax(0,1fr));max-width:900px}
+#summon-page .summon-result-footer{justify-content:center;align-items:center;gap:16px}
+#summon-page .summon-result-footer .primary-button{flex:0 1 220px;height:52px;margin:0;padding:8px 16px;min-height:0}
+@media(max-height:500px){#summon-page .summon-result-footer .primary-button{height:36px;flex-basis:160px}}

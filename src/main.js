@@ -674,10 +674,32 @@ function summonRates(level=summonLevel(state.summons)){
 }
 
 function draw(count){
- if(busy)return;const outcome=summon(state,count);if(outcome.error)return toast(outcome.error);persist();busy=true;
- const finish=()=>{if(revealSummon!==finish)return;revealSummon=null;busy=false;const grade=Math.max(...outcome.result.map(p=>summonGrade(p.speciesId)));sound.effect(grade===3?'legendary':'reveal');summonPage(`<h1>${grade>=2?SUMMON_GRADES[grade]+' 등장!':'소환 완료'} · ${count}마리</h1><p>소환 Lv.${summonLevel(state.summons)}</p><div class="summon-scroll"><div class="result-grid ${grade>=2?'legendary-result':''}">${outcome.result.map(p=>`<div><strong class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</strong>${card(p)}</div>`).join('')}</div></div><button class="primary-button result-confirm" data-action="summon">확인</button>`);};
- revealSummon=finish;summonPage(`<h1>소환 중 · 다이아 ${num(state.gems)}</h1><div class="summoning"><div class="big-ball"><span></span></div></div><button class="primary-button" data-action="skipSummon">연출 건너뛰기</button>`);setTimeout(finish,1200);
+ if(busy)return;
+ const owned=new Set(state.inventory.map(p=>evolutionFamily(p.speciesId)));
+ const outcome=summon(state,count);if(outcome.error)return toast(outcome.error);persist();busy=true;
+ const entries=outcome.result.map(p=>{const family=evolutionFamily(p.speciesId),duplicate=owned.has(family);owned.add(family);return {p,duplicate};});
+ const finish=()=>{
+  if(revealSummon!==finish)return;
+  const video=$('#summon-video');if(video){video.pause();video.removeAttribute('src');video.load();}
+  revealSummon=null;
+  summonPage(`<header class="summon-result-heading"><h1>소환 결과</h1><p>${count}마리 · 소환 Lv.${summonLevel(state.summons)}</p></header><div class="summon-scroll result-reveal-scroll"><div class="summon-result-grid">${entries.map(({p,duplicate},index)=>`<article class="pokemon-card summon-result-card grade-border-${summonGrade(p.speciesId)}" style="--reveal-delay:${index*.18}s"><b class="rate-grade grade-${summonGrade(p.speciesId)}">${SUMMON_GRADES[summonGrade(p.speciesId)]}</b>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong><span class="result-shard">${duplicate?'돌파 조각 +1':'새로운 포켓몬'}</span></article>`).join('')}</div></div><footer class="summon-result-footer"><button class="primary-button" data-action="draw" data-count="10" disabled>10회 · 다이아 1,000</button><button class="primary-button result-confirm" data-action="summon" disabled>확인</button><button class="primary-button" data-action="draw" data-count="30" disabled>30회 · 다이아 3,000</button><button class="text-button reveal-all" data-action="skipSummon">모두 공개</button></footer>`);
+  const revealAll=()=>{
+   if(revealSummon!==revealAll)return;
+   clearTimeout(revealTimer);revealSummon=null;busy=false;
+   document.querySelectorAll('.summon-result-card').forEach(c=>c.classList.add('revealed'));
+   document.querySelectorAll('.summon-result-footer button').forEach(b=>{b.disabled=b.dataset.action==='draw'&&state.gems<Number(b.dataset.count)*100;});
+   $('.reveal-all')?.remove();
+  };
+  revealSummon=revealAll;const revealTimer=setTimeout(revealAll,(count-1)*180+450);
+  sound.effect(entries.some(({p})=>summonGrade(p.speciesId)===3)?'legendary':'reveal');
+ };
+ revealSummon=finish;
+ summonPage(`<div class="summon-video-stage"><video id="summon-video" playsinline preload="auto" aria-label="포켓몬 소환 영상"></video><button class="primary-button video-skip" data-action="skipSummon">연출 건너뛰기</button></div>`);
+ const video=$('#summon-video');video.src=window.POKEMON_SUMMON_VIDEO||'/video/summon.mp4';video.volume=sound.prefs.effectsVolume/100;video.muted=!sound.prefs.effects;
+ video.addEventListener('ended',finish,{once:true});video.addEventListener('error',()=>{toast('영상을 재생할 수 없어 결과를 표시합니다.');finish();},{once:true});
+ video.play().catch(()=>{if(revealSummon!==finish)return;video.muted=true;video.play().catch(finish);});
 }
+
 function stages() {
   active = "stages";
   const current = ((state.stage - 1) % 20) + 1,

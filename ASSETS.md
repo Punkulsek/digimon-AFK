@@ -96,3 +96,6 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 
 ## Korean Pokédex descriptions
 `src/generated/dex-flavor.json`: Korean flavor text for all 151 Kanto species, sourced from PokeAPI's `data/v2/csv/pokemon_species_flavor_text.csv` (language_id 3). Each entry records the source version ID; selected the last available Korean version in the source. Descriptions are reproduced without invented lore; whitespace normalized. Source: https://github.com/PokeAPI/pokeapi/blob/master/data/v2/csv/pokemon_species_flavor_text.csv . Pokémon text remains the property of its respective rights holders.
+
+## Summon video
+`public/video/summon.mp4`: user-provided 1280×720 H.264/AAC video (6.04 seconds), supplied for the summon animation. Included unchanged and embedded in the offline build.
