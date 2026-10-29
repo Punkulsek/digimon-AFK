@@ -730,3 +730,17 @@
 .bottom-nav .nav-button .nav-ball{width:36px;height:36px;background:linear-gradient(#fff7df 0 44%,#8d785b 44% 56%,#ddd0b6 56%);border:3px solid #f0e6cb;opacity:1;filter:drop-shadow(2px 3px 0 #806b50);box-sizing:border-box}
 .bottom-nav .nav-button .nav-ball::after{width:12px;height:12px;left:9px;top:9px;border:3px solid #8d785b;background:#fff4d7;box-sizing:border-box}
 @media(max-height:500px){.bottom-nav .nav-button>svg{width:29px;height:29px}.bottom-nav .nav-button .nav-ball{width:28px;height:28px}.bottom-nav .nav-button .nav-ball::after{left:5px;top:5px}.bottom-nav .nav-button{font-size:10px;gap:0}.collection-subnav button{font-size:12px}}
+/* Compact navy currency counters with artwork sitting over the left edge. */
+.topbar .currencies{gap:14px;align-items:center}
+.topbar .currency,.summon-wallet .wallet-amount{position:relative;display:flex;align-items:center;justify-content:flex-end;gap:6px;height:28px;min-width:108px;padding:2px 8px 2px 30px;background:linear-gradient(110deg,#293c59dd,#102139ee);border:0;border-bottom:2px solid #648198;border-radius:3px;box-sizing:border-box;color:#fff;text-shadow:0 2px #0a1327}
+.topbar .currency b,.summon-wallet .wallet-amount b{text-align:right;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.topbar .currency>img,.summon-wallet .wallet-amount>img{position:absolute;left:-7px;top:50%;transform:translateY(-50%);width:34px;height:34px;object-fit:contain;filter:drop-shadow(1px 2px 0 #041526);margin:0}
+.topbar .currency.balls>img,.summon-wallet .wallet-amount[aria-label="몬스터볼"]>img{image-rendering:pixelated}
+.summon-wallet{background:transparent;border:0;padding:3px 0 3px 8px;gap:14px;min-width:0;box-shadow:none}
+.topbar .settings-button{background:transparent;border:0;border-radius:0;box-shadow:none;padding:0;width:44px;height:44px;min-width:44px;color:#e4fbff}
+.topbar .settings-button>svg{width:40px;height:40px;fill:#daeff0;stroke:#09191f;stroke-width:2.3;filter:drop-shadow(0 2px 0 #000) drop-shadow(0 0 1px #000)}
+.topbar .settings-button>svg circle{fill:#132b35;stroke:#132b35}
+.topbar .settings-button:hover{background:transparent;filter:brightness(1.12)}
+@media(max-width:900px){.topbar .currencies{gap:10px}.topbar .currency{min-width:85px;padding-left:24px}.topbar .currency b{font-size:11px}.topbar .currency>img{width:28px;height:28px}.topbar .settings-button{width:36px;height:36px;min-width:36px}.topbar .settings-button>svg{width:34px;height:34px}}
+@media(max-height:500px){.summon-wallet .wallet-amount{height:23px;min-width:90px}.summon-wallet .wallet-amount b{font-size:11px}.summon-wallet .wallet-amount>img{width:29px;height:29px}}
+.topbar .currency.gems{background:linear-gradient(110deg,#293c59dd,#102139ee);border:0;border-bottom:2px solid #648198}
