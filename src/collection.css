@@ -692,3 +692,6 @@
 .mission-clipboard{width:46px;height:50px;filter:drop-shadow(2px 3px 0 #0006)}
 .mission-button .mission-label{font-size:13px;font-weight:900}.mission-button #mission-progress{font-size:10px;background:#123d4bcc;border-radius:5px;padding:2px 5px}
 @media(max-height:500px){.mission-clipboard{width:35px;height:38px}#summon-page .summon-result-card>.rate-grade{font-size:12px}#summon-page .summon-result-heading p{font-size:10px}}
+.mission-clipboard{width:68px;height:74px}.mission-button .mission-label{font-size:16px}
+.summon-options{display:flex;justify-content:center;gap:20px;padding:8px 0;flex-shrink:0}.summon-options button{background:#064355cc;color:#e4ffff;border:1px solid #3e9fa9;border-radius:6px;padding:7px 14px;font-size:14px;font-weight:800}.summon-options button[aria-pressed=true]{background:#078b8e;border-color:#8effdd}
+@media(max-height:500px){.mission-clipboard{width:52px;height:57px}.mission-button .mission-label{font-size:13px}.summon-options{padding:3px 0;gap:12px}.summon-options button{padding:4px 9px;font-size:11px}}
