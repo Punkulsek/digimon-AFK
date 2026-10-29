@@ -149,3 +149,7 @@
 #scene.scene[data-dungeon=tower]{background:#354639 url('/scene/tower/bellsprout-tower.svg') center/cover no-repeat;filter:none}
 #scene.scene[data-dungeon=tower]>*{display:none}
 @media(max-height:500px){.tower-layout{gap:8px}.tower-details{padding:9px}.tower-enemies{margin:8px 0}.tower-enemies .pokemon-art{height:55px}.tower-enemies img{width:65px;height:65px}.tower-floor{padding:10px 6px;gap:5px}.tower-details h2{font-size:19px}.tower-details p{font-size:12px}}
+/* Daily dungeons scroll as a list, including newly added dungeon types. */
+.dungeon-selection .dungeon-content:has(.dungeon-cards){display:block;overflow-y:auto;overflow-x:hidden;min-height:0;overscroll-behavior:contain}
+.dungeon-selection .dungeon-cards{height:auto;min-height:100%;grid-template-rows:none;grid-auto-rows:minmax(145px,22vh);align-content:start;margin:0 auto}
+@media(max-height:540px){.dungeon-selection .dungeon-cards{grid-auto-rows:115px}}
