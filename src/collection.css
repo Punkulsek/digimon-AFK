@@ -706,3 +706,9 @@
 .mission-modal .mission-tabs{margin:0;width:100%;flex-shrink:0}
 .mission-modal .mission-claim-all,.mission-modal .mission-reset{flex-shrink:0}
 @media(max-height:500px){.mission-button.soft-button{width:76px;min-width:76px}.mission-button.soft-button>svg.mission-clipboard{width:70px;height:76px}.mission-button.soft-button>.mission-label{font-size:18px}.mission-button .mission-ready-dot{width:15px;height:15px}.mission-modal .modal-header{padding:5px 14px}.mission-modal .mission-list{height:100px;padding:6px}.mission-modal .mission-row{padding:5px}.mission-modal .mission-claim-all{padding:5px;min-height:30px}.mission-modal .mission-tabs button{padding:7px 2px}.mission-modal .modal-body{gap:5px;padding:6px 12px 0}}
+/* Reference-sized shortcut, aligned with the right edge of the currency HUD. */
+.mission-button.soft-button{right:14px;top:82px;width:78px;min-width:78px}
+.mission-button.soft-button>svg.mission-clipboard{width:74px;height:80px}
+.mission-button.soft-button>.mission-label{font-size:18px}
+.mission-button .mission-ready-dot{right:0;top:2px;width:16px;height:16px}
+@media(max-height:500px){.mission-button.soft-button{top:76px;right:12px;width:70px;min-width:70px}.mission-button.soft-button>svg.mission-clipboard{width:70px;height:76px}.mission-button.soft-button>.mission-label{font-size:16px}}

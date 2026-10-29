@@ -13,7 +13,9 @@ export function dungeonInfo(id,stage) {
     const hp=Math.round(220*(1+(stage-1)*.18)**2*(boss?1.5:1)),atk=Math.round(12*(1+(stage-1)*.1)**1.6*(boss?1.3:1));
     return {...definition,stage,boss,enemies,enemy:enemies[0],hp,atk,power:hp+atk*5,amount:Math.round((500+stage*100)*(boss?2:1))};
   }
-  return {...definition,stage,hp,atk,power:hp+atk*5,amount};
+  // Daily-only relief: retain the progression curve and round once at payout precision.
+  const dailyHp=Math.round(hp*.9),dailyAtk=Math.max(1,Math.round(atk*.92));
+  return {...definition,stage,hp:dailyHp,atk:dailyAtk,power:dailyHp+dailyAtk*5,amount:Math.round(amount*1.25)};
 }
 export function canEnterDungeon(state,id,stage) {
   return !!dungeonInfo(id,stage) && stage <= (state.dungeonClears[id]||0)+1;
