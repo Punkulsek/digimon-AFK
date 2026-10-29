@@ -38,6 +38,7 @@ for (let id = 1; id <= 151; id++) {
     animated: `data:image/gif;base64,${animated.toString("base64")}`,
   };
 }
+const settingsGear = await readFile(resolve(root, "public/ui/settings-gear.png"));
 const currencyData = {};
 for (const name of ["pokecoin", "diamond", "pokeball"]) {
   const png = await readFile(resolve(root, `public/currency/${name}.png`));
@@ -85,7 +86,7 @@ const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>
 <body><div id="app"></div>
-<script>window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
+<script>window.POKEMON_SETTINGS_GEAR="data:image/png;base64,${settingsGear.toString("base64")}";window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
 <script type="module">${safeScript}</script>
 <!-- PokeAPI data attribution and license:\n${license.replace(/-->/g, "-- >")}-->
 <!-- Asset credits:\n${credits.replace(/-->/g, "-- >")}-->

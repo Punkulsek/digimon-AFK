@@ -751,3 +751,5 @@
 .topbar .currency>img,#summon-page .summon-wallet .wallet-amount>img{left:-4px;filter:none;z-index:1}
 .topbar .settings-button>svg.settings-gear{fill:#dff4f5;stroke:#081416;stroke-width:3;stroke-linejoin:round;filter:none}
 .topbar .settings-button>svg.settings-gear path{fill-rule:evenodd}
+.topbar .settings-button>img.settings-gear{display:block;width:44px;height:44px;object-fit:contain;background:transparent;border:0;box-shadow:none;filter:none}
+@media(max-width:900px){.topbar .settings-button>img.settings-gear{width:36px;height:36px}}
