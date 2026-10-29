@@ -712,3 +712,21 @@
 .mission-button.soft-button>.mission-label{font-size:18px}
 .mission-button .mission-ready-dot{right:0;top:2px;width:16px;height:16px}
 @media(max-height:500px){.mission-button.soft-button{top:76px;right:12px;width:70px;min-width:70px}.mission-button.soft-button>svg.mission-clipboard{width:70px;height:76px}.mission-button.soft-button>.mission-label{font-size:16px}}
+/* Teal inset sub-tabs and warm carved main navigation. */
+.collection-subnav{background:#007f91;border-top:3px solid #16a6b6;padding:4px 8px;gap:10px;box-sizing:border-box}
+.collection-subnav button{position:relative;background:#005265;color:#c4e2e4;border:1px solid #004656;border-radius:5px;box-shadow:inset 0 1px #003d4e;font-size:15px;font-weight:900;transform:skew(-6deg);text-shadow:0 2px #003e50;overflow:hidden}
+.collection-subnav button+button{border-left:1px solid #004656}
+.collection-subnav button.selected{color:#fff;background:radial-gradient(ellipse at bottom,#35d8df66,transparent 65%),linear-gradient(#079aad,#00b8c5);border-color:#10c4cd;box-shadow:inset 0 -3px #32e1e1;text-shadow:0 2px #087384}
+.collection-subnav button.selected::before{content:'▸';margin-right:5px}.collection-subnav button.selected::after{content:'◂';margin-left:5px}
+.game-shell>.bottom-nav{background:#302420}
+.bottom-nav .nav-inner{border-top:3px solid #846b4c;background:repeating-linear-gradient(172deg,#342722 0 18px,#2b211e 19px 22px,#392a24 23px 40px);box-shadow:0 -3px 8px #150f1266}
+.bottom-nav .nav-button{min-width:0;flex-direction:column;gap:2px;padding:3px 8px 5px;color:#e9dfc7;background:linear-gradient(165deg,#54403466,#241b1988);border-radius:0 0 14px 14px;box-shadow:inset 0 -5px #1c1512,inset 0 -7px #49382d;font-size:12px;font-weight:900;text-shadow:0 2px 2px #160f0b;transition:background .15s,color .15s}
+.bottom-nav .nav-button+.nav-button{border-left:2px solid #201916}
+.bottom-nav .nav-button>svg{width:40px;height:40px;color:#f7f0dc;stroke:#f5ead1;stroke-width:2.6;filter:drop-shadow(2px 3px 0 #887255)}
+.bottom-nav .nav-button>svg.menu-emblem{fill:#f5efdd;stroke:#d7c7aa;stroke-width:1.4}
+.bottom-nav .nav-button.active{color:#fff5d9;background:radial-gradient(ellipse at top,#94745288,transparent 75%),linear-gradient(#584333,#39291f);box-shadow:inset 0 -4px #b08a51,inset 0 -7px #62482e}
+.bottom-nav .nav-button.active::before{display:none}
+.bottom-nav .nav-button:hover:not(:disabled){background-color:#72563b;filter:brightness(1.12)}
+.bottom-nav .nav-button .nav-ball{width:36px;height:36px;background:linear-gradient(#fff7df 0 44%,#8d785b 44% 56%,#ddd0b6 56%);border:3px solid #f0e6cb;opacity:1;filter:drop-shadow(2px 3px 0 #806b50);box-sizing:border-box}
+.bottom-nav .nav-button .nav-ball::after{width:12px;height:12px;left:9px;top:9px;border:3px solid #8d785b;background:#fff4d7;box-sizing:border-box}
+@media(max-height:500px){.bottom-nav .nav-button>svg{width:29px;height:29px}.bottom-nav .nav-button .nav-ball{width:28px;height:28px}.bottom-nav .nav-button .nav-ball::after{left:5px;top:5px}.bottom-nav .nav-button{font-size:10px;gap:0}.collection-subnav button{font-size:12px}}
