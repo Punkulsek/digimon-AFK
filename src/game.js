@@ -35,7 +35,7 @@ export function save(storage,state){try{normalizePresets(state);storage.setItem(
 export function summon(state,count,rng=Math.random){
  if(![1,10,30].includes(count))return {error:'잘못된 소환 횟수입니다.'};
  const payment=summonPayment(state,count),cost=payment.gems;
- if((state.pokeballs||0)<count)return {error:'몬스터볼이 부족해요. 미션 보상을 받아 주세요.'};
+ if(state.gems<payment.gems)return {error:'몬스터볼 또는 다이아가 소환 비용 전액을 충족해야 해요.'};
  if(state.inventory.length+count>10000)return {error:'보유 한도에 도달했어요.'};
  state.gems-=cost;state.pokeballs=(state.pokeballs||0)-payment.balls;const result=[];
  for(let i=0;i<count;i++){let roll=rng()*100;let rarity=0;const rates=SUMMON_RATES[summonLevel(state.summons)-1];for(let r=0;r<rates.length;r++){roll-=rates[r];if(roll<0){rarity=r;break;}}

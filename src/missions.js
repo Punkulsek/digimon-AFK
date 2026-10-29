@@ -17,4 +17,4 @@ export function claimMission(state,tab){if(!['daily','weekly','challenge','repea
  else if(tab==='challenge')state.missionBook.challenge++;else state.missionBook[tab].claimed=true;
  state.pokeballs=(state.pokeballs||0)+info.reward;return info.reward;
 }
-export function summonPayment(state,count){return {balls:count,gems:0};}
+export function summonPayment(state,count){return (state.pokeballs||0)>=count?{balls:count,gems:0}:{balls:0,gems:count*100};}

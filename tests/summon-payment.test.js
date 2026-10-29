@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {initialState,summon} from '../src/game.js';
+test('full ball payment has priority; full diamond alternative never mixes',()=>{for(const [balls,gems,ok,leftBalls,leftGems] of [[10,1000,true,0,1000],[9,1000,true,9,0],[9,999,false,9,999],[0,1000,true,0,0],[10,0,true,0,0]]){const s=initialState();s.pokeballs=balls;s.gems=gems;const r=summon(s,10);assert.equal(!r.error,ok);assert.equal(s.pokeballs,leftBalls);assert.equal(s.gems,leftGems);}});
