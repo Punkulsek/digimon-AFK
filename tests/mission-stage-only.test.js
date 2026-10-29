@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {Battle,initialState} from '../src/game.js';import {claimMission} from '../src/missions.js';
+test('only normal stage kills advance every defeat mission',()=>{for(const dungeon of [null,{id:'coin',stage:1}]){const s=initialState();s.auto=true;const b=new Battle(s,dungeon);b.enemies[0].hp=0;b.tick(.01);assert.equal(s.missionKills,dungeon?0:1);assert.equal(s.missionBook?.total||0,dungeon?0:1);b.tick(.01);assert.equal(s.missionKills,dungeon?0:1);}});
+test('repeat grants five balls per hundred kills and keeps remainder',()=>{const s=initialState();s.missionKills=350;assert.equal(claimMission(s,'repeat'),15);assert.equal(s.missionKills,50);assert.equal(claimMission(s,'repeat'),0);});

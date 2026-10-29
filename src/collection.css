@@ -678,3 +678,17 @@
 .mission-modal .mission-claim-all{width:65%;align-self:center;background:#20adb5;color:#e2ffff;border-bottom:4px solid #004d61}.mission-reset{text-align:center;font-size:11px;margin:0}.mission-modal .mission-tabs{margin:0 -16px;gap:0}.mission-tabs button{border:0;padding:14px 3px;background:#03566c;color:#c6f7ff;font-weight:900}.mission-tabs .selected{background:#1494a4;box-shadow:inset 0 -3px #66eee0}
 .detail-info .growth-panel{display:block;margin-top:16px;background:#075562;border:1px solid #2396a0;padding:10px;border-radius:8px}.growth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:10px}.growth-tabs button{border:0;background:#043e4f;color:#b7e9ef;padding:10px;font-weight:900}.growth-tabs button[aria-pressed=true]{background:#10aa98;color:white}.growth-panel [data-growth][hidden]{display:none}
 @media(max-height:500px){.mission-list{min-height:100px}.mission-modal .modal-body{gap:6px;padding-top:6px}.mission-tabs button{padding:8px 3px}}
+/* Fit every revealed card within the available landscape viewport. */
+#summon-page:has(.summon-result-grid){overflow:hidden;min-height:0}
+#summon-page .result-reveal-scroll{overflow:hidden;min-height:0;display:flex}
+#summon-page .summon-result-grid{width:100%;height:100%;max-width:1500px;grid-template-columns:repeat(var(--result-columns),minmax(0,1fr));grid-template-rows:repeat(var(--result-rows),minmax(0,1fr));gap:clamp(4px,1vh,10px);padding:5px;margin:0 auto}
+#summon-page .summon-result-card{height:100%;max-height:250px;width:100%;max-width:190px;justify-self:center;padding:3px;box-sizing:border-box}
+#summon-page .summon-result-card .pokemon-art{height:0;min-height:0;width:100%;overflow:hidden}
+#summon-page .summon-result-card img{height:100%;width:100%;max-width:100%;max-height:100%;object-fit:contain}
+.summon-result-footer{flex-shrink:0}
+#summon-page .summon-result-card>strong{font-size:clamp(9px,1vw,12px);line-height:1.2;white-space:nowrap}
+#summon-page .summon-result-card .result-shard{font-size:clamp(8px,.8vw,10px);padding:2px 0}
+.mission-button.soft-button{background:transparent;border:0;box-shadow:none;padding:0;gap:0;color:white;text-shadow:1px 2px #152b32}
+.mission-clipboard{width:46px;height:50px;filter:drop-shadow(2px 3px 0 #0006)}
+.mission-button .mission-label{font-size:13px;font-weight:900}.mission-button #mission-progress{font-size:10px;background:#123d4bcc;border-radius:5px;padding:2px 5px}
+@media(max-height:500px){.mission-clipboard{width:35px;height:38px}#summon-page .summon-result-card>.rate-grade{font-size:12px}#summon-page .summon-result-heading p{font-size:10px}}
