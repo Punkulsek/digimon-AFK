@@ -24,7 +24,8 @@ export const EVOLUTION_TYPES = [
 export const DUNGEONS = [
   {id:'tower',name:'모다피의 탑',reward:'포켓코인',enemy:69,icon:'swords'},
   {id:'coin',name:'포켓코인 던전',reward:'포켓코인',enemy:52,icon:'coins'},
+  {id:'rune',name:'포켓룬 던전',reward:'포켓룬 가루',enemy:121,icon:'gem'},
   {id:'candy',name:'이상한사탕 던전',reward:'이상한사탕',enemy:113,icon:'sparkles'},
   ...EVOLUTION_TYPES.map(t=>({...t,id:`evolution-${t.id}`,name:`${t.name}타입 진화재료 던전`,reward:`${t.name} 진화 재료`,material:t.id})),
 ];
-export const dungeonDefaults = () => ({candies:0,materials:Object.fromEntries(EVOLUTION_TYPES.map(t=>[t.id,0])),dungeonClears:Object.fromEntries(DUNGEONS.map(d=>[d.id,0]))});
+export const dungeonDefaults = () => ({runeDust:0,candies:0,materials:Object.fromEntries(EVOLUTION_TYPES.map(t=>[t.id,0])),dungeonClears:Object.fromEntries(DUNGEONS.map(d=>[d.id,0]))});

@@ -1,3 +1,4 @@
+import {applyRunes} from './runes.js';
 import {applySynergies} from './synergies.js';
 import {species} from './data.js';
 import {summonGrade} from './summoning.js';
@@ -12,7 +13,7 @@ export function pokemonStats(p,state){
  const boost=1+stars*.15,u=state?.upgrades||{},growth=1+g*.025;
  // Actual species base stats, including evolved species, are the sole base.
  const core=(base,scale,rate,key)=>Math.round(Math.round(base*scale)*boost*(1+level*rate*growth)*(1+(u[key]||0)*.005));
- return applySynergies({
+ return applyRunes(applySynergies({
  hp:core(b.hp,1.6,.14,'hp'),atk:core(b.attack,.28,.16,'atk'),def:core(b.defense,1,.14,'def'),
  attackSpeed:round(100+b.speed*.2+level*.15+stars*2),
  penetration:round(b.attack/100+level*.03+stars*.5),
@@ -21,7 +22,7 @@ export function pokemonStats(p,state){
  skillHaste:round(b.speed*.1+level*.1+stars),
  skillAmplification:round(b.specialAttack*.1+level*.1+stars*2),
  critChance:5,critDamage:150,
- },state);
+ },state),p);
 }
 export function criticalStats(stats){
  const chance=Math.max(0,finite(stats.critChance,5));

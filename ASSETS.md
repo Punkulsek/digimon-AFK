@@ -107,3 +107,5 @@ No Pokémon sprites, music, currency icons or dungeon art were generated or repl
 `public/currency/pokeball.png`: `poke-ball.png` extracted unchanged from the user-provided `PokeAPI_Pokeball_Sprites.zip`. Used for summon currency and mission rewards, with pixelated rendering; embedded in the offline build.
 
 - `public/ui/settings-gear.png`: generated transparent settings icon; outer background and centre hole use alpha transparency.
+
+- `src/rune-ui.js`: original interactive eight-segment Poké Ball rune frame drawn with SVG paths, in the game's teal UI palette.

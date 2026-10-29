@@ -15,6 +15,7 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
     ['coin','포켓코인 던전',52,'coins'],
     ['evolution','진화재료 던전',133,'leaf'],
     ['candy','이상한사탕 던전',113,'sparkles'],
+    ['rune','포켓룬 던전',121,'gem'],
   ]).map(([id,name,p,symbol])=>`<button class="dungeon-card dungeon-banner" data-action="dungeonSelect" data-dungeon="${id}"><div class="dungeon-banner-art">${art(species(p),'field-art')}</div><span class="dungeon-emblem">${icon(symbol)}</span><div class="dungeon-banner-title"><h2>${name}</h2></div><small>${id==='evolution'?'타입 선택':`${state.dungeonClears[id]} / ${dungeonLimit(id)}${id==='tower'?'층 클리어':'단계 클리어'}`}</small><span class="dungeon-banner-arrow" aria-hidden="true">›</span></button>`).join('')}</div></div>`);}
   function types(){run=null;show(header('진화재료 던전')+`<div class="dungeon-content"><div class="dungeon-types">${EVOLUTION_TYPES.map(t=>`<button class="dungeon-card dungeon-banner type-dungeon" style="--type-color:${t.color}" data-action="dungeonSelect" data-dungeon="evolution-${t.id}">${typeBackground(t)}<div class="dungeon-banner-art">${art(species(t.enemy))}</div><span class="dungeon-emblem">${typeIcon(t.id)}</span><div class="dungeon-banner-title"><h2>${t.name}타입</h2></div><small>${state.dungeonClears[`evolution-${t.id}`]} / ${DUNGEON_STAGES}단계 클리어</small></button>`).join('')}</div></div>`);}
   function stages(id,stage=1){

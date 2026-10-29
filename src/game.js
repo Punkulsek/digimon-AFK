@@ -25,6 +25,7 @@ export function validateState(s,partyLimit=PARTY_LIMIT){
  if(s.campaignCleared!==undefined&&(typeof s.campaignCleared!=='boolean'||(s.campaignCleared&&s.stage!==MAX_STAGE)))return false;
  if(s.discovered!==undefined&&(!Array.isArray(s.discovered)||s.discovered.length>151||new Set(s.discovered).size!==s.discovered.length||!s.discovered.every(id=>species(id))))return false;
  if(!s.inventory.every(p=>p&&typeof p.uid==='string'&&species(p.speciesId)&&Number.isSafeInteger(p.level)&&p.level>=1&&p.level<=100&&(p.breakthrough===undefined||(Number.isInteger(p.breakthrough)&&p.breakthrough>=0&&p.breakthrough<=10))))return false;
+ if(s.runeDust!==undefined&&(!Number.isSafeInteger(s.runeDust)||s.runeDust<0))return false;
  if(!Number.isSafeInteger(s.candies)||s.candies<0||!s.materials||!s.dungeonClears)return false;
  if(!EVOLUTION_TYPES.every(t=>Number.isSafeInteger(s.materials[t.id])&&s.materials[t.id]>=0)||!DUNGEONS.every(d=>Number.isInteger(s.dungeonClears[d.id])&&s.dungeonClears[d.id]>=0&&s.dungeonClears[d.id]<=dungeonLimit(d.id)))return false;
  if(new Set(s.inventory.map(p=>p.uid)).size!==s.inventory.length)return false;
@@ -113,6 +114,7 @@ export class Battle {
  if(status==='won'){
  const d=this.dungeon;
  if(d.id==='coin'||d.id==='tower')this.state.gold+=d.amount;
+ else if(d.id==='rune')this.state.runeDust+=d.amount;
  else if(d.id==='candy')this.state.candies+=d.amount;
  else this.state.materials[d.material]+=d.amount;
  this.state.dungeonClears[d.id]=Math.max(this.state.dungeonClears[d.id],d.stage);

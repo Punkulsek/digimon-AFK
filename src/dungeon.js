@@ -5,7 +5,7 @@ export function dungeonInfo(id,stage) {
   // Preserve early progression, then taper the exponential for a 100-stage campaign.
   const growth=stage<=10?stage-1:9+24*Math.log1p((stage-10)/24);
   const hp=Math.round(170*1.42**growth), atk=Math.round(8*1.32**growth);
-  const amount=id==='coin'?500*stage:id==='candy'?Math.round(100+8*(stage-1)+2*(stage-1)**2):3*stage;
+  const amount=id==='rune'?Math.round(24+stage*6):id==='coin'?500*stage:id==='candy'?Math.round(100+8*(stage-1)+2*(stage-1)**2):3*stage;
   if(id==='tower'){
     const boss=stage%5===0,pool=[16,19,21,23,25,27,35,37,41,43,46,48,52,54,56,58,60,63,66,69,72,74,77,79,81,84,86,88,90,92,96,98,100,102,104,109,111,114,116,118,120,123,125,126,127,128,129,132,133,138,140,147];
     const enemies=Array.from({length:5},(_,n)=>pool[(stage*3+n*7)%pool.length]);

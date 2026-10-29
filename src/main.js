@@ -1,3 +1,4 @@
+import {createRuneUI} from './rune-ui.js';
 import {summonPayment,missionInfo,claimMission,syncMissions} from './missions.js';
 import {maxLevel,canBreakthrough,isFinalEvolution} from './growth.js';
 import {dexBody,dexStatRows} from './dex.js';
@@ -516,7 +517,7 @@ function step() {
     t.querySelector('small').textContent=`${d.name} · ${d.stage}${d.id==='tower'?'층':'단계'}`;
     t.querySelector('strong').textContent=won?'클리어!':'도전 실패';
     const loot=t.querySelector('.clear-ribbon > span');loot.classList.add('clear-loot');
-    const rewardIcon=(d.id==='coin'||d.id==='tower')?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':typeIcon(d.material);
+    const rewardIcon=(d.id==='coin'||d.id==='tower')?currencyIcon('pokecoin','포켓코인'):d.id==='candy'?'🍬':d.id==='rune'?'◆':typeIcon(d.material);
     loot.innerHTML=won?`${rewardIcon}<b>${d.reward} ${num(d.amount)}개 획득</b>`:'획득 보상 없음';
     t.classList.add('visible');sound.effect(won?'clear':'defeat');
     t.hideTimer=setTimeout(()=>{t.classList.remove('visible');if(battle===completed){dungeonUI.returnToChallenge(d.id,d.id==='tower'&&won?Math.min(200,d.stage+1):d.stage);active='dungeons';updateNavigation();}},2200);
@@ -637,6 +638,7 @@ function partyChanged() {
   toast("탐험대 편성을 저장했어요.");
 }
 function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.type} · ${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p><small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
+const runeUI=createRuneUI({state,modal,persist,art,species,toast,onChange(){for(const ally of battle.allies){const p=state.inventory.find(p=>p.uid===ally.uid);if(!p)continue;const st=stats(p,state),ratio=ally.hp/ally.maxHp;Object.assign(ally,st,{maxHp:st.hp,hp:Math.round(st.hp*ratio)});}renderBattle();updateHud();}});
 function detail(uid) {
   replaceSlot = null;
   selected = uid;
@@ -647,7 +649,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ ${maxLevel(p)}</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= maxLevel(p) ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small>${growthPanel(p)}</div></div>`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><h3>Lv. ${p.level} <small>/ ${maxLevel(p)}</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= maxLevel(p) ? "disabled" : ""}>${i("arrow-up")} 레벨업 <span>이상한사탕 ${num(levelCost(p))}개</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small><button class="primary-button full rune-open" data-action="openRunes" data-id="${p.uid}">포켓룬 · 8슬롯</button>${growthPanel(p)}</div></div>`,
     "detail-modal",
   );
 }
@@ -761,6 +763,7 @@ document.addEventListener("click", (e) => {
   if (action !== "music" && !sound.started) sound.unlock();
   if (action !== "music") sound.effect("click");
   if (dungeonUI.handle(action, btn)) return;
+  if (runeUI.handle(action,btn))return;
   switch (action) {
     case "upgrades":
       if(document.getElementById('upgrade-page')){document.getElementById('upgrade-page').remove();active='home';updateNavigation();}else upgradeScreen();
@@ -816,6 +819,7 @@ document.addEventListener("click", (e) => {
     case "formationPokemon":
       selectFormationPokemon(btn.dataset.id);
       break;
+    case "openRunes":runeUI.open(btn.dataset.id);break;
     case "detail":
       detail(btn.dataset.id);
       break;
