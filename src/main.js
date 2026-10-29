@@ -754,6 +754,7 @@ document.addEventListener("click", (e) => {
   if (!btn || btn.disabled) return;
   if(btn.dataset.action==="skipSummon"){revealSummon?.();return;}
   if(busy)return;
+  if(battle.dungeon&&battle.status==='fighting'&&btn.matches('.nav-button')){toast('던전 전투 중입니다. 상단 던전 정보를 눌러 도전을 종료할 수 있습니다.');return;}
   if(["home","collection","dungeons","upgrades"].includes(btn.dataset.action))document.getElementById("summon-page")?.remove();
   const action = btn.dataset.action;
   if(["home","collection","dungeons","summon"].includes(action))document.getElementById('upgrade-page')?.remove();
@@ -773,8 +774,9 @@ document.addEventListener("click", (e) => {
       persist();renderBattle();updateHud();upgradeScreen();sound.effect('level');break;
     }
     case "dungeonStatus":
-      modal(battle.dungeon.name, `${battle.dungeon.stage}${battle.dungeon.id==='tower'?'층':'단계'}`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="dungeons">도전 종료 · 던전 선택</button>`);
+      modal(battle.dungeon.name, `${battle.dungeon.stage}${battle.dungeon.id==='tower'?'층':'단계'}`, `<p>자동 전투 · ${battle.turn} / 120턴</p><p>승리 보상: ${battle.dungeon.reward} ${num(battle.dungeon.amount)}개</p><button class="soft-button" data-action="exitDungeon">도전 종료 · 던전 선택</button>`);
       break;
+    case "exitDungeon":
     case "dungeons":
       leaveCollection();
       $("#modal-root").innerHTML = "";

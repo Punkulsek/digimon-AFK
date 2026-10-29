@@ -16,7 +16,8 @@ export function dungeonInfo(id,stage) {
   // Daily-only relief: retain the progression curve and round once at payout precision.
   const dailyHp=Math.round(hp*.9),dailyAtk=Math.max(1,Math.round(atk*.92));
   const earlyCandyBonus=id==='candy'&&stage<=20?Math.round(125*((21-stage)/20)**2):0;
-  return {...definition,stage,hp:dailyHp,atk:dailyAtk,power:dailyHp+dailyAtk*5,amount:Math.round(amount*1.25)+earlyCandyBonus};
+  const reward=Math.round(amount*1.25)+earlyCandyBonus;
+  return {...definition,stage,hp:dailyHp,atk:dailyAtk,power:dailyHp+dailyAtk*5,amount:id==='candy'?Math.round(reward*1.2):reward};
 }
 export function canEnterDungeon(state,id,stage) {
   return !!dungeonInfo(id,stage) && stage <= (state.dungeonClears[id]||0)+1;

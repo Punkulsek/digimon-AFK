@@ -39,14 +39,14 @@ test('패배·중도 이탈은 보상과 클리어 기록을 바꾸지 않고 �
  const retry=createRun(s,'coin',10);assert.equal(retry.enemy.hp,retry.enemy.maxHp);assert.equal(retry.allies[0].hp,retry.allies[0].maxHp);retry.tick();assert.deepEqual(s,before);
 });
 test('사탕 던전 보상으로 성장하고 높은 레벨에서는 더 많은 사탕 소비',()=>{
- const s=initialState();assert.equal(finish(createRun(s,'candy',1)).status,'won');assert.equal(s.candies,250);
- const p=s.inventory[0];const gold=s.gold;assert.equal(levelUp(s,p.uid),null);assert.equal(s.candies,150);assert.equal(s.gold,gold);p.level=51;assert.equal(levelCost(p),1147);assert.ok(levelUp(s,p.uid));assert.equal(p.level,51);
+ const s=initialState();assert.equal(finish(createRun(s,'candy',1)).status,'won');assert.equal(s.candies,300);
+ const p=s.inventory[0];const gold=s.gold;assert.equal(levelUp(s,p.uid),null);assert.equal(s.candies,200);assert.equal(s.gold,gold);p.level=51;assert.equal(levelCost(p),1147);assert.ok(levelUp(s,p.uid));assert.equal(p.level,51);
 });
 test('모든 던전 100단계 개방 경계와 사탕 성장 곡선',()=>{
  const s=initialState();
  for(const id of Object.keys(s.dungeonClears)){s.dungeonClears[id]=99;assert.ok(canEnterDungeon(s,id,100));assert.equal(canEnterDungeon(s,id,101),false);const end=dungeonInfo(id,100);assert.ok(Number.isSafeInteger(end.hp)&&Number.isSafeInteger(end.atk)&&end.amount>0);}
  for(const [level,cost] of [[1,100],[2,105],[3,110],[4,116],[10,155],[20,253],[50,1092]])assert.equal(levelCost({level}),cost);
  for(let level=2;level<100;level++)assert.ok(levelCost({level})>levelCost({level:level-1}));
- assert.equal(dungeonInfo('candy',1).amount,250);assert.equal(dungeonInfo('candy',100).amount,25618);
+ assert.equal(dungeonInfo('candy',1).amount,300);assert.equal(dungeonInfo('candy',100).amount,30742);
  assert.ok(validateState(s));
 });
