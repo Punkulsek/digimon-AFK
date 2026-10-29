@@ -695,3 +695,14 @@
 .mission-clipboard{width:68px;height:74px}.mission-button .mission-label{font-size:16px}
 .summon-options{display:flex;justify-content:center;gap:20px;padding:8px 0;flex-shrink:0}.summon-options button{background:#064355cc;color:#e4ffff;border:1px solid #3e9fa9;border-radius:6px;padding:7px 14px;font-size:14px;font-weight:800}.summon-options button[aria-pressed=true]{background:#078b8e;border-color:#8effdd}
 @media(max-height:500px){.mission-clipboard{width:52px;height:57px}.mission-button .mission-label{font-size:13px}.summon-options{padding:3px 0;gap:12px}.summon-options button{padding:4px 9px;font-size:11px}}
+/* Keep the mission shortcut legible and its notification anchored to the icon. */
+.mission-button.soft-button{width:104px;min-width:104px;align-items:center;overflow:visible}
+.mission-button.soft-button>svg.mission-clipboard{width:96px;height:104px;max-width:none;max-height:none}
+.mission-button.soft-button>.mission-label{font-size:22px;line-height:1.2}
+.mission-button .mission-ready-dot{position:absolute;top:3px;right:4px;width:18px;height:18px;border-radius:50%;background:#ff3448;border:2px solid #fff4d5;box-shadow:0 2px 4px #0008}
+.mission-modal .modal-body,.mission-modal .mission-list{overflow:hidden;min-height:0;scrollbar-width:none}
+.mission-modal .modal-body::-webkit-scrollbar,.mission-modal .mission-list::-webkit-scrollbar{display:none}
+.mission-modal .mission-list{height:150px;flex-shrink:0;box-sizing:border-box}
+.mission-modal .mission-tabs{margin:0;width:100%;flex-shrink:0}
+.mission-modal .mission-claim-all,.mission-modal .mission-reset{flex-shrink:0}
+@media(max-height:500px){.mission-button.soft-button{width:76px;min-width:76px}.mission-button.soft-button>svg.mission-clipboard{width:70px;height:76px}.mission-button.soft-button>.mission-label{font-size:18px}.mission-button .mission-ready-dot{width:15px;height:15px}.mission-modal .modal-header{padding:5px 14px}.mission-modal .mission-list{height:100px;padding:6px}.mission-modal .mission-row{padding:5px}.mission-modal .mission-claim-all{padding:5px;min-height:30px}.mission-modal .mission-tabs button{padding:7px 2px}.mission-modal .modal-body{gap:5px;padding:6px 12px 0}}
