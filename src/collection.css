@@ -744,3 +744,10 @@
 @media(max-width:900px){.topbar .currencies{gap:10px}.topbar .currency{min-width:85px;padding-left:24px}.topbar .currency b{font-size:11px}.topbar .currency>img{width:28px;height:28px}.topbar .settings-button{width:36px;height:36px;min-width:36px}.topbar .settings-button>svg{width:34px;height:34px}}
 @media(max-height:500px){.summon-wallet .wallet-amount{height:23px;min-width:90px}.summon-wallet .wallet-amount b{font-size:11px}.summon-wallet .wallet-amount>img{width:29px;height:29px}}
 .topbar .currency.gems{background:linear-gradient(110deg,#293c59dd,#102139ee);border:0;border-bottom:2px solid #648198}
+/* The dark counter begins under the icon centre, never to its left. */
+.topbar .currency,.topbar .currency.gems,#summon-page .summon-wallet .wallet-amount{background:none;border:0;box-shadow:none;backdrop-filter:none;isolation:isolate;color:#fff}
+.topbar .currency::before,#summon-page .summon-wallet .wallet-amount::before{content:'';position:absolute;inset:0 0 0 12px;border-radius:3px;background:rgba(0,0,0,.78);z-index:-1;pointer-events:none}
+.topbar .currency b,#summon-page .summon-wallet .wallet-amount b{color:#fff;text-shadow:0 1px 2px #000}
+.topbar .currency>img,#summon-page .summon-wallet .wallet-amount>img{left:-4px;filter:none;z-index:1}
+.topbar .settings-button>svg.settings-gear{fill:#dff4f5;stroke:#081416;stroke-width:3;stroke-linejoin:round;filter:none}
+.topbar .settings-button>svg.settings-gear path{fill-rule:evenodd}
