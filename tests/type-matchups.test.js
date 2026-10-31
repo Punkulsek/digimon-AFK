@@ -17,7 +17,7 @@ test('move typing is independent of caster, with individual AoE immunity and att
  const f=arena([['강철']]);f.r.cast(f.a,'독침');assert.equal(f.enemies[0].hp,100000);assert.equal(f.enemies[0].statuses.poison,undefined);
 });
 test('support and HP-based damage bypass matchups, while delayed damage retains its move type',()=>{
- const {r,a,enemies:[e]}=arena([['강철']]);r.status(e,'poison',6,a);r.tick(6);assert.equal(e.hp,95000);
+ const {r,a,enemies:[e]}=arena([['독']]);e.types=['노말'];r.status(e,'poison',6,a);r.tick(6);assert.equal(e.hp,95000);
  r.cast(a,'저주');r.tick(8);assert.equal(e.hp,91000);
  a.hp=50000;r.cast(a,'잠자기');assert.equal(a.hp,100000);
  const f=arena([['불꽃']]);f.r.cast(f.a,'솔라빔');f.r.tick(2);assert.equal(f.enemies[0].hp,100000-235);
@@ -29,5 +29,5 @@ test('matching primary or secondary caster type never grants a same-type attack 
 test('immune hits cannot stun, drain gauge, execute, or consume shields; standalone status still works',()=>{
  const {r,a,enemies:[e]}=arena([['고스트']]);e.shield=500;e.shieldUntil=50;r.cast(a,'속이기');assert.equal(e.holdUntil,0);assert.equal(e.shield,500);e.hp=1;r.cast(a,'뿔드릴');assert.equal(e.hp,1);
  e.types=['비행'];e.gauge=70;r.cast(a,'뼈다귀치기');assert.equal(e.gauge,70);
- e.types=['땅'];r.cast(a,'전기자석파');assert.ok(e.statuses.shock);
+ e.types=['땅'];r.cast(a,'전기자석파');assert.equal(e.statuses.shock,undefined);r.cast(a,'뱀눈초리');assert.ok(e.statuses.shock);
 });

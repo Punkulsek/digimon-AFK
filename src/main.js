@@ -1,3 +1,4 @@
+import {STATUS_LABELS,skillExtras} from './status-rules.js';
 import {createRuneUI} from './rune-ui.js';
 import {summonPayment,missionInfo,claimMission,syncMissions} from './missions.js';
 import {maxLevel,canBreakthrough,isFinalEvolution} from './growth.js';
@@ -329,7 +330,7 @@ function renderBattle() {
   }).join('');
   icons();
 }
-const statusLabels={poison:'독',burn:'화상',shock:'감전',sleep:'잠듦',confusion:'혼란'};
+const statusLabels=STATUS_LABELS;
 function combatStatus(unit){
  const chips=[],names={atkPct:'공격',defPct:'방어',attackSpeedPct:'공속',skillHaste:'가속',skillAmplification:'증폭',critChance:'급소',critDamage:'급소피해',penetration:'관통',damageReduction:'피감',gaugeRatePct:'충전'};
  const chip=(label,kind,title,key,remaining,stacks=0)=>effectIcon(key||label,label,kind,title,remaining,stacks);
@@ -637,7 +638,7 @@ function partyChanged() {
   collection();
   toast("탐험대 편성을 저장했어요.");
 }
-function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.type} · ${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p><small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
+function skillDetail(id){const move=skillForSpecies(id);return `<section class="pokemon-skill-detail"><div><b>${move.name}</b><span>${move.type} · ${move.scope} · 기본 ${move.seconds}초</span></div><p>${move.description.replaceAll('**','').replaceAll('`','')}</p>${skillExtras(move)}<small>게이지 100%에서 자동 발동 · 스킬 가속에 따라 충전속도 증가</small></section>`;}
 const runeUI=createRuneUI({state,modal,persist,art,species,toast,onChange(){for(const ally of battle.allies){const p=state.inventory.find(p=>p.uid===ally.uid);if(!p)continue;const st=stats(p,state),ratio=ally.hp/ally.maxHp;Object.assign(ally,st,{maxHp:st.hp,hp:Math.round(st.hp*ratio)});}renderBattle();updateHud();}});
 function switchDetailPanel(panel){if(panel==='stats'){const p=state.inventory.find(p=>p.uid===selected);if(p){const st=stats(p,state);for(const [key] of STAT_FIELDS){const el=document.querySelector(`[data-stat="${key}"]`);if(el)el.textContent=formatStat(key,st[key]);}const powerEl=document.querySelector('[data-detail-power]');if(powerEl)powerEl.textContent=num(power(p,state));const note=document.querySelector('.stat-note');if(note)note.innerHTML=`급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용`;}}document.querySelectorAll('[data-detail-panel]').forEach(el=>el.hidden=el.dataset.detailPanel!==panel);document.querySelectorAll('.growth-side-menu button').forEach(el=>el.setAttribute('aria-pressed',String(panel==='stats'?el.dataset.action==='detailStats':panel==='runes'?el.dataset.action==='openRunes':el.dataset.tab===growthTab)));const area=document.querySelector('.detail-modal .modal-body');if(area)area.scrollTop=0;}
 function detail(uid) {

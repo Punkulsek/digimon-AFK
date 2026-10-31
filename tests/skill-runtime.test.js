@@ -7,8 +7,8 @@ test('poison total budget, refresh, boss cap and final tick are independent of r
  b.hp=b.maxHp;b.isBoss=true;r.status(b,'poison',6,a);r.tick(6);assert.equal(b.hp,9900);
  b.hp=b.maxHp;b.isBoss=false;r.status(b,'poison',6,a);r.tick(2);r.status(b,'poison',6,a);assert.equal(Object.keys(b.statuses).length,1);r.tick(6);assert.ok(Math.abs(b.hp-(10000-500/3-500))<1e-6);
 });
-test('sleep stops basic and casting; only explicit freeze stops gauge; haste is timed',()=>{
- const {r,a,b}=arena();a.skill='불꽃세례';r.status(a,'sleep',3,b);r.tick(2);assert.ok(Math.abs(a.gauge-200/9)<1e-8);assert.equal(r.basic(a,b).damage,0);
+test('sleep stops attacks and gauge; haste resumes after expiration',()=>{
+ const {r,a,b}=arena();a.skill='불꽃세례';r.status(a,'sleep',3,b);r.tick(2);assert.equal(a.gauge,0);assert.equal(r.basic(a,b).damage,0);
  a.gauge=0;r.status(a,'sleep',3,b,{freezeGauge:true});r.tick(3);assert.equal(a.gauge,0);r.tick(1);assert.ok(Math.abs(a.gauge-100/9)<1e-8);
  a.gauge=0;a.skillHaste=100;r.tick(1);assert.ok(Math.abs(a.gauge-200/9)<1e-8);
 });

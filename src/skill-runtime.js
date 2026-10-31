@@ -1,3 +1,4 @@
+import {statusImmune} from './status-rules.js';
 import {typeEffectiveness} from './type-matchups.js';
 import skillData from './generated/skills.json' with {type:'json'};
 import {resolveDamage} from './combat-stats.js';
@@ -10,7 +11,7 @@ const keyOf=key=>aliases[key]||key;
 const finite=(v,otherwise=0)=>Number.isFinite(v)?v:otherwise;
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,finite(v)));
 let nextCastId=0;
-const badStatuses=['poison','burn','shock','sleep','confusion'];
+const badStatuses=['poison','burn','shock','sleep','confusion','freeze','flinch'];
 
 export class SkillRuntime {
  constructor(battle){this.battle=battle;this.time=0;this.pending=[];this.periodic=new Map();this.context=null;this.nextUid=0;this.rng=()=>battle.rng();}
@@ -26,7 +27,7 @@ export class SkillRuntime {
  getBuff(unit,key){return this.has(unit,key)?unit.buffs[keyOf(key)]:null;}
  removeStatus(unit,name){delete unit.statuses[name];}
  removeBuff(unit,key){delete unit.buffs[keyOf(key)];}
- isDisabled(unit){return unit.hp<=0||this.has(unit,'sleep')||this.has(unit,'charging')||unit.castingUntil>this.time;}
+ isDisabled(unit){return unit.hp<=0||['sleep','freeze','flinch','recharge'].some(k=>this.has(unit,k))||this.has(unit,'charging')||unit.castingUntil>this.time;}
  effective(unit){
   const out={...unit},mods={};
   for(const [key,b] of Object.entries(unit.buffs||{})){
@@ -51,11 +52,11 @@ export class SkillRuntime {
   target.buffs[key]=b;this.emit({type:"buff",uid:this.context?.caster?.uid,targetUid:target.uid,name:key});return b;
  }
  status(target,name,duration,source,options={}){
-  if(target.hp<=0||this.context?.immuneTargets?.has(target.uid))return false;
+  if(target.hp<=0||this.context?.immuneTargets?.has(target.uid)||statusImmune(target,name,this.context?.moveName))return false;
   if(badStatuses.includes(name)&&this.has(target,'safeguard')){this.removeBuff(target,'safeguard');this.emit({type:'statusBlock',targetUid:target.uid});return false;}
   const previous=target.statuses[name];
   target.statuses[name]={expires:this.time+duration,source,data:{...options},duration,appliedAt:this.time,paid:0};
-  if(name==='sleep'&&options.freezeGauge)target.statuses[name].data.freezeGauge=true;
+  if(['sleep','freeze','flinch','recharge'].includes(name))target.statuses[name].data.freezeGauge=true;
   this.emit({type:'status',uid:source?.uid,targetUid:target.uid,name,duration,refresh:!!previous});return true;
  }
  charge(unit,points){if(points<0&&this.context?.immuneTargets?.has(unit.uid))return;unit.gauge=clamp(unit.gauge+points,0,100);}
@@ -79,7 +80,7 @@ export class SkillRuntime {
   if(!target||target.hp<=0||!this.units.includes(target))return {damage:0,crit:false};
   const skill=options.skill!==false,a=this.effective(caster),d=this.effective(target),ctx=this.context?.caster===caster?this.context:null;
   const attackType=options.attackType||(options.basic?caster.types?.[0]:ctx?.attackType);
-  const effectiveness=options.percentHp||options.pure||options.counter?1:typeEffectiveness(attackType,target.types);
+  const effectiveness=options.confusion||options.percentHp||options.pure||options.counter?1:typeEffectiveness(attackType,target.types);
   if(effectiveness===0){if(ctx){ctx.immuneTargets??=new Set();ctx.immuneTargets.add(target.uid);}this.emit({type:'immune',uid:caster.uid,targetUid:target.uid,attackType});return {damage:0,crit:false,immune:true};}
   a.penetration+=finite(options.penetration)+(skill?ctx?.penetration||0:0);a.critChance+=finite(options.critChance);
   if(options.forceCrit)a.critChance=Math.max(100,a.critChance);
@@ -96,6 +97,7 @@ export class SkillRuntime {
   const endure=this.getBuff(target,'endure');let endured=false;
   if(amount>=target.hp&&endure&&(target.memory.endureUses||0)<2){amount=Math.max(0,target.hp-1);target.memory.endureUses=(target.memory.endureUses||0)+1;this.removeBuff(target,'endure');endured=true;}
   const actual=Math.min(target.hp,amount);target.hp=Math.max(0,target.hp-actual);
+  if(actual>0&&attackType==='불꽃')this.removeStatus(target,'freeze');
   if(actual>0||shieldLoss>0){target.memory.rage=Math.min(5,(target.memory.rage||0)+1);const future=target.memory.futureSight;if(skill&&future&&future.caster!==caster&&future.caster?.side===caster.side)future.bonus=Math.min(.32,(future.bonus||0)+.08);}
   this.emit({type:'damage',uid:caster.uid,targetUid:target.uid,damage:actual,shieldDamage:shieldLoss,crit,skill,attackType,effectiveness,side:caster.side,basic:!!options.basic,periodic:!!options.periodic,counter:!!options.counter});
   if(endured)this.shield(target,target,target.maxHp*.15,6,endure.data.scale??1);
@@ -106,7 +108,8 @@ export class SkillRuntime {
  basic(caster,target){
   if(!target||target.hp<=0)target=this.opponents(caster)[0];
   if(this.isDisabled(caster)||!target||target.hp<=0)return {damage:0,crit:false};
-  if(this.has(caster,'confusion')&&this.rng()<.2)return this.damage(caster,caster,.5,{skill:false,noCounter:true});
+  if(this.has(caster,'shock')&&this.rng()<.25)return {damage:0,crit:false};
+  if(this.has(caster,'confusion')&&this.rng()<.2)return this.damage(caster,caster,.5,{skill:false,noCounter:true,confusion:true});
   const coil=this.getBuff(caster,'coil'),forced=!!caster.memory.coilReady;
   const ice=this.getBuff(caster,'iceShard');let multiplier=ice?.data.multiplier||caster.memory.nextBasicMultiplier||1;
   if(ice)this.removeBuff(caster,'iceShard');delete caster.memory.nextBasicMultiplier;
@@ -126,8 +129,10 @@ export class SkillRuntime {
  }
  cast(unit,moveName=unit.skill,scale=1){
   if(this.isDisabled(unit)||unit.holdUntil>this.time||!SKILLS[moveName])return false;
+  if(this.has(unit,'shock')&&this.rng()<.25){unit.gauge=0;return false;}
+  if(this.has(unit,'confusion')&&this.rng()<.2){unit.gauge=0;this.damage(unit,unit,.5,{skill:false,noCounter:true,confusion:true});return false;}
   const previous=this.context,help=this.getBuff(unit,'helpingHand'),swords=this.getBuff(unit,'swordsDance');
-  const context={id:++nextCastId,caster:unit,targets:new Set(),multiplier:1+(help?.data.damageBonus||0)/100+(unit.memory.growthReady||0),penetration:swords?.data.penetration||0};
+  const context={id:++nextCastId,caster:unit,targets:new Set(),moveName,multiplier:1+(help?.data.damageBonus||0)/100+(unit.memory.growthReady||0),penetration:swords?.data.penetration||0};
   this.context=context;const start=this.battle.events.length,oldGauge=unit.gauge;unit.gauge=0;
   let done;
   try{done=executeSkill(this,unit,moveName,scale)!==false;}finally{this.context=previous;}
@@ -145,12 +150,13 @@ export class SkillRuntime {
  }
  tick(dt){
   if(!(dt>0))return;
-  const before=this.time;const blocked=new Map(this.units.map(u=>[u,Math.max(before,u.holdUntil||0,this.has(u,'chargeStop')?u.buffs.chargeStop.expires:0,this.has(u,'sleep')&&u.statuses.sleep.data.freezeGauge?u.statuses.sleep.expires:0)]));this.time+=dt;
+  const before=this.time;const blocked=new Map(this.units.map(u=>[u,Math.max(before,u.holdUntil||0,this.has(u,'chargeStop')?u.buffs.chargeStop.expires:0,...['sleep','freeze','flinch','recharge'].map(k=>this.has(u,k)?u.statuses[k].expires:0))]));this.time+=dt;
   for(const u of this.units){
    if(u.hp<=0)continue;
-   const poison=u.statuses.poison;
-   if(poison){const elapsed=Math.min(this.time,poison.expires)-Math.max(before,poison.appliedAt);if(elapsed>0){const total=u.maxHp*(u.isBoss?.01:.05)*(poison.data.scale??1)*(1+(poison.source?.statusDamage||0)/100);const damage=Math.min(total-poison.paid,total*elapsed/poison.duration);poison.paid+=damage;this.damage(poison.source||u,u,0,{fixed:damage,pure:true,skill:false,noCounter:true,periodic:true});}}
-   for(const [key,s] of Object.entries(u.statuses)){if(s.expires<=this.time){delete u.statuses[key];if(key==='sleep'&&s.data.cleanseOnEnd)for(const bad of ['poison','burn','shock','confusion'])delete u.statuses[bad];}}
+   for(const statusKey of ['poison','burn']){const poison=u.statuses[statusKey];
+   if(poison){const elapsed=Math.min(this.time,poison.expires)-Math.max(before,poison.appliedAt);if(elapsed>0){const total=u.maxHp*(u.isBoss?.01:statusKey==='burn'?.03:.05)*(poison.data.scale??1)*(1+(poison.source?.statusDamage||0)/100);const damage=Math.min(total-poison.paid,total*elapsed/poison.duration);poison.paid+=damage;this.damage(poison.source||u,u,0,{fixed:damage,pure:true,skill:false,noCounter:true,periodic:true});}}
+   }
+   for(const [key,s] of Object.entries(u.statuses)){if(s.expires<=this.time){delete u.statuses[key];if(key==='sleep'&&s.data.cleanseOnEnd)for(const bad of ['poison','burn','shock','confusion','freeze','flinch'])delete u.statuses[bad];}}
    for(const [key,b] of Object.entries(u.buffs)){if(b.stacks)b.stacks=b.stacks.filter(t=>t>this.time);if(b.expires<=this.time||b.stacks?.length===0){delete u.buffs[key];if(key==='성장')u.memory.growthHits=0;if(key==='똬리틀기'){u.memory.coilHits=0;u.memory.coilReady=false;}if(key==='록커트')u.memory.rockHits=0;}}
    if(u.shieldUntil<=this.time)u.shield=0;
   }
@@ -163,7 +169,7 @@ export class SkillRuntime {
   for(const j of due)if(!j.owner||j.owner.hp>0)j.fn();
   for(const u of this.units){
    if(u.hp<=0)continue;const skill=SKILLS[u.skill];if(!skill)continue;
-   const freeze=this.has(u,'chargeStop')||u.holdUntil>this.time||(this.has(u,'sleep')&&u.statuses.sleep.data.freezeGauge);
+   const freeze=this.has(u,'chargeStop')||u.holdUntil>this.time||['sleep','freeze','flinch','recharge'].some(k=>this.has(u,k));
    if(!freeze){const st=this.effective(u);this.charge(u,Math.max(0,this.time-blocked.get(u))/skill.seconds*100*Math.max(0,1+st.skillHaste/100)*st.gaugeRate);}
    if(u.gauge>=100&&!this.isDisabled(u))this.cast(u);
   }

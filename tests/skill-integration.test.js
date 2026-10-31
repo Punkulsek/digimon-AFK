@@ -22,18 +22,18 @@ test('AoE retains per-target coefficient when opponents are missing',()=>{
  const expected=235;for(const t of many.targets)near(t.maxHp-t.hp,expected);near(one.targets[0].maxHp-one.targets[0].hp,expected);
  const medium=fixture(5);medium.runtime.cast(medium.caster,'에어커터');assert.equal(medium.targets.filter(t=>t.hp<t.maxHp).length,3);
 });
-test('sleep blocks basics and casts while ordinary sleep still charges; dream eater holds gauge',()=>{
+test('sleep blocks basics, casting and gauge; dream eater holds gauge',()=>{
  const {runtime,caster,targets}=fixture();caster.skill='불꽃세례';caster.gauge=100;
  assert.equal(runtime.cast(caster,'꿈먹기'),false);assert.equal(caster.gauge,100);
  caster.gauge=0;runtime.status(caster,'sleep',3,targets[0]);const hp=targets[0].hp;
- runtime.basic(caster,targets[0]);assert.equal(runtime.cast(caster,'불꽃세례'),false);runtime.tick(1);assert.equal(targets[0].hp,hp);near(caster.gauge,100/9);
+ runtime.basic(caster,targets[0]);assert.equal(runtime.cast(caster,'불꽃세례'),false);runtime.tick(1);assert.equal(targets[0].hp,hp);near(caster.gauge,0);
  runtime.removeStatus(caster,'sleep');runtime.status(caster,'sleep',3,targets[0],{freezeGauge:true});const gauge=caster.gauge;runtime.tick(1);near(caster.gauge,gauge);
 });
 test('nonstacking poison pays exactly total 5 percent, or 1 percent on bosses; curse has separate boss cap',()=>{
  for(const boss of [false,true]){const {runtime,caster,targets}=fixture(1),target=targets[0];target.isBoss=boss;
  runtime.status(target,'poison',6,caster);for(let i=0;i<60;i++)runtime.tick(.1);near(target.maxHp-target.hp,target.maxHp*(boss?.01:.05));}
  const {runtime,caster,targets}=fixture(1),target=targets[0];target.isBoss=true;runtime.status(target,'burn',6,caster);runtime.status(target,'burn',6,caster);near(runtime.effective(target).atk,85);
- runtime.cast(caster,'저주');for(let i=0;i<80;i++)runtime.tick(.1);near(target.maxHp-target.hp,target.maxHp*.01);
+ runtime.cast(caster,'저주');for(let i=0;i<80;i++)runtime.tick(.1);near(target.maxHp-target.hp,target.maxHp*.02);
 });
 test('execute skills never instant-kill bosses; copied moves exclude executes and recursive copying',()=>{
  const {runtime,caster,targets}=fixture(1),target=targets[0];target.isBoss=true;target.hp=target.maxHp*.1;

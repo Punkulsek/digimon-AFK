@@ -22,14 +22,14 @@ function single(name,fn){handlers[name]=x=>{if(!x.t)return false;x.e.context?.ta
 function area(name,n,fn){handlers[name]=x=>{if(!x.t)return false;for(const [i,t] of x.enemies.slice(0,n).entries()){x.e.context?.targets.add(t.uid);fn(x,t,i);}};}
 function periodic(x,t,name,seconds,k){x.e.dot(x.c,t,name,seconds,2,()=>x.hit(t,k));}
 function drain(x,t,k,p){const out=x.hit(t,k);x.heal(x.c,out.damage*p);return out;}
-function charged(x,seconds,fn){x.c.castingUntil=x.e.time+seconds;const release=()=>{if(!alive(x.c))return;if(x.e.has(x.c,'sleep')){x.c.castingUntil=x.e.time+.05;x.e.delay(.05,release,x.c);return;}fn();};x.e.delay(seconds,release,x.c);}
+function charged(x,seconds,fn){x.c.castingUntil=x.e.time+seconds;const release=()=>{if(!alive(x.c))return;if(['sleep','freeze','flinch','recharge'].some(k=>x.e.has(x.c,k))){x.c.castingUntil=x.e.time+.05;x.e.delay(.05,release,x.c);return;}fn();};x.e.delay(seconds,release,x.c);}
 function recoil(x,n){return x.e.recoil(x.c,n*x.s);}
 function statusBonus(x,t,key,k,extra,chance,duration){const before=x.e.has(t,key);x.hit(t,k);if(before)x.hit(t,extra);x.status(t,key,duration,chance);}
 
 single('불꽃세례',(x,t)=>statusBonus(x,t,'burn',1.7,.7,.55,5));
 area('불꽃회오리',3,(x,t)=>{x.hit(t,1.4);periodic(x,t,'불꽃회오리',6,.4);});
 handlers['오버히트']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.9:4.3));x.buff(x.c,'오버히트',6,{atkPct:-20});};
-handlers['하이드로캐논']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.9:4.5,{shieldBonus:80*x.s}));x.e.hold(x.c,3);};
+handlers['하이드로캐논']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.9:4.5,{shieldBonus:80*x.s}));x.e.status(x.c,'recharge',3,x.c);};
 single('독침',(x,t)=>{x.hit(t,1.2);x.status(t,'poison',6,.7);});
 single('더블니들',(x,t)=>{x.hit(t,1.2);x.status(t,'poison',6,.4);x.hit(t,x.e.has(t,'poison')?1.8:1.2);x.status(t,'poison',6,.4);});
 area('바람일으키기',3,(x,t)=>{x.hit(t,1.3);x.buff(t,'바람일으키기',4,{attackSpeedPct:-10});});
@@ -54,7 +54,7 @@ handlers['꽃잎댄스']=x=>{const targets=x.enemies.slice(0,5);for(let i=0;i<3;
 single('기가드레인',(x,t)=>drain(x,t,3.3,.5));
 single('땅파기',(x,t)=>charged(x,1,()=>x.hit(t,3.4,{penetration:20*x.s})));
 single('땅가르기',(x,t)=>{if(!t.isBoss&&ratio(t)<=.18)x.e.execute(x.c,t,x.type);else x.hit(t,4.1,{penetration:t.isBoss?35*x.s:0});});
-single('속이기',(x,t)=>{const first=!x.c.memory.fakeOutUsed;x.c.memory.fakeOutUsed=true;x.hit(t,first?3.1:2.1);if(first)x.e.hold(t,2);});
+single('속이기',(x,t)=>{const first=!x.c.memory.fakeOutUsed;x.c.memory.fakeOutUsed=true;x.hit(t,first?3.1:2.1);if(first)x.status(t,'flinch',2);});
 single('염동력',(x,t)=>{x.hit(t,2);x.status(t,'confusion',5,.5);});
 area('사이코키네시스',3,(x,t)=>{x.hit(t,2.3);if(x.e.rng()<.6*x.s)x.buff(t,'사이코키네시스',6,{defPct:-15});});
 single('분노',(x,t)=>{x.hit(t,2*(1+(x.c.memory.rage||0)*.18));x.c.memory.rage=0;});
@@ -73,7 +73,7 @@ area('용해액',3,(x,t)=>{x.hit(t,1.45);x.buff(t,'용해액',6,{defPct:-12});})
 area('오물웨이브',5,(x,t)=>{x.hit(t,1.85);x.status(t,'poison',7,.6);});
 single('돌떨구기',(x,t)=>{x.hit(t,2.35);x.buff(t,'돌떨구기',5,{attackSpeedPct:-15});});
 single('불꽃바퀴',(x,t)=>{x.hit(t,2.15);x.status(t,'burn',5,.55);x.buff(x.c,'flameWheel',Infinity,{}, {coefficient:.8*x.s});});
-area('트라이어택',3,(x,t)=>{x.hit(t,2);const key=['burn','shock','confusion'][Math.floor(x.e.rng()*3)];x.status(t,key,6,.7);});
+area('트라이어택',3,(x,t)=>{x.hit(t,2);const key=['burn','shock','freeze'][Math.floor(x.e.rng()*3)];x.status(t,key,key==='freeze'?2:6,.7);});
 single('얼음뭉치',(x,t)=>{x.hit(t,1.9);x.buff(t,'얼음뭉치',5,{attackSpeedPct:-12});x.buff(x.c,'iceShard',Infinity,{}, {multiplier:1+.5*x.s});});
 area('오로라빔',3,(x,t)=>{x.hit(t,1.8);if(x.e.rng()<.65*x.s)x.buff(t,'오로라빔',6,{atkPct:-20});});
 area('오물폭탄',3,(x,t,i)=>{x.hit(t,i?1.55:3.2);x.status(t,'poison',7,.7);});
@@ -83,7 +83,7 @@ single('조이기',(x,t)=>{x.hit(t,1.5);periodic(x,t,'조이기',6,.55);x.buff(t
 single('찝기',(x,t)=>x.hit(t,2.8,{shieldBonus:60*x.s}));
 single('집게해머',(x,t)=>{const out=x.hit(t,4.2,{critChance:30*x.s});if(out.crit)x.buff(t,'집게해머',6,{defPct:-20});});
 area('소닉붐',3,(x,t)=>x.hit(t,0,{fixed:x.c.level*10+50}));
-handlers['대폭발']=x=>{if(ratio(x.c)<=.2)return false;x.enemies.slice(0,5).forEach(t=>x.hit(t,4.4));recoil(x,x.c.hp*.6);x.e.hold(x.c,4);};
+handlers['대폭발']=x=>{if(ratio(x.c)<=.2)return false;x.enemies.slice(0,5).forEach(t=>x.hit(t,4.4));recoil(x,x.c.hp*.6);x.e.status(x.c,'recharge',4,x.c);};
 area('씨폭탄',3,(x,t)=>{x.hit(t,1.8);x.c.memory.seedBomb??={};const count=(x.c.memory.seedBomb[t.uid]||0)+1;x.c.memory.seedBomb[t.uid]=count%3;if(count%3===0)x.hit(t,1.2);});
 handlers['솔라빔']=x=>{const targets=x.enemies.slice(0,3);targets.forEach(t=>x.e.context?.targets.add(t.uid));charged(x,2,()=>targets.forEach((t,i)=>x.hit(t,i?1.9:4.7)));};
 single('뼈다귀치기',(x,t)=>{x.hit(t,2.8);x.e.charge(t,-15*x.s);});
@@ -93,9 +93,9 @@ single('마하펀치',(x,t)=>{let crit=0;for(let i=0;i<3;i++)if(x.hit(t,1.1).cri
 single('핥기',(x,t)=>{x.hit(t,2.1);if(x.status(t,'shock',5,.55))x.e.charge(t,-15*x.s);});
 area('스모그',3,(x,t)=>{x.hit(t,1.25);x.status(t,'poison',6,.65);});
 single('뿔찌르기',(x,t)=>x.hit(t,3,{penetration:20*x.s}));
-handlers['암석포']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.85:4.9));x.e.hold(x.c,3);};
+handlers['암석포']=x=>{x.enemies.slice(0,3).forEach((t,i)=>x.hit(t,i?1.85:4.9));x.e.status(x.c,'recharge',3,x.c);};
 area('용의숨결',3,(x,t)=>{x.hit(t,1.85);x.status(t,'shock',5,.55);});
-single('폭포오르기',(x,t)=>{x.hit(t,2.8);x.e.charge(t,-15*x.s);});
+single('폭포오르기',(x,t)=>{x.hit(t,2.8);x.status(t,'flinch',1,.3);});
 single('뿔드릴',(x,t)=>{if(!t.isBoss&&ratio(t)<=.2)x.e.execute(x.c,t,x.type);else x.hit(t,4.2,{penetration:t.isBoss?35*x.s:0});});
 handlers['스피드스타']=x=>{x.enemies.slice(0,3).forEach(t=>x.hit(t,1.75));x.buff(x.c,'스피드스타',6,{skillHaste:12});};
 single('시저크로스',(x,t)=>{x.hit(t,2.1);x.hit(t,2.1*(ratio(t)<=.4?1.4:1));});
@@ -105,7 +105,7 @@ handlers['난동부리기']=x=>{const targets=x.enemies.slice(0,3);for(let i=0;i
 single('플레어드라이브',(x,t)=>{x.hit(t,5.1);x.status(t,'burn',7);recoil(x,x.c.maxHp*.15);});
 handlers['원시의힘']=x=>{x.enemies.slice(0,3).forEach(t=>x.hit(t,1.9));if(x.e.rng()<.3*x.s)x.buff(x.c,'원시의힘',8,{atkPct:20,defPct:20,attackSpeedPct:20});};
 single('불새',(x,t)=>{x.buff(x.c,'불새',1.5,{defPct:-15});charged(x,1.5,()=>x.hit(t,5.5,{critChance:25*x.s}));});
-area('눈보라',5,(x,t)=>{x.hit(t,2.25);x.buff(t,'눈보라',6,{attackSpeedPct:-20});});
+area('눈보라',5,(x,t)=>{x.hit(t,2.25);x.status(t,'freeze',2,.3);});
 handlers['방전']=x=>{let successes=0;for(const t of x.enemies.slice(0,5)){x.hit(t,2.15);if(x.status(t,'shock',6,.55))successes++;}x.e.charge(x.c,Math.min(20,successes*4)*x.s);};
 single('용의분노',(x,t)=>x.hit(t,0,{fixed:x.c.level*13+60}));
 handlers['역린']=x=>{const targets=x.enemies.slice(0,3);for(let i=0;i<2;i++)targets.forEach(t=>x.hit(t,1.65));if(targets[0])x.hit(targets[0],2.1);x.status(x.c,'confusion',4);};
@@ -114,7 +114,7 @@ handlers['사이코브레이크']=x=>{const target=x.highest(x.enemies,'atk');if
 // Support / control moves.
 single('씨뿌리기',(x,t)=>x.e.dot(x.c,t,'씨뿌리기',8,2,()=>{const out=x.hit(t,0,{fixed:t.maxHp*.0125,percentHp:true});x.heal(x.c,out.damage);}));
 handlers['성장']=x=>x.buff(x.c,'성장',9,{atkPct:25,skillAmplification:20});
-handlers['아로마테라피']=x=>{for(const a of x.allies)for(const k of ['poison','burn','shock','confusion'])x.e.removeStatus(a,k);x.lowest(3).forEach(a=>x.heal(a,x.atk()*1.6));};
+handlers['아로마테라피']=x=>{for(const a of x.allies)for(const k of ['poison','burn','shock','confusion','freeze','flinch'])x.e.removeStatus(a,k);x.lowest(3).forEach(a=>x.heal(a,x.atk()*1.6));};
 handlers['껍질에숨기']=x=>{x.shield(x.c,x.c.maxHp*.16,7);x.buff(x.c,'껍질에숨기',7,{defPct:25});};
 handlers['철벽']=x=>x.buff(x.c,'철벽',8,{defPct:40,damageReduction:8});
 area('실뿜기',3,(x,t)=>{x.hit(t,.6);x.buff(t,'실뿜기',6,{attackSpeedPct:-22,gaugeRatePct:-10});});
@@ -157,7 +157,7 @@ handlers['바톤터치']=x=>{const target=x.highest(x.allies.filter(a=>a!==x.c),
 handlers['아쿠아링']=x=>x.lowest(3).forEach(a=>x.e.dot(x.c,a,'아쿠아링',8,2,()=>x.heal(a,x.atk()*.7)));
 handlers['껍질깨기']=x=>x.buff(x.c,'껍질깨기',9,{atkPct:55,attackSpeedPct:35,skillAmplification:25,defPct:-30});
 handlers['버티기']=x=>{if((x.c.memory.endureUses||0)>=2)return false;x.buff(x.c,'버티기',6,{}, {shieldRatio:.15*x.s});};
-handlers['잠자기']=x=>{x.status(x.c,'sleep',2.5);x.heal(x.c,x.c.maxHp*.5);x.e.delay(2.5,()=>{for(const key of ['poison','burn','shock','confusion'])x.e.removeStatus(x.c,key);},x.c);};
+handlers['잠자기']=x=>{x.status(x.c,'sleep',2.5);x.heal(x.c,x.c.maxHp*.5);x.e.delay(2.5,()=>{for(const key of ['poison','burn','shock','confusion','freeze','flinch'])x.e.removeStatus(x.c,key);},x.c);};
 handlers['신비의부적']=x=>{for(const a of x.allies){for(const key of Object.keys(a.statuses))x.e.removeStatus(a,key);x.buff(a,'신비의부적',7,{}, {charges:1});}};
 
 const attackNames=Object.keys(skillData.moves).slice(0,Object.keys(skillData.moves).indexOf('씨뿌리기'));
