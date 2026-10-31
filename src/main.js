@@ -1,3 +1,5 @@
+import {installModalScrollGuard} from './modal-scroll.js';
+installModalScrollGuard();
 import {STATUS_LABELS,skillExtras} from './status-rules.js';
 import {createRuneUI} from './rune-ui.js';
 import {summonPayment,missionInfo,claimMission,syncMissions} from './missions.js';
