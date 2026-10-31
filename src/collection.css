@@ -757,3 +757,13 @@
 @media(max-height:500px){.rune-modal .modal-header{padding:8px 16px}.rune-modal .modal-body{padding:12px}.rune-wheel{max-width:210px}.rune-row button{padding:4px;font-size:11px}.rune-grade{font-size:16px}.rune-layout{gap:12px}.rune-owner .pokemon-art{height:36px}.rune-hero p{font-size:11px;margin:4px}}
 .rune-modal .rune-hero .soft-button{background:#08798d;color:#e5ffff;border:1px solid #4ac5d2}.rune-modal .primary-button{background:#0ea99c;color:white;border-bottom:3px solid #005667}.rune-modal .rune-auto .primary-button{background:#f5a300;color:white;border-bottom-color:#a45f00}.rune-modal .modal-header{padding:10px 20px}.rune-modal .rune-owner .pokemon-art{flex:0 0 58px}.rune-modal .rune-hero{position:static}.rune-modal .rune-row button{padding:5px 7px}.rune-modal .rune-auto{gap:6px;padding:8px}.rune-modal .rune-help{margin:8px 0}.rune-modal .rune-hero p{margin:8px 0}
 .rune-auto[hidden]{display:none}.rune-auto-open{margin-top:8px}.rune-row .rune-grade{color:#d6ebef}.rune-row .grade-1{color:#ff8fc0}.rune-row .grade-2{color:#ffe14b}.rune-row .grade-3{color:#dab0ff}
+/* Hide scrollbars without disabling wheel, touch or keyboard scrolling. */
+*,*::before,*::after{scrollbar-width:none!important;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.detail-modal .modal-body{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr) 115px}
+.detail-modal .growth-side-menu{grid-column:3;grid-row:2;position:sticky;top:0;display:flex;flex-direction:column;gap:13px;padding:7px 6px;margin:0;align-self:start}
+.detail-modal .growth-side-menu button{min-height:65px;padding:12px 5px;background:linear-gradient(130deg,#167e90,#064353);color:#e6ffff;border:2px solid #37bdc5;border-radius:5px;transform:skew(-12deg);box-shadow:0 5px #003c4a;font-weight:900;font-size:17px;text-shadow:0 2px #063845}
+.detail-modal .growth-side-menu button span{display:block;transform:skew(12deg)}
+.detail-modal .growth-side-menu button[aria-pressed=true]{background:linear-gradient(130deg,#17c5b4,#0b8495);border-color:#82fff0;color:#fff;box-shadow:0 5px #075562}
+.detail-modal .growth-side-menu button:hover{filter:brightness(1.15)}
+@media(max-width:900px){.detail-modal .modal-body{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) 78px;gap:8px}.detail-modal .growth-side-menu{padding:5px 4px;gap:10px}.detail-modal .growth-side-menu button{min-height:49px;font-size:13px;padding:8px 2px}}
