@@ -1,13 +1,14 @@
-/* Five 1536×1024 atlases, four 768×512 scenes each. The image files remain unchanged.
-   This 3:2 plane covers the viewport while keeping each region's native aspect. */
+/* FRLG reference-based atlases: four 768×512 scenes per 1536×1024 image.
+   Keep the 3:2 aspect and anchor the walkable foreground to the viewport bottom.
+   On widescreens, crop the upper scenery rather than the teams' ground. */
 .scene:not([data-dungeon]) { background:#26483d; filter:none; transition:none; }
 .scene:not([data-dungeon]) > :not(.region-art) { display:none; }
 .region-art {
   position:absolute;
-  left:50%; top:50%;
+  left:50%; bottom:0;
   width:max(100vw,150vh); height:max(100vh,calc(100vw * 2 / 3));
   width:max(100dvw,150dvh); height:max(100dvh,calc(100dvw * 2 / 3));
-  transform:translate(-50%,-50%);
+  transform:translateX(-50%);
   background-size:200% 200%; background-repeat:no-repeat;
   image-rendering:pixelated;
 }

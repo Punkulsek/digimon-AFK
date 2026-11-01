@@ -1,167 +1,217 @@
 [
   {
     "file": "kanto-1.png",
-    "sha256": "cdf834ada17f947ac9dd03007996abc6d48dc207405ea2a1936ff796e46eae79",
+    "sha256": "10179fb58365641b7f51ace51069a937189fac89e69f13822af8839cfbf2b651",
     "width": 1536,
     "height": 1024,
-    "source": "OpenAI image generation, user-requested original environment art",
+    "source": "OpenAI image generation using rendered FireRed/LeafGreen map references; adapted battle view",
     "regions": [
       {
         "id": 1,
         "name": "상록숲",
         "column": 0,
-        "row": 0
+        "row": 0,
+        "referenceMap": "ViridianForest"
       },
       {
         "id": 2,
         "name": "회색체육관",
         "column": 1,
-        "row": 0
+        "row": 0,
+        "referenceMap": "PewterCity_Gym"
       },
       {
         "id": 3,
         "name": "달맞이산",
         "column": 0,
-        "row": 1
+        "row": 1,
+        "referenceMap": "MtMoon_1F"
       },
       {
         "id": 4,
         "name": "블루체육관",
         "column": 1,
-        "row": 1
+        "row": 1,
+        "referenceMap": "CeruleanCity_Gym"
       }
-    ]
+    ],
+    "generation": "b831a6f1-ee5a-4892-95af-86b637c5aef0",
+    "reference": {
+      "repository": "https://github.com/pret/pokefirered",
+      "commit": "ce6406d8c2eaf46d543c8a2606de0c3cb1951982",
+      "version": "FireRed / LeafGreen"
+    }
   },
   {
     "file": "kanto-2.png",
-    "sha256": "ad5c39df9a722c81667c01db1e71cba67bfff34c1563ea5c526799c58dcbd7c4",
+    "sha256": "6eab34f1b95b4c62823b86920e686a1f09f80bab9f258da4a11fac4af1f373ce",
     "width": 1536,
     "height": 1024,
-    "source": "OpenAI image generation, user-requested original environment art",
+    "source": "OpenAI image generation using rendered FireRed/LeafGreen map references; adapted battle view",
     "regions": [
       {
         "id": 5,
         "name": "상트안느호",
         "column": 0,
-        "row": 0
+        "row": 0,
+        "referenceMap": "SSAnne_Deck"
       },
       {
         "id": 6,
         "name": "갈색체육관",
         "column": 1,
-        "row": 0
+        "row": 0,
+        "referenceMap": "VermilionCity_Gym"
       },
       {
         "id": 7,
         "name": "바위터널",
         "column": 0,
-        "row": 1
+        "row": 1,
+        "referenceMap": "RockTunnel_1F"
       },
       {
         "id": 8,
         "name": "포켓몬타워",
         "column": 1,
-        "row": 1
+        "row": 1,
+        "referenceMap": "PokemonTower_3F"
       }
-    ]
+    ],
+    "generation": "b4d2cd89-c33c-46e4-bb05-72e8f06f5fbf",
+    "reference": {
+      "repository": "https://github.com/pret/pokefirered",
+      "commit": "ce6406d8c2eaf46d543c8a2606de0c3cb1951982",
+      "version": "FireRed / LeafGreen"
+    }
   },
   {
     "file": "kanto-3.png",
-    "sha256": "d0012fcd8d89b9c317f81f94b7e47ac8b51ed8b559562ef8fbe16d1a4c0434e4",
+    "sha256": "4a0675f7ee218d6479e681687f9b5b01607a82fade981da6b0b21e267c7f16ac",
     "width": 1536,
     "height": 1024,
-    "source": "OpenAI image generation, user-requested original environment art",
+    "source": "OpenAI image generation using rendered FireRed/LeafGreen map references; adapted battle view",
     "regions": [
       {
         "id": 9,
         "name": "로켓단 아지트",
         "column": 0,
-        "row": 0
+        "row": 0,
+        "referenceMap": "RocketHideout_B2F"
       },
       {
         "id": 10,
         "name": "무지개체육관",
         "column": 1,
-        "row": 0
+        "row": 0,
+        "referenceMap": "CeladonCity_Gym"
       },
       {
         "id": 11,
         "name": "실프주식회사",
         "column": 0,
-        "row": 1
+        "row": 1,
+        "referenceMap": "SilphCo_3F"
       },
       {
         "id": 12,
         "name": "사파리존",
         "column": 1,
-        "row": 1
+        "row": 1,
+        "referenceMap": "SafariZone_Center"
       }
-    ]
+    ],
+    "generation": "07274587-a7e6-48d1-8c58-f0579e1b88f3",
+    "reference": {
+      "repository": "https://github.com/pret/pokefirered",
+      "commit": "ce6406d8c2eaf46d543c8a2606de0c3cb1951982",
+      "version": "FireRed / LeafGreen"
+    }
   },
   {
     "file": "kanto-4.png",
-    "sha256": "9d08c9a4fb99fd9922aac3e9afec26a51ee17df5ef282eae71fb0ed972ec132e",
+    "sha256": "9b3adebc2af31f43ab60cb1ecf97713a7eecd0cdffb65b7dccfc42d01fdcd492",
     "width": 1536,
     "height": 1024,
-    "source": "OpenAI image generation, user-requested original environment art",
+    "source": "OpenAI image generation using rendered FireRed/LeafGreen map references; adapted battle view",
     "regions": [
       {
         "id": 13,
         "name": "무인발전소",
         "column": 0,
-        "row": 0
+        "row": 0,
+        "referenceMap": "PowerPlant"
       },
       {
         "id": 14,
         "name": "쌍둥이섬",
         "column": 1,
-        "row": 0
+        "row": 0,
+        "referenceMap": "SeafoamIslands_1F"
       },
       {
         "id": 15,
         "name": "포켓몬저택",
         "column": 0,
-        "row": 1
+        "row": 1,
+        "referenceMap": "PokemonMansion_1F"
       },
       {
         "id": 16,
         "name": "홍련체육관",
         "column": 1,
-        "row": 1
+        "row": 1,
+        "referenceMap": "CinnabarIsland_Gym"
       }
-    ]
+    ],
+    "generation": "2e7233af-ccc6-4759-ac9a-1b5fb52993de",
+    "reference": {
+      "repository": "https://github.com/pret/pokefirered",
+      "commit": "ce6406d8c2eaf46d543c8a2606de0c3cb1951982",
+      "version": "FireRed / LeafGreen"
+    }
   },
   {
     "file": "kanto-5.png",
-    "sha256": "b76ea3adf60b1d761374f52999b5c07dde134dee7c7db4983e3dcb86c8b4aabc",
+    "sha256": "ae5c188788264dcdea6d5406fac94637999d724745624a72ba79772987510d76",
     "width": 1536,
     "height": 1024,
-    "source": "OpenAI image generation, user-requested original environment art",
+    "source": "OpenAI image generation using rendered FireRed/LeafGreen map references; adapted battle view",
     "regions": [
       {
         "id": 17,
         "name": "상록체육관",
         "column": 0,
-        "row": 0
+        "row": 0,
+        "referenceMap": "ViridianCity_Gym"
       },
       {
         "id": 18,
         "name": "챔피언로드",
         "column": 1,
-        "row": 0
+        "row": 0,
+        "referenceMap": "VictoryRoad_1F"
       },
       {
         "id": 19,
         "name": "석영고원",
         "column": 0,
-        "row": 1
+        "row": 1,
+        "referenceMap": "IndigoPlateau_Exterior"
       },
       {
         "id": 20,
         "name": "블루시티 동굴",
         "column": 1,
-        "row": 1
+        "row": 1,
+        "referenceMap": "CeruleanCave_1F"
       }
-    ]
+    ],
+    "generation": "43e53dad-a9fc-4bcf-a449-53e39c6f8a06",
+    "reference": {
+      "repository": "https://github.com/pret/pokefirered",
+      "commit": "ce6406d8c2eaf46d543c8a2606de0c3cb1951982",
+      "version": "FireRed / LeafGreen"
+    }
   }
 ]

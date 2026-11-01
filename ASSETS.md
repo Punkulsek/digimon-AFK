@@ -51,22 +51,35 @@ stored under `public/scene/dungeons/` and embedded in `play.html`.
 The client repository specifies AGPLv3; separate per-image reuse permissions
 have not been verified. User selection does not transfer underlying artwork rights.
 
-## Generated Kanto region backgrounds
+## FireRed / LeafGreen Kanto region backgrounds
 
-The user explicitly requested creating and applying new backgrounds in a similar
-pixel-art style to the existing environments. Twenty new environment scenes were
-created with OpenAI image generation for this project. These are original generated
-interpretations of the requested locations, not extracted official game backgrounds.
-No Pokémon sprites, music, currency icons or dungeon art were generated or replaced.
+The user selected FireRed / LeafGreen as the visual reference. All twenty normal
+region backgrounds were regenerated using actual map layouts, tiles and palettes
+from https://github.com/pret/pokefirered at commit
+`ce6406d8c2eaf46d543c8a2606de0c3cb1951982`. Maps were rendered from the source's
+`data/layouts` blockmaps and primary/secondary metatiles to provide visual references.
+The generated images reconstruct recognizable architecture and terrain for a battle
+view; they are not pixel-exact copies of the original overhead maps. Obstacles are
+placed behind a continuous walkable foreground for the existing two teams.
+No Pokémon sprites, music, currency icons or dungeon art were replaced.
 
 - Files: `public/scene/regions/kanto-1.png` through `kanto-5.png`.
 - Each unchanged 1536×1024 PNG contains four 768×512 scenes in reading order.
 - Five sheets cover region IDs 1–4, 5–8, 9–12, 13–16 and 17–20 respectively.
 - The renderer displays one quadrant at its native aspect ratio, using CSS to cover
-  the viewport. No other quadrant is shown in the game.
+  the viewport and anchoring the foreground to the bottom. No other quadrant is shown.
 - All five sheets are embedded once in `play.html` for offline play.
-- `sources.json` records SHA-256 hashes and the region mapping; it does not assert
-  a third-party asset license for these generated images.
+- `sources.json` records SHA-256 hashes, generation IDs, source maps and region mapping.
+  Pokémon location designs remain the property of their respective rights holders.
+
+### Environment art style for subsequent dungeon work
+
+Use the Kanto atlases as the shared style reference: crisp GBA-style pixel edges,
+consistent texture density and restrained shading, slightly elevated front view,
+and clear solid ground in the lower battlefield. Use the source region's actual
+palette and objects (e.g. green Tower floor, Cinnabar quiz rooms); do not replace
+them with generic themed scenery. Future dungeon art should follow this style;
+the existing dungeon backgrounds are unchanged by this normal-stage update.
 
 ## 소환 포켓몬 일러스트
 사용자 요청에 따라 새로 생성한 만화풍 포켓몬 단체 일러스트: `public/scene/summon/pokemon-ensemble.png`. 포켓몬 캐릭터 권리는 Nintendo / Creatures / GAME FREAK에 있습니다. 독립 실행 HTML에도 포함합니다.
