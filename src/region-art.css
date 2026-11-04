@@ -1,20 +1,9 @@
-/* FRLG reference-based atlases: four 768×512 scenes per 1536×1024 image.
-   Keep the 3:2 aspect and anchor the walkable foreground to the viewport bottom.
-   On widescreens, crop the upper scenery rather than the teams' ground. */
-.scene:not([data-dungeon]) { background:#26483d; filter:none; transition:none; }
-.scene:not([data-dungeon]) > :not(.region-art) { display:none; }
-.region-art {
-  position:absolute;
-  left:50%; bottom:0;
-  width:max(100vw,150vh); height:max(100vh,calc(100vw * 2 / 3));
-  width:max(100dvw,150dvh); height:max(100dvh,calc(100dvw * 2 / 3));
-  transform:translateX(-50%);
-  background-size:200% 200%; background-repeat:no-repeat;
-  image-rendering:pixelated;
-}
-.region-art[data-atlas="1"] { background-image:url('/scene/regions/kanto-1.png'); }
-.region-art[data-atlas="2"] { background-image:url('/scene/regions/kanto-2.png'); }
-.region-art[data-atlas="3"] { background-image:url('/scene/regions/kanto-3.png'); }
-.region-art[data-atlas="4"] { background-image:url('/scene/regions/kanto-4.png'); }
-.region-art[data-atlas="5"] { background-image:url('/scene/regions/kanto-5.png'); }
+/* Four equal horizontal scenery strips per atlas; combat ground is separate. */
+.scene:not([data-dungeon]) > :not(.region-art):not(.battle-floor) { display:none; }
+.region-art { position:absolute; inset:0 0 auto; width:100%; height:var(--scenery-height); background-size:100% 400%; background-repeat:no-repeat; image-rendering:pixelated; pointer-events:none; }
+.region-art[data-atlas="1"] { background-image:url('/scene/panoramas/regions-1.png'); }
+.region-art[data-atlas="2"] { background-image:url('/scene/panoramas/regions-2.png'); }
+.region-art[data-atlas="3"] { background-image:url('/scene/panoramas/regions-3.png'); }
+.region-art[data-atlas="4"] { background-image:url('/scene/panoramas/regions-4.png'); }
+.region-art[data-atlas="5"] { background-image:url('/scene/panoramas/regions-5.png'); }
 .scene[data-dungeon] > .region-art { display:none; }

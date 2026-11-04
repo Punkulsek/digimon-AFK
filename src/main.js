@@ -83,6 +83,8 @@ import "./dungeon.css";
 import "./stages.css";
 import "./region-art.css";
 import "./type-art.css";
+import "./battle-scenery.css";
+import {regionScenery,dungeonScenery,panoramaPosition} from './battle-scenery.js';
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
@@ -221,7 +223,7 @@ $("#app").innerHTML = `
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정"><img class="settings-gear" src="${window.POKEMON_SETTINGS_GEAR||'/ui/settings-gear.png'}" alt="" aria-hidden="true"></button></header>
 <main class="adventure"><button class="mission-button soft-button" data-action="missions" aria-label="미션"><svg class="mission-clipboard" viewBox="0 0 48 52" aria-hidden="true"><path d="M13 9 39 13 35 48 5 42Z" fill="#45342e" stroke="#161719" stroke-width="3"/><path d="m12 7 29 5-6 32-29-5Z" fill="#fffbed" stroke="#14191c" stroke-width="3" stroke-linejoin="round"/><path d="m21 5 3-3 6 1 2 4 4 1-1 7-18-3 1-7Z" fill="#badbd9" stroke="#16191c" stroke-width="3"/><path d="m12 21 3 3 5-5m-10 12 3 3 5-5" fill="none" stroke="#203036" stroke-width="3"/><path d="m24 23 10 2m-12 8 10 2" stroke="#203036" stroke-width="3"/></svg><span class="mission-label">미션</span><span class="mission-ready-dot" hidden aria-hidden="true"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
-<div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
+<div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="battle-floor" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
 <div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition" role="status" aria-live="polite"><div class="clear-ribbon"><small>스테이지</small><strong>클리어!</strong><span>다음 모험을 향해 출발해요</span></div></div>
@@ -286,13 +288,14 @@ function updateHud() {
   if (battle.dungeon) $("#scene").dataset.dungeon = battle.dungeon.id;
   else delete $("#scene").dataset.dungeon;
   $("#scene").dataset.region = regionIndex(state.stage);
-  const typeArt=EVOLUTION_TYPES.find(t=>battle.dungeon?.id===`evolution-${t.id}`)?.art;
+  const typeArt=dungeonScenery(battle.dungeon?.id);
   const typeBackdrop=$("#scene > .type-background");typeBackdrop.hidden=!typeArt;
-  if(typeArt){typeBackdrop.dataset.atlas=typeArt.atlas;typeBackdrop.style.backgroundPosition=`${typeArt.column*100}% ${typeArt.row*50}%`;}
-  const artConfig=regionForStage(state.stage).art;
+  if(typeArt){typeBackdrop.dataset.atlas=typeArt.atlas;typeBackdrop.style.backgroundPosition=panoramaPosition(typeArt);typeBackdrop.style.setProperty('--panorama-rows',typeArt.rows);}
+  const artConfig=regionScenery(regionIndex(state.stage));
+  $('#scene').dataset.floor=(typeArt||artConfig).floor;
   const backdrop=$(".region-art");
   backdrop.dataset.atlas=artConfig.atlas;
-  backdrop.style.backgroundPosition=`${artConfig.column*100}% ${artConfig.row*100}%`;
+  backdrop.style.backgroundPosition=panoramaPosition(artConfig);
   $("#boss-progress-ui").hidden = !!battle.dungeon;
   const ready=state.kills>=STAGE_KILLS&&!battle.boss&&!state.campaignCleared;
   $("#boss-gauge").setAttribute("aria-valuenow",state.campaignCleared||battle.boss?STAGE_KILLS:state.kills);

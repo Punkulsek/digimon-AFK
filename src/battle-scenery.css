@@ -1,0 +1,46 @@
+/* Shared boundary for scenery, independent platform and both combat teams. */
+.battlefield { --scenery-height:40%; --combat-top:calc(40% + 26px); }
+#scene.scene,#scene.scene[data-dungeon] { background:#202a37; filter:none; transition:none; }
+#scene.scene[data-dungeon] > .type-background:not([hidden]) { display:block; }
+#scene.scene > .battle-floor {
+  display:block; position:absolute; z-index:1;
+  top:var(--scenery-height); bottom:var(--menu-height,80px); left:0; right:0;
+  box-sizing:border-box; pointer-events:none; overflow:hidden;
+  border:clamp(5px,.65vw,12px) solid #33394f;
+  border-top-color:#737b94; border-bottom-color:#171e30;
+  box-shadow:0 -3px #b5aab0,0 -9px 0 #24293d,0 -12px 12px #10152477,
+    inset 0 5px #20263888,inset 0 -5px #d3c4ad55;
+  background:#bf9163 url('/scene/panoramas/floors.png') 0% 0% / 200% 200% no-repeat;
+  image-rendering:pixelated;
+}
+#scene[data-floor="stone"] > .battle-floor { background-position:100% 0%; }
+#scene[data-floor="wood"] > .battle-floor { background-position:0% 100%; }
+#scene[data-floor="metal"] > .battle-floor { background-position:100% 100%; }
+/* Keep the established mirrored front-three / rear-two formation entirely
+   inside the platform, including gauges and temporary status icons. */
+#fighters.fighters,#enemy.enemy-squad,#enemy.enemy-squad.boss-formation {
+  top:var(--combat-top); bottom:calc(var(--menu-height,80px) + 24px);
+  height:auto; width:min(27vw,370px); column-gap:14px; translate:none;
+}
+#fighters.fighters { left:15%; }
+#enemy.enemy-squad { right:15%; }
+#fighters .field-art { height:clamp(32px,9vh,100px); }
+#enemy.enemy-squad .fighter.enemy { height:clamp(30px,8.2vh,92px); }
+#enemy.enemy-squad .fighter.enemy.boss { height:clamp(38px,10.4vh,118px); }
+@media(max-height:700px) {
+  .battlefield { --scenery-height:37%; --combat-top:calc(37% + 18px); }
+  #fighters.fighters,#enemy.enemy-squad,#enemy.enemy-squad.boss-formation { bottom:calc(var(--menu-height,70px) + 14px); }
+  #fighters .field-art { height:8vh; }
+  #enemy.enemy-squad .fighter.enemy { height:7.5vh; }
+  #enemy.enemy-squad .fighter.enemy.boss { height:9.5vh; }
+}
+@media(max-height:500px) {
+  .battlefield { --scenery-height:34%; --combat-top:calc(34% + 14px); }
+  #fighters.fighters,#enemy.enemy-squad,#enemy.enemy-squad.boss-formation { width:29%; bottom:calc(var(--menu-height,52px) + 10px); column-gap:5px; }
+  #fighters.fighters { left:12%; } #enemy.enemy-squad { right:12%; }
+  #fighters .field-art { height:7.5vh; }
+  #enemy.enemy-squad .fighter.enemy { height:7vh; }
+  #enemy.enemy-squad .fighter.enemy.boss { height:9vh; }
+  #fighters .combat-status,#enemy.enemy-squad .combat-status { min-height:12px; }
+  #fighters .combat-status:empty,#enemy.enemy-squad .combat-status:empty { min-height:4px; }
+}

@@ -73,6 +73,11 @@ for (const file of await readdir(resolve(root, "public/scene/type-dungeons"))) {
   offlineCss=offlineCss.replaceAll(`/scene/type-dungeons/${file}`,`data:image/png;base64,${png.toString("base64")}`);
 }
 const towerArt=await readFile(resolve(root,"public/scene/tower/bellsprout-tower.svg"));
+for (const file of await readdir(resolve(root,"public/scene/panoramas"))) {
+  if (!file.endsWith('.png')) continue;
+  const png=await readFile(resolve(root,'public/scene/panoramas',file));
+  offlineCss=offlineCss.replaceAll(`/scene/panoramas/${file}`,`data:image/png;base64,${png.toString('base64')}`);
+}
 offlineCss=offlineCss.replaceAll('/scene/tower/bellsprout-tower.svg',`data:image/svg+xml;base64,${towerArt.toString('base64')}`);
 const typeIcons=await readFile(resolve(root,"public/types/type-icons.webp"));
 offlineCss=offlineCss.replaceAll('/types/type-icons.webp',`data:image/webp;base64,${typeIcons.toString('base64')}`);

@@ -1,0 +1,460 @@
+[
+  {
+    "file": "regions-1.png",
+    "source": "exec-bb0bb1ed-04ff-4f39-98db-9bde9cb885da.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "a0090e48f0fa3600e1015551694cac0b081a2c80d3c326feae5c9f3723fc2de3",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "name": "상록숲",
+        "atlas": 1,
+        "row": 0,
+        "rows": 4,
+        "floor": "sand"
+      },
+      {
+        "name": "회색체육관",
+        "atlas": 1,
+        "row": 1,
+        "rows": 4,
+        "floor": "sand"
+      },
+      {
+        "name": "달맞이산",
+        "atlas": 1,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "블루체육관",
+        "atlas": 1,
+        "row": 3,
+        "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "regions-2.png",
+    "source": "exec-cf694e59-e423-4bda-95fb-9b9539196e7a.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "8ae39740e5d18cf1fac13c9ac9c00f844b039461799470a9ed47497da6cd3479",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "name": "상트안느호",
+        "atlas": 2,
+        "row": 0,
+        "rows": 4,
+        "floor": "wood"
+      },
+      {
+        "name": "갈색체육관",
+        "atlas": 2,
+        "row": 1,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "name": "바위터널",
+        "atlas": 2,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "포켓몬타워",
+        "atlas": 2,
+        "row": 3,
+        "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "regions-3.png",
+    "source": "exec-b0a6c559-cc44-43fb-8cc7-2150ca6ee820.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "0f50fe966656cf635a6b6dd7cf86592911257923fd00a96dd859e332e2a0d80e",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "name": "로켓단 아지트",
+        "atlas": 3,
+        "row": 0,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "name": "무지개체육관",
+        "atlas": 3,
+        "row": 1,
+        "rows": 4,
+        "floor": "sand"
+      },
+      {
+        "name": "실프주식회사",
+        "atlas": 3,
+        "row": 2,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "name": "사파리존",
+        "atlas": 3,
+        "row": 3,
+        "rows": 4,
+        "floor": "sand"
+      }
+    ]
+  },
+  {
+    "file": "regions-4.png",
+    "source": "exec-66a292d6-9af9-4df7-83f6-5e1272913ecc.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "ba468a5c420148e669385e297b8b72da79c54e90a4fe9f2f11fe54a65a523cc3",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "name": "무인발전소",
+        "atlas": 4,
+        "row": 0,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "name": "쌍둥이섬",
+        "atlas": 4,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "포켓몬저택",
+        "atlas": 4,
+        "row": 2,
+        "rows": 4,
+        "floor": "wood"
+      },
+      {
+        "name": "홍련체육관",
+        "atlas": 4,
+        "row": 3,
+        "rows": 4,
+        "floor": "metal"
+      }
+    ]
+  },
+  {
+    "file": "regions-5.png",
+    "source": "exec-d7df4f02-c4bf-43a3-9517-b65af190ba5c.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "02598a57bdc90abc68529809327d5981ebccfc3ca58135982655b145395de04a",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "name": "상록체육관",
+        "atlas": 5,
+        "row": 0,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "챔피언로드",
+        "atlas": 5,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "석영고원",
+        "atlas": 5,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "name": "블루시티 동굴",
+        "atlas": 5,
+        "row": 3,
+        "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "dungeons-6.png",
+    "source": "exec-2ac2fdb5-b702-4bf5-84d5-631b97d93add.png",
+    "rows": 2,
+    "width": 1774,
+    "height": 887,
+    "sha256": "a7a9cabc6dc681679a6b788d8b975159b62219c646475bff73772f43863e5ac9",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "tower",
+        "name": "모다피의 탑",
+        "atlas": 6,
+        "row": 1,
+        "rows": 2,
+        "floor": "wood"
+      },
+      {
+        "id": "rune",
+        "name": "포켓룬 던전",
+        "atlas": 6,
+        "row": 0,
+        "rows": 2,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "floors.png",
+    "source": "exec-5276187a-68f5-483e-bf1e-cbf9d89ab022.png",
+    "rows": 2,
+    "columns": 2,
+    "width": 1536,
+    "height": 1024,
+    "sha256": "5c0e665910a1733a39d10c4eac9d347a608793087b24f84d9c99f9267de2206e",
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics"
+  },
+  {
+    "file": "dungeons-1.png",
+    "source": "exec-037750e0-3f0b-4287-b9de-de772633e681.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "be46339cef5a5742531b5b7b974a207db2740bd256568bf5f13bf3aefd0b4089",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "evolution-normal",
+        "name": "노말타입 진화재료 던전",
+        "atlas": 1,
+        "row": 0,
+        "rows": 4,
+        "floor": "sand"
+      },
+      {
+        "id": "evolution-fire",
+        "name": "불꽃타입 진화재료 던전",
+        "atlas": 1,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-water",
+        "name": "물타입 진화재료 던전",
+        "atlas": 1,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-grass",
+        "name": "풀타입 진화재료 던전",
+        "atlas": 1,
+        "row": 3,
+        "rows": 4,
+        "floor": "sand"
+      }
+    ]
+  },
+  {
+    "file": "dungeons-2.png",
+    "source": "exec-8fbbe14a-b422-4339-8d72-2cfd74705dd2.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "329663057c92b4abeb51a720f344ead3af34ba5420018e4b57de58b3a759a050",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "evolution-electric",
+        "name": "전기타입 진화재료 던전",
+        "atlas": 2,
+        "row": 0,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "id": "evolution-ice",
+        "name": "얼음타입 진화재료 던전",
+        "atlas": 2,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-fighting",
+        "name": "격투타입 진화재료 던전",
+        "atlas": 2,
+        "row": 2,
+        "rows": 4,
+        "floor": "wood"
+      },
+      {
+        "id": "evolution-poison",
+        "name": "독타입 진화재료 던전",
+        "atlas": 2,
+        "row": 3,
+        "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "dungeons-3.png",
+    "source": "exec-47cb3f31-fa56-4302-be4f-453ee07bfd4d.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "013980fc5794eb58714ff3520b9ed2643c605efafb8df2e3835670f2400f48eb",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "evolution-ground",
+        "name": "땅타입 진화재료 던전",
+        "atlas": 3,
+        "row": 0,
+        "rows": 4,
+        "floor": "sand"
+      },
+      {
+        "id": "evolution-flying",
+        "name": "비행타입 진화재료 던전",
+        "atlas": 3,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-psychic",
+        "name": "에스퍼타입 진화재료 던전",
+        "atlas": 3,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-bug",
+        "name": "벌레타입 진화재료 던전",
+        "atlas": 3,
+        "row": 3,
+        "rows": 4,
+        "floor": "sand"
+      }
+    ]
+  },
+  {
+    "file": "dungeons-4.png",
+    "source": "exec-95b252a4-1d43-4539-a05e-fded2b34d309.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "fb29bdc09a5d22e9602e0f7bc5f54938c9cf0bdfc0431a50c5c58bcd5194e886",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "evolution-rock",
+        "name": "바위타입 진화재료 던전",
+        "atlas": 4,
+        "row": 0,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-ghost",
+        "name": "고스트타입 진화재료 던전",
+        "atlas": 4,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-dragon",
+        "name": "드래곤타입 진화재료 던전",
+        "atlas": 4,
+        "row": 2,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-dark",
+        "name": "악타입 진화재료 던전",
+        "atlas": 4,
+        "row": 3,
+        "rows": 4,
+        "floor": "metal"
+      }
+    ]
+  },
+  {
+    "file": "dungeons-5.png",
+    "source": "exec-26289d2f-cdb4-4adb-b8ed-e202c3b57f0c.png",
+    "rows": 4,
+    "width": 1254,
+    "height": 1254,
+    "sha256": "254014ca8eef3820558efd6f31fb3c5e1f5545626c523b419c9b9fb78d6be05a",
+    "columns": 1,
+    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "scenes": [
+      {
+        "id": "coin",
+        "name": "포켓코인 던전",
+        "atlas": 5,
+        "row": 2,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "id": "candy",
+        "name": "이상한사탕 던전",
+        "atlas": 5,
+        "row": 3,
+        "rows": 4,
+        "floor": "stone"
+      },
+      {
+        "id": "evolution-steel",
+        "name": "강철타입 진화재료 던전",
+        "atlas": 5,
+        "row": 0,
+        "rows": 4,
+        "floor": "metal"
+      },
+      {
+        "id": "evolution-fairy",
+        "name": "페어리타입 진화재료 던전",
+        "atlas": 5,
+        "row": 1,
+        "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  }
+]

@@ -51,7 +51,10 @@ stored under `public/scene/dungeons/` and embedded in `play.html`.
 The client repository specifies AGPLv3; separate per-image reuse permissions
 have not been verified. User selection does not transfer underlying artwork rights.
 
-## FireRed / LeafGreen Kanto region backgrounds
+## Archived FireRed / LeafGreen Kanto region backgrounds
+
+The following describes the previous full-screen background pass. The files are
+retained as visual references; current combat uses the panorama assets below.
 
 The user selected FireRed / LeafGreen as the visual reference. All twenty normal
 region backgrounds were regenerated using actual map layouts, tiles and palettes
@@ -72,19 +75,36 @@ No Pokémon sprites, music, currency icons or dungeon art were replaced.
 - `sources.json` records SHA-256 hashes, generation IDs, source maps and region mapping.
   Pokémon location designs remain the property of their respective rights holders.
 
-### Environment art style for subsequent dungeon work
+## Mobile RPG scenery and independent battle platforms
 
-Use the Kanto atlases as the shared style reference: crisp GBA-style pixel edges,
-consistent texture density and restrained shading, slightly elevated front view,
-and clear solid ground in the lower battlefield. Use the source region's actual
-palette and objects (e.g. green Tower floor, Cinnabar quiz rooms); do not replace
-them with generic themed scenery. Future dungeon art should follow this style;
-the existing dungeon backgrounds are unchanged by this normal-stage update.
+`public/scene/panoramas/` contains the current generated pixel-art environments.
+The images were drawn for this project, using the FRLG references above for Kanto
+region features rather than importing original game tiles. They reinterpret the
+regions in a horizontal scenic view, with richer lighting and depth. They are not
+exact overhead map reproductions. Pokémon designs belong to their respective owners.
+
+- `regions-1.png`–`regions-5.png`: 20 normal regions in game order, four horizontal
+  strips per sheet. Original details include Cerulean's pool walkway, Vermilion's
+  trashcan puzzle, the Tower's green floor, and Cinnabar's quiz rooms.
+- `dungeons-1.png`–`dungeons-4.png`: first 16 evolution-material types in config order.
+- `dungeons-5.png`: Steel, Fairy, Poké Coin, Rare Candy (top to bottom).
+- `dungeons-6.png`: Pokérune chamber and Bellsprout Tower, two horizontal strips.
+  The rune chamber, resource vault and candy lab are game-specific environments;
+  the tower uses a timber interior with a central pillar inspired by Sprout Tower.
+- `floors.png`: four independent empty platform surfaces (sand, stone, wood, metal),
+  in a 2×2 sheet. The upper scenic region and lower battlefield are separate DOM
+  layers, divided by a raised frame and shadow. Units never occupy the scenery layer.
+- `sources.json` records original generated filenames, dimensions and SHA-256 hashes;
+  `src/battle-scenery.js` maps every region/dungeon to its scenery strip and platform.
+
+Use this panorama pass as the style reference for future environments. Keep crisp
+pixel clusters, consistent lighting/detail, and the separate scenery/platform
+structure. These assets are embedded in the standalone HTML for offline play.
 
 ## 소환 포켓몬 일러스트
 사용자 요청에 따라 새로 생성한 만화풍 포켓몬 단체 일러스트: `public/scene/summon/pokemon-ensemble.png`. 포켓몬 캐릭터 권리는 Nintendo / Creatures / GAME FREAK에 있습니다. 독립 실행 HTML에도 포함합니다.
 
-## 18타입 진화재료 던전 배경
+## 이전 18타입 진화재료 던전 배경 (보관용)
 사용자 요청에 따라 새로 생성한 원본 도트 배경 18종입니다. `public/scene/type-dungeons/types-1.png`~`types-3.png`는 각각 2열×3행으로 구성되며 이미지 원본을 수정하지 않고 CSS로 해당 장면을 표시합니다. 타입 순서는 `src/dungeon-config.js`, 파일 해시와 크기는 같은 폴더의 `sources.json`에 기록했습니다. 타입 선택·도전 화면·실제 던전 전투에 같은 배경을 적용하며 `play.html`에도 내장합니다. 이전 6타입 배경은 보관용이며 새 타입 배경으로 대체했습니다. 포켓코인·이상한사탕 배경과 사용자 BGM은 유지합니다.
 
 ## 사용자 제공 타입 아이콘

@@ -1,4 +1,5 @@
 import {typeIcon} from './type-icons.js';
+import {dungeonScenery,panoramaStyle} from './battle-scenery.js';
 import {DUNGEONS,EVOLUTION_TYPES,DUNGEON_STAGES,dungeonLimit} from './dungeon-config.js';
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {species} from './data.js';
@@ -7,7 +8,7 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
   const root=document.querySelector('#dungeon-page');
   let dungeonTab="daily";
   let opened=false,run=null,selectedId=null,selectedStage=1;
-  const typeBackground=t=>t?`<div class="type-background" data-atlas="${t.art.atlas}" style="background-position:${t.art.column*100}% ${t.art.row*50}%" aria-hidden="true"></div>`:'';
+  const typeBackground=t=>{const a=t&&dungeonScenery(t.id.startsWith('evolution-')?t.id:`evolution-${t.id}`);return a?`<div class="type-background" data-atlas="${a.atlas}" style="${panoramaStyle(a)}" aria-hidden="true"></div>`:'';};
   const n=v=>v.toLocaleString('ko-KR');
   const header=(title,back='dungeonMenu')=>`<header class="dungeon-header"><div><h1>${title}</h1></div><button class="soft-button" data-action="${back}">${icon('chevron-left')}${back==='dungeonExit'?'홈으로':'돌아가기'}</button></header>`;
   function show(html){root.classList.toggle('dungeon-challenge',html.includes('challenge-layout'));root.classList.toggle('dungeon-selection',html.includes('dungeon-cards')||html.includes('dungeon-types'));root.innerHTML=html+`<nav class="collection-subnav dungeon-bottom-tabs" aria-label="던전 하위 메뉴">${[['challenge','도전 던전'],['daily','일일 던전']].map(([id,name])=>`<button class="${dungeonTab===id?'selected':''}" data-action="dungeonTab" data-tab="${id}" aria-pressed="${dungeonTab===id}">${name}</button>`).join('')}</nav>`;icons();}
