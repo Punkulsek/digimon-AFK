@@ -1,8 +1,10 @@
 import {evolutionFamily,EVOLUTIONS} from './growth.js';
 import {summonGrade} from './summoning.js';
+import {recordCollection} from './collection-record.js';
 export const duplicateKey=p=>`${evolutionFamily(p.speciesId)}:${summonGrade(p.speciesId)}`;
 const depth=id=>{const parent=EVOLUTIONS.find(e=>e.to===id);return parent?1+depth(parent.from):0;};
 export function mergeDuplicates(state){
+ recordCollection(state);
  state.shards ||= {};
  const groups=new Map(),aliases=new Map();
  for(const p of state.inventory){const key=duplicateKey(p);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(p);}

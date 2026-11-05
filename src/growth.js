@@ -84,5 +84,5 @@ export function breakthrough(state,uid) {
  if(p.level<maxLevel(p))return `현재 최대 레벨 Lv.${maxLevel(p)}을 달성해야 해요.`;
  const family=evolutionFamily(p.speciesId),cost=breakthroughCost(p);
  if((state.shards?.[family]||0)<cost)return '같은 진화 계열의 돌파 조각이 부족해요.';
- state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;p.level=1;p.speciesId=family;return null;
+ recordCollection(state);state.shards[family]-=cost;p.breakthrough=(p.breakthrough||0)+1;p.level=1;p.speciesId=family;return null;
 }

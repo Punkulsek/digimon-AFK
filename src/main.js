@@ -5,6 +5,8 @@ import {createRuneUI} from './rune-ui.js';
 import {summonPayment,missionInfo,claimMission,syncMissions} from './missions.js';
 import {maxLevel,canBreakthrough,isFinalEvolution} from './growth.js';
 import {dexBody,dexStatRows} from './dex.js';
+import {createTrainerUI} from './trainer-ui.js';
+import {trainerProgress} from './trainer.js';
 import {normalizePresets,selectPreset,PRESET_COUNT} from './party-presets.js';
 import {SYNERGIES,speciesSynergies,partySynergies} from './synergies.js';
 import {initialState} from './game.js';
@@ -62,6 +64,8 @@ import {
   Compass,
   Backpack,
   ExternalLink,
+  Pencil,
+  Camera,
 } from "lucide";
 import { species, SPECIES, RARITIES, stageLabel, regionName } from "./data.js";
 import {
@@ -88,6 +92,8 @@ import {regionScenery,dungeonScenery,panoramaPosition} from './battle-scenery.js
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
+  Pencil,
+  Camera,
   Leaf,
   Flame,
   Droplets,
@@ -219,7 +225,7 @@ function card(p, action = "detail") {
 }
 $("#app").innerHTML = `
 <div class="game-shell">
-<header class="topbar"><button class="profile" data-action="profile"><div class="avatar">${i("compass")}<span>01</span></div><div><small>오늘도, 새로운 모험</small><strong>새싹 트레이너 ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
+<header class="topbar"><button class="profile" data-action="profile" aria-label="트레이너 프로필 열기"><div class="avatar"><img id="trainer-hud-avatar" src="${species(state.trainer.avatarSpeciesId).sprite}" alt="프로필 포켓몬"><span>01</span></div><div><small>오늘도, 새로운 모험</small><strong><span id="trainer-hud-name">새싹 트레이너</span> ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정"><img class="settings-gear" src="${window.POKEMON_SETTINGS_GEAR||'/ui/settings-gear.png'}" alt="" aria-hidden="true"></button></header>
 <main class="adventure"><button class="mission-button soft-button" data-action="missions" aria-label="미션"><svg class="mission-clipboard" viewBox="0 0 48 52" aria-hidden="true"><path d="M13 9 39 13 35 48 5 42Z" fill="#45342e" stroke="#161719" stroke-width="3"/><path d="m12 7 29 5-6 32-29-5Z" fill="#fffbed" stroke="#14191c" stroke-width="3" stroke-linejoin="round"/><path d="m21 5 3-3 6 1 2 4 4 1-1 7-18-3 1-7Z" fill="#badbd9" stroke="#16191c" stroke-width="3"/><path d="m12 21 3 3 5-5m-10 12 3 3 5-5" fill="none" stroke="#203036" stroke-width="3"/><path d="m24 23 10 2m-12 8 10 2" stroke="#203036" stroke-width="3"/></svg><span class="mission-label">미션</span><span class="mission-ready-dot" hidden aria-hidden="true"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
@@ -248,15 +254,20 @@ function enterDungeon(info){
  renderBattle();updateHud();updateNavigation();
 }
 const dungeonUI = createDungeonUI({state,art,icon:i,icons,onEnter:enterDungeon,onLeave:restoreOverworld,onHome:closeModal,sound});
+const trainerUI = createTrainerUI({state,art,icon:i,icons,modal,persist,toast});
 function hudText(selector, value) {
   const element = $(selector);
   if (element) element.textContent = value;
 }
 function updateHud() {
   refreshUpgradeButtons();
-  $(".avatar>span").textContent = String(
-    Math.floor((state.stage - 1) / 5) + 1,
-  ).padStart(2, "0");
+  const trainerLevel=trainerProgress(state);
+  $(".topbar .avatar>span").textContent=String(trainerLevel.level).padStart(2,'0');
+  hudText('#trainer-hud-name',state.trainer.nickname);
+  const portrait=$('#trainer-hud-avatar'),avatar=species(state.trainer.avatarSpeciesId);
+  if(portrait.dataset.species!==String(avatar.id)){portrait.src=avatar.sprite;portrait.alt=avatar.name;portrait.dataset.species=String(avatar.id);}
+  $('.topbar .profile-xp>span').style.width=`${trainerLevel.progress/trainerLevel.required*100}%`;
+  trainerUI.refresh();
   $("#gold").textContent = num(state.gold);
   $("#gems").textContent = num(state.gems);
   const missionReady=['daily','weekly','challenge','repeat'].some(tab=>missionInfo(state,tab).ready);
@@ -772,6 +783,7 @@ document.addEventListener("click", (e) => {
   if (action !== "music") sound.effect("click");
   if (dungeonUI.handle(action, btn)) return;
   if (runeUI.handle(action,btn))return;
+  if (trainerUI.handle(action,btn))return;
   switch (action) {
     case "upgrades":
       if(document.getElementById('upgrade-page')){document.getElementById('upgrade-page').remove();active='home';updateNavigation();}else upgradeScreen();
@@ -928,14 +940,6 @@ document.addEventListener("click", (e) => {
     case "missions":missionScreen();break;
     case "missionTab":missionTab=btn.dataset.tab;missionScreen();break;
     case "claimMission":{const reward=claimMission(state,missionTab);persist();missionScreen();if(reward)toast(`몬스터볼 ${reward}개 획득!`);break;}
-    case "profile":
-      modal(
-        "새싹 트레이너",
-        "트레이너 프로필",
-        `<div class="profile-detail">${i("compass")}<h3>모든 모험은 작은 한 걸음부터.</h3><p>트레이너 레벨 ${Math.floor((state.stage - 1) / 5) + 1}</p><div class="profile-stats"><span>처치한 포켓몬<b>${num(state.totalKills)}</b></span><span>보유 포켓몬<b>${state.inventory.length}</b></span><span>파티 전투력<b>${num(partyPower())}</b></span></div></div>`,
-        "settings-modal",
-      );
-      break;
     case "auto":
     case "settingAuto":
       state.auto = !state.auto;
