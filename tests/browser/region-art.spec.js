@@ -19,7 +19,11 @@ test('관동 20지역 배경 연결·원본 비율·전체화면 표시',async({
  expect(seen.size).toBe(20);
  for(const size of [{width:1920,height:1080},{width:1440,height:810},{width:844,height:390},{width:568,height:320},{width:390,height:844}]){
    await page.setViewportSize(size);const rect=await page.locator('.region-art').boundingBox();
-   expect(rect.width).toBe(size.width);expect(rect.y).toBe(0);const floor=await page.locator('.battle-floor').boundingBox();expect(rect.height).toBeCloseTo(floor.y,0);expect(floor.height).toBeGreaterThan(size.height*.4);
+   expect(rect.width).toBe(size.width);expect(rect.y).toBe(0);const floor=await page.locator('.battle-floor').boundingBox();
+   // The scenery overlaps the ground to soften the join without exposing a gap.
+   expect(rect.height-floor.y).toBeGreaterThanOrEqual(19);
+   expect(rect.height-floor.y).toBeLessThanOrEqual(73);
+   expect(floor.height).toBeGreaterThan(size.height*.4);
  }
 });
 test('80→81 지역 전환과 던전 퇴장 시 새 배경 복원',async({page})=>{

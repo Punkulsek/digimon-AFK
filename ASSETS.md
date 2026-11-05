@@ -93,7 +93,8 @@ exact overhead map reproductions. Pokémon designs belong to their respective ow
   the tower uses a timber interior with a central pillar inspired by Sprout Tower.
 - `floors.png`: four independent empty platform surfaces (sand, stone, wood, metal),
   in a 2×2 sheet. The upper scenic region and lower battlefield are separate DOM
-  layers meeting without a divider or outer frame. The ground fills the viewport
+  layers with a short feathered foreground overlap, without a divider or outer
+  frame. The ground fills the viewport
   width and continues behind the bottom navigation. Each team uses an upper row
   of three and a centred lower row of two; units stay in the ground layer.
 - `sources.json` records original generated filenames, dimensions and SHA-256 hashes;

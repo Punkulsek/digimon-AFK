@@ -1,7 +1,15 @@
-/* Scenery and edge-to-edge ground meet without a decorative divider. */
-.battlefield { --scenery-height:48%; --combat-top:calc(48% + 20px); }
+/* Overlap the scenery's foreground with the ground instead of cutting it off. */
+.battlefield { --scenery-height:48%; --scenery-blend:clamp(20px,6vh,72px); --combat-top:calc(48% + 20px); }
 #scene.scene,#scene.scene[data-dungeon] { background:#202a37; filter:none; transition:none; }
 #scene.scene[data-dungeon] > .type-background:not([hidden]) { display:block; }
+#scene.scene > .region-art,
+#scene.scene[data-dungeon] > .type-background:not([hidden]) {
+  height:calc(var(--scenery-height) + var(--scenery-blend));
+  z-index:2;
+  /* Only the overlap fades; the landscape above remains sharp pixel art. */
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - var(--scenery-blend)),transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 calc(100% - var(--scenery-blend)),transparent 100%);
+}
 #scene.scene > .battle-floor {
   display:block; position:absolute; z-index:1;
   top:var(--scenery-height); bottom:0; left:0; right:0;
