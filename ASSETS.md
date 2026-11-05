@@ -100,6 +100,14 @@ exact overhead map reproductions. Pokémon designs belong to their respective ow
 - `sources.json` records original generated filenames, dimensions and SHA-256 hashes;
   `src/battle-scenery.js` maps every region/dungeon to its scenery strip and platform.
 
+### Tower floor selection facade
+- `public/scene/tower/tower-story.png`: generated single-story timber pagoda facade,
+  repeated vertically in the 200-floor selector. Original generation:
+  `exec-33e6d3e1-ad55-4015-861e-4a612011d85c.png`. Blue slate eaves, lattice windows,
+  leaf banner and lanterns use the game's illustrated pixel-art style.
+- The detail preview reuses the actual tower panorama and timber battle floor;
+  opponents and rewards come directly from `dungeonInfo`, with no balance changes.
+
 Use this panorama pass as the style reference for future environments. Keep crisp
 pixel clusters, consistent lighting/detail, and the separate scenery/platform
 structure. These assets are embedded in the standalone HTML for offline play.

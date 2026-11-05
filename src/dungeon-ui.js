@@ -1,4 +1,5 @@
 import {typeIcon} from './type-icons.js';
+import './tower-ui.css';
 import {dungeonScenery,panoramaStyle} from './battle-scenery.js';
 import {DUNGEONS,EVOLUTION_TYPES,DUNGEON_STAGES,dungeonLimit} from './dungeon-config.js';
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
@@ -7,11 +8,11 @@ import {power} from './game.js';
 export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sound}) {
   const root=document.querySelector('#dungeon-page');
   let dungeonTab="daily";
-  let opened=false,run=null,selectedId=null,selectedStage=1;
+  let opened=false,run=null,selectedId=null,selectedStage=1,towerResizeObserver=null;
   const typeBackground=t=>{const a=t&&dungeonScenery(t.id.startsWith('evolution-')?t.id:`evolution-${t.id}`);return a?`<div class="type-background" data-atlas="${a.atlas}" style="${panoramaStyle(a)}" aria-hidden="true"></div>`:'';};
   const n=v=>v.toLocaleString('ko-KR');
   const header=(title,back='dungeonMenu')=>`<header class="dungeon-header"><div><h1>${title}</h1></div><button class="soft-button" data-action="${back}">${icon('chevron-left')}${back==='dungeonExit'?'홈으로':'돌아가기'}</button></header>`;
-  function show(html){root.classList.toggle('dungeon-challenge',html.includes('challenge-layout'));root.classList.toggle('dungeon-selection',html.includes('dungeon-cards')||html.includes('dungeon-types'));root.innerHTML=html+`<nav class="collection-subnav dungeon-bottom-tabs" aria-label="던전 하위 메뉴">${[['challenge','도전 던전'],['daily','일일 던전']].map(([id,name])=>`<button class="${dungeonTab===id?'selected':''}" data-action="dungeonTab" data-tab="${id}" aria-pressed="${dungeonTab===id}">${name}</button>`).join('')}</nav>`;icons();}
+  function show(html){towerResizeObserver?.disconnect();root.classList.toggle('tower-page',html.includes('tower-layout'));root.classList.toggle('dungeon-challenge',html.includes('challenge-layout'));root.classList.toggle('dungeon-selection',html.includes('dungeon-cards')||html.includes('dungeon-types'));root.innerHTML=html+`<nav class="collection-subnav dungeon-bottom-tabs" aria-label="던전 하위 메뉴">${[['challenge','도전 던전'],['daily','일일 던전']].map(([id,name])=>`<button class="${dungeonTab===id?'selected':''}" data-action="dungeonTab" data-tab="${id}" aria-pressed="${dungeonTab===id}">${name}</button>`).join('')}</nav>`;icons();}
   function menu(){run=null;show(header('던전','dungeonExit')+`<div class="dungeon-content"><div class="dungeon-cards">${(dungeonTab==='challenge'?[['tower','모다피의 탑',69,'swords']]:[
     ['coin','포켓코인 던전',52,'coins'],
     ['evolution','진화재료 던전',133,'leaf'],
@@ -28,15 +29,47 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
     show(header(d.name,id.startsWith('evolution-')?'dungeonTypes':'dungeonMenu')+`<div class="challenge-layout"><div class="dungeon-preview challenge-hero">${typeBackground(EVOLUTION_TYPES.find(t=>id===`evolution-${t.id}`))}<div class="challenge-enemy-name">${id==='tower'?`${stage}층 · ${d.boss?'보스 층':'일반 층'} · `:''}${species(d.enemy).name}</div><div class="challenge-reward"><span>${id.startsWith('evolution-')?typeIcon(id.slice(10)):icon(id==='coin'?'coins':'sparkles')}</span><strong>${n(d.amount)}</strong><small>${d.reward}</small></div><div class="challenge-enemy-art">${art(species(d.enemy),'field-art')}</div><div class="challenge-controls"><div class="challenge-enemy-power">${icon('swords')} ${n(d.power)}</div><span>스테이지 선택</span><div class="challenge-stepper"><button data-action="dungeonStep" data-delta="-1" aria-label="이전 단계" ${stage<=1?'disabled':''}>−</button><b>${stage}</b><button data-action="dungeonStep" data-delta="1" aria-label="다음 단계" ${stage>=limit||!canEnterDungeon(state,id,stage+1)?'disabled':''}>+</button></div></div><p class="dungeon-reward challenge-reward-caption">예상 보상 · ${d.reward} ${n(d.amount)}개</p></div><section class="challenge-team"><div class="challenge-team-heading"><strong>${icon('swords')} 전투력 ${n(partyPower)}</strong><button class="soft-button" data-action="collection">편성하기</button></div><div class="challenge-party">${Array.from({length:5},(_,i)=>{const p=party[i];return p?`<div class="challenge-party-card"><small>Lv.${p.level}</small>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong></div>`:'<div class="challenge-party-card empty">+</div>';}).join('')}</div><div class="challenge-stage-heading">스테이지 <small>${state.dungeonClears[id]} / ${DUNGEON_STAGES} 클리어</small></div><div class="dungeon-stage-list">${Array.from({length:limit},(_,i)=>`<button class="soft-button ${stage===i+1?'selected':''}" data-action="dungeonStage" data-stage="${i+1}" aria-label="${i+1}단계" aria-pressed="${stage===i+1}" ${canEnterDungeon(state,id,i+1)?'':'disabled'}>${i+1}</button>`).join('')}</div><div class="challenge-footer"><button class="primary-button challenge-enter" data-action="dungeonEnter" aria-label="던전 입장">${icon('swords')}<span>도전하기!<small>입장 비용 없음</small></span></button></div></section></div>`);
 
   }
-  function tower(stage=Math.min(200,(state.dungeonClears.tower||0)+1)){
+  const towerCurrent=()=>Math.min(dungeonLimit('tower'),(state.dungeonClears.tower||0)+1);
+  const towerStatus=floor=>floor<=(state.dungeonClears.tower||0)?'cleared':floor===(state.dungeonClears.tower||0)+1?'current':'locked';
+  const towerStatusLabel={cleared:'클리어 완료',current:'도전 가능',locked:'미개방'};
+  const ballMark='<span class="tower-ball" aria-hidden="true"></span>';
+  function towerDetail(stage){
+    const d=dungeonInfo('tower',stage),status=towerStatus(stage),a=dungeonScenery('tower');
+    return `<header class="tower-detail-heading"><span class="tower-heading-leaf" aria-hidden="true">${icon('leaf')}</span><h2>모다피의 탑 <b>${stage}</b>층</h2><span class="tower-state ${status}">${status==='cleared'?icon('check'):icon(status==='current'?'swords':'shield')}${towerStatusLabel[status]}</span></header>
+      <div class="tower-detail-body">
+        <div class="tower-encounter">
+          <figure class="tower-battle-preview" role="img" aria-label="${stage}층 전투 배경 · 모다피의 탑 목조 실내"><div class="type-background" data-atlas="${a.atlas}" style="${panoramaStyle(a)}" aria-hidden="true"></div><div class="tower-preview-floor" aria-hidden="true"></div><figcaption>${d.boss?`${icon('crown')} 보스 층`:'모다피의 탑 · 전투 배경'}</figcaption></figure>
+          <section class="tower-opponents"><h3>${ballMark} 출현 정보 <small>5마리</small></h3><div class="tower-enemies">${d.enemies.map((id,i)=>`<div class="tower-enemy-card ${d.boss&&i===0?'tower-boss':''}">${d.boss&&i===0?`<span class="tower-boss-label">${icon('crown')} 보스</span>`:''}${art(species(id))}<strong>${species(id).name}</strong></div>`).join('')}</div></section>
+        </div>
+        <div class="tower-reward-info"><section class="tower-rewards"><h3>${icon('gift')} 클리어 보상</h3><div class="tower-reward"><span class="tower-coin"><img src="${globalThis.POKEMON_CURRENCY?.pokecoin||'/currency/pokecoin.png'}" alt="포켓코인"></span><div><span>포켓코인</span><strong>× ${n(d.amount)}</strong></div>${d.boss?'<span class="tower-bonus">보스 층 보상</span>':''}</div></section><section class="tower-floor-info"><p>${icon('swords')}<span>상대 전투력</span><strong>${n(d.power)}</strong></p><p>${icon(d.boss?'crown':'leaf')}<span>층 구분</span><strong>${d.boss?'보스 층':'일반 층'}</strong></p></section></div>
+        <footer class="tower-detail-footer">${status==='current'?`<button class="tower-enter" data-action="dungeonEnter" aria-label="던전 입장">${ballMark} 도전하기</button><p>현재 편성으로 ${stage}층에 도전합니다.</p>`:`<div class="tower-unavailable ${status}">${icon(status==='cleared'?'check':'shield')}<strong>${status==='cleared'?'클리어한 층입니다':`${stage-1}층 클리어 후 도전할 수 있습니다`}</strong></div><button class="tower-current-link" data-action="towerCurrent">${(state.dungeonClears.tower||0)>=dungeonLimit('tower')?'최상층 보기':`현재 도전 층 · ${towerCurrent()}층으로 이동`}${icon('chevron-right')}</button>`}</footer>
+      </div>`;
+  }
+  function centerTowerSelection(){
+    const list=root.querySelector('.tower-floors'),selected=list?.querySelector('.selected');
+    if(selected)list.scrollTop+=selected.getBoundingClientRect().top-list.getBoundingClientRect().top-(list.clientHeight-selected.clientHeight)/2;
+  }
+  function tower(stage=towerCurrent()){
+    if(!dungeonInfo('tower',stage))return;
     selectedId='tower';selectedStage=stage;dungeonTab='challenge';run=null;
-    const d=dungeonInfo('tower',stage),cleared=state.dungeonClears.tower||0;
-    const scroll=root.querySelector('.tower-floors')?.scrollTop;
-    show(header('모다피의 탑')+`<div class="tower-layout"><div class="tower-floors" tabindex="0" aria-label="모다피의 탑 200층"><div class="tower-roof">모다피의 탑 · 200층</div>${Array.from({length:200},(_,i)=>{const floor=i+1,info=dungeonInfo('tower',floor);return `<button class="tower-floor ${info.boss?'boss-floor':''} ${floor===stage?'selected':''}" data-action="dungeonStage" data-stage="${floor}" ${canEnterDungeon(state,'tower',floor)?'':'disabled'} aria-label="${floor}층${info.boss?' 보스':''}"><b>${floor}층</b><span>${info.boss?'♛ 보스 층':floor<=cleared?'클리어':'일반 층'}</span><span class="tower-reward">${icon('coins')} ${n(info.amount)} 포켓코인</span>${floor>cleared+1?'🔒':''}</button>`;}).join('')}</div><section class="tower-details"><h2>${stage}층 ${d.boss?'· 보스 도전':''}</h2><p>상대 전투력 ${n(d.power)}</p><div class="tower-enemies">${d.enemies.map((id,i)=>`<div class="${d.boss&&i===0?'tower-boss':''}">${art(species(id))}<strong>${species(id).name}</strong>${d.boss&&i===0?'<small>보스</small>':''}</div>`).join('')}</div><p class="tower-reward">${icon('coins')} 클리어 보상 · 포켓코인 ${n(d.amount)}개</p><p>현재 편성한 포켓몬 5마리로 도전합니다.</p><button class="primary-button" data-action="dungeonEnter" aria-label="던전 입장" ${canEnterDungeon(state,'tower',stage)?'':'disabled'}>${stage}층 도전하기</button></section></div>`);
-    const list=root.querySelector('.tower-floors');if(scroll!==undefined)list.scrollTop=scroll;else list.querySelector('.selected')?.scrollIntoView({block:'center'});
+    const existing=root.querySelector('.tower-details');
+    if(existing&&root.dataset.towerCleared===String(state.dungeonClears.tower||0)){
+      // Keep the scrolling tower and the focused floor button mounted.
+      existing.innerHTML=towerDetail(stage);
+      root.querySelectorAll('.tower-floor').forEach(button=>{const selected=Number(button.dataset.stage)===stage;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));});
+      icons();return;
+    }
+    const cleared=state.dungeonClears.tower||0,limit=dungeonLimit('tower');
+    show(`<header class="tower-header"><button class="tower-back" data-action="dungeonMenu" aria-label="도전 던전으로 돌아가기">${icon('chevron-left')}</button><div class="tower-title">${art(species(69))}<h1>모다피의 탑</h1></div><div class="tower-progress">${icon('trophy')}<span><b>${cleared}</b> / ${limit}층 클리어</span></div></header>
+      <div class="tower-layout"><section class="tower-map" aria-label="층 선택"><div class="tower-map-toolbar"><span>${icon('arrow-up')} 위로 올라가며 층 선택</span><button data-action="towerCurrent">${cleared>=limit?'최상층':'현재 층'}</button></div><div class="tower-floors" tabindex="0" aria-label="모다피의 탑 1층부터 200층까지 스크롤"><div class="tower-roof">${icon('leaf')} 정상 · 200층</div>${Array.from({length:limit},(_,i)=>{const floor=limit-i,info=dungeonInfo('tower',floor),status=towerStatus(floor);return `<div class="tower-story ${info.boss?'boss-story':''}"><button class="tower-floor ${info.boss?'boss-floor':''} ${floor===stage?'selected':''} ${status}" data-action="dungeonStage" data-stage="${floor}" aria-pressed="${floor===stage}" aria-label="${floor}층${info.boss?' 보스':''} · ${towerStatusLabel[status]}">${ballMark}<span class="tower-floor-text"><b>${floor}층</b><small>${info.boss?'보스 층 · ':''}${towerStatusLabel[status]}</small></span><span class="tower-floor-state" aria-hidden="true">${icon(status==='cleared'?'check':info.boss?'crown':status==='current'?'swords':'shield')}</span></button></div>`;}).join('')}<div class="tower-entrance">${art(species(69))}<span>모험의 시작 · 1층</span></div></div></section><section class="tower-details" aria-label="선택한 층 상세 정보">${towerDetail(stage)}</section></div>`);
+    root.dataset.towerCleared=String(cleared);
+    centerTowerSelection();
+    towerResizeObserver=new ResizeObserver(()=>{if(!root.hidden)centerTowerSelection();});
+    towerResizeObserver.observe(root.querySelector('.tower-floors'));
   }
   function start(){
     if(!canEnterDungeon(state,selectedId,selectedStage))return;
+    if(selectedId==='tower'&&towerStatus(selectedStage)!=='current')return;
     run=null;opened=false;root.hidden=true;
     document.querySelector('.game-shell').classList.remove('in-dungeon');
     onEnter(dungeonInfo(selectedId,selectedStage));
@@ -45,7 +78,7 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
   return {
     isOpen:()=>opened,
     open(){onLeave();opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');menu();},
-    close(){onLeave();opened=false;run=null;root.hidden=true;root.innerHTML='';document.querySelector('.game-shell').classList.remove('in-dungeon');},
+    close(){onLeave();opened=false;run=null;towerResizeObserver?.disconnect();root.hidden=true;root.innerHTML='';document.querySelector('.game-shell').classList.remove('in-dungeon');},
     returnToChallenge(id,stage){onLeave();opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');stages(id,stage);},
     handle(action,btn){
       switch(action){
@@ -55,7 +88,8 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
         case 'dungeonTypes':types();break;
         case 'dungeonSelect':btn.dataset.dungeon==='evolution'?types():stages(btn.dataset.dungeon,btn.dataset.dungeon==='tower'?Math.min(200,(state.dungeonClears.tower||0)+1):1);break;
         case 'dungeonStep':{const next=selectedStage+Number(btn.dataset.delta);if(next>=1&&next<=dungeonLimit(selectedId)&&canEnterDungeon(state,selectedId,next))stages(selectedId,next);break;}
-        case 'dungeonStage':if(canEnterDungeon(state,selectedId,Number(btn.dataset.stage)))stages(selectedId,Number(btn.dataset.stage));break;
+        case 'dungeonStage':if(selectedId==='tower'||canEnterDungeon(state,selectedId,Number(btn.dataset.stage)))stages(selectedId,Number(btn.dataset.stage));break;
+        case 'towerCurrent':tower();centerTowerSelection();break;
         case 'dungeonStages':case 'dungeonRetreat':stages(selectedId,selectedStage);break;
         case 'dungeonEnter':start();break;
         default:return false;
