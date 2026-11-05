@@ -47,6 +47,6 @@ test('records and trainer progress use real stages, collection and dungeon data'
   const s=initialState();s.stage=57;s.inventory[1].breakthrough=10;s.summons=1234;s.dungeonClears.coin=23;s.dungeonClears.candy=31;s.dungeonClears['evolution-fire']=49;s.dungeonClears.tower=99;
   assert.deepEqual(trainerProgress(s),{level:12,completed:56,progress:1,required:5,isMax:false});
   const rows=Object.fromEntries(trainerRecords(s).map(r=>[r.id,r.value]));
-  assert.deepEqual(rows,{stages:'56 / 400',pokemon:'6마리',breakthrough:'1마리',pets:'0마리','pet-breakthrough':'0마리',coin:'23단계',candy:'31단계',types:'최고 49단계',tower:'100층',summons:'1,234회'});
+  assert.deepEqual(rows,{stages:'56 / 400',pokemon:'6마리',breakthrough:'1마리',coin:'23단계',candy:'31단계',types:'최고 49단계',tower:'100층',summons:'1,234회'});
   s.stage=400;s.campaignCleared=true;s.dungeonClears.tower=200;assert.equal(trainerProgress(s).level,80);assert.equal(trainerProgress(s).completed,400);assert.equal(trainerProgress(s).progress,5);assert.equal(trainerRecords(s).find(r=>r.id==='tower').value,'200층');
 });

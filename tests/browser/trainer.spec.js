@@ -82,5 +82,13 @@ test('standalone profile and unlocked portraits work without external assets',as
     await page.getByRole('button',{name:'뮤츠 프로필 이미지',exact:true}).click();
     await expect(page.locator('#trainer-hud-avatar')).toHaveAttribute('data-species','150');
     await expect(page.locator('.trainer-modal')).not.toContainText('레벨 보상');
+    await expect(page.locator('.trainer-modal')).not.toContainText('펫');
+    await expect(page.locator('[data-trainer-record]')).toHaveCount(8);
+    await page.getByRole('button',{name:'닫기',exact:true}).click();
+    await expect(page.locator('#boss-gauge')).toHaveAttribute('aria-valuenow','0');
+    await expect(page.locator('.stage-wave')).toHaveCount(10);
+    await page.getByRole('checkbox',{name:'자동 소환 예약'}).click();
+    await expect(page.locator('#hud-auto-boss')).toHaveAttribute('aria-checked','false');
+    await page.screenshot({path:'/tmp/stage-hud-standalone.png'});
   } finally {await new Promise(resolve=>server.close(resolve));}
 });

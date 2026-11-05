@@ -88,6 +88,7 @@ import "./stages.css";
 import "./region-art.css";
 import "./type-art.css";
 import "./battle-scenery.css";
+import {stageHud,updateStageHud} from './stage-hud.js';
 import {regionScenery,dungeonScenery,panoramaPosition} from './battle-scenery.js';
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
@@ -225,12 +226,12 @@ function card(p, action = "detail") {
 }
 $("#app").innerHTML = `
 <div class="game-shell">
-<header class="topbar"><button class="profile" data-action="profile" aria-label="트레이너 프로필 열기"><div class="avatar"><img id="trainer-hud-avatar" src="${species(state.trainer.avatarSpeciesId).sprite}" alt="프로필 포켓몬"><span>01</span></div><div><small>오늘도, 새로운 모험</small><strong><span id="trainer-hud-name">새싹 트레이너</span> ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
+<header class="topbar"><button class="profile" data-action="profile" aria-label="트레이너 프로필 열기"><div class="avatar"><img id="trainer-hud-avatar" src="${species(state.trainer.avatarSpeciesId).sprite}" alt="프로필 포켓몬"><span>01</span></div><div><small>TRAINER PROFILE</small><strong><span id="trainer-hud-name">새싹 트레이너</span> ${i("chevron-right")}</strong><div class="profile-xp"><span></span></div></div></button>
 <div class="currencies"><div class="currency gold" aria-label="보유 포켓코인">${currencyIcon("pokecoin", "포켓코인")}<b id="gold"></b></div><div class="currency gems" aria-label="보유 다이아">${currencyIcon("diamond", "다이아")}<b id="gems"></b></div></div><button class="icon-button settings-button" data-action="settings" aria-label="설정"><img class="settings-gear" src="${window.POKEMON_SETTINGS_GEAR||'/ui/settings-gear.png'}" alt="" aria-hidden="true"></button></header>
 <main class="adventure"><button class="mission-button soft-button" data-action="missions" aria-label="미션"><svg class="mission-clipboard" viewBox="0 0 48 52" aria-hidden="true"><path d="M13 9 39 13 35 48 5 42Z" fill="#45342e" stroke="#161719" stroke-width="3"/><path d="m12 7 29 5-6 32-29-5Z" fill="#fffbed" stroke="#14191c" stroke-width="3" stroke-linejoin="round"/><path d="m21 5 3-3 6 1 2 4 4 1-1 7-18-3 1-7Z" fill="#badbd9" stroke="#16191c" stroke-width="3"/><path d="m12 21 3 3 5-5m-10 12 3 3 5-5" fill="none" stroke="#203036" stroke-width="3"/><path d="m24 23 10 2m-12 8 10 2" stroke="#203036" stroke-width="3"/></svg><span class="mission-label">미션</span><span class="mission-ready-dot" hidden aria-hidden="true"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="battle-floor" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
-<div class="stage-hud"><button class="stage-banner" data-action="stages" aria-label="스테이지 정보"><span id="region-name">상록숲</span><strong id="stage-number">1-1</strong>${i("chevron-right")}</button><div class="boss-progress-ui" id="boss-progress-ui"><div class="boss-gauge-row"><span class="gauge-shield" aria-hidden="true">${i("shield")}</span><div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="10"><span id="boss-gauge-fill"></span></div><button id="hud-boss-button" class="hud-boss-button" data-action="boss" aria-label="진행도 보스 도전">${i("crown")}</button></div><div class="boss-gauge-caption"><span id="boss-progress-label"></span><button id="hud-auto-boss" data-action="autoBoss" aria-label="자동 보스 도전" aria-pressed="true">자동 도전 ON</button></div></div></div>
+${stageHud(i,art)}
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition" role="status" aria-live="polite"><div class="clear-ribbon"><small>스테이지</small><strong>클리어!</strong><span>다음 모험을 향해 출발해요</span></div></div>
 </section>
@@ -307,18 +308,7 @@ function updateHud() {
   const backdrop=$(".region-art");
   backdrop.dataset.atlas=artConfig.atlas;
   backdrop.style.backgroundPosition=panoramaPosition(artConfig);
-  $("#boss-progress-ui").hidden = !!battle.dungeon;
-  const ready=state.kills>=STAGE_KILLS&&!battle.boss&&!state.campaignCleared;
-  $("#boss-gauge").setAttribute("aria-valuenow",state.campaignCleared||battle.boss?STAGE_KILLS:state.kills);
-  $("#boss-gauge-fill").style.width=`${state.campaignCleared||battle.boss?100:state.kills/STAGE_KILLS*100}%`;
-  const label=state.campaignCleared?"관동 400스테이지 완료":battle.boss?`${BOSS_NAMES[bossTier(state.stage)]} · ${Math.max(0,BOSS_TURN_LIMIT-battle.bossTurns)}턴`:ready?`${BOSS_NAMES[bossTier(state.stage)]} 도전 가능`:`보스까지 ${STAGE_KILLS-state.kills}전 · ${state.kills}/${STAGE_KILLS}`;
-  hudText("#boss-progress-label",label);
-  $("#boss-gauge").setAttribute("aria-valuetext",label);
-  $("#hud-boss-button").disabled=!ready;
-  $("#hud-boss-button").classList.toggle("ready",ready);
-  $("#hud-auto-boss").setAttribute("aria-pressed",String(state.autoBoss));
-  $("#hud-auto-boss").disabled=!!state.campaignCleared;
-  hudText("#hud-auto-boss",`자동 도전 ${state.autoBoss?'ON':'OFF'}`);
+  updateStageHud(state,battle);
   $(".battlefield").classList.toggle("boss-active", battle.boss);
   hudText(
     "#boss-status",

@@ -30,7 +30,7 @@ test('80→81 지역 전환과 던전 퇴장 시 새 배경 복원',async({page}
  const seed=initialState();seed.stage=80;seed.kills=10;seed.auto=false;seed.speed=3;seed.inventory.forEach(p=>{p.level=100;p.breakthrough=10;});
  await page.addInitScript(s=>{if(!localStorage.getItem('pokemon-days-v1'))localStorage.setItem('pokemon-days-v1',JSON.stringify(s));},seed);
  await page.goto('/');await expect(page.locator('.region-art')).toHaveAttribute('data-atlas','1');
- await page.locator('#hud-boss-button').click();await expect(page.locator('#stage-number')).toHaveText('5-1');await expect(page.locator('.region-art')).toHaveAttribute('data-atlas','2');await expect(page.locator('.region-art')).toHaveCSS('background-position','0% 0%');
+ await page.getByRole('button',{name:'스테이지 정보',exact:true}).click();await page.locator('#boss-button').click();await expect(page.locator('#stage-number')).toHaveText('5-1');await expect(page.locator('.region-art')).toHaveAttribute('data-atlas','2');await expect(page.locator('.region-art')).toHaveCSS('background-position','0% 0%');
  await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator('[data-dungeon="coin"]').click();await page.getByRole('button',{name:'던전 입장'}).click();await expect(page.locator('.region-art')).toBeHidden();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','coin');
  await page.locator('[data-action="dungeonStatus"]').click();await page.locator('[data-action="exitDungeon"]').click();await page.locator('.nav-button[data-action="home"]').click();await expect(page.locator('.region-art')).toBeVisible();await expect(page.locator('.region-art')).toHaveAttribute('data-atlas','2');await expect(page.locator('#scene')).toHaveCSS('filter','none');
 });

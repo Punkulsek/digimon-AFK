@@ -49,8 +49,6 @@ export function trainerRecords(state){
     {id:'stages',icon:'map',label:'스테이지 돌파',value:`${progress.completed.toLocaleString('ko-KR')} / ${MAX_STAGE}`},
     {id:'pokemon',icon:'users',label:'보유 포켓몬 수',value:`${state.inventory.length.toLocaleString('ko-KR')}마리`},
     {id:'breakthrough',icon:'star',label:'10돌 포켓몬 수',value:`${state.inventory.filter(p=>p.breakthrough===10).length}마리`},
-    {id:'pets',icon:'heart',label:'보유 펫 수',value:'0마리'},
-    {id:'pet-breakthrough',icon:'sparkles',label:'최대 돌파 펫 수',value:'0마리'},
     {id:'coin',icon:'coins',label:'포켓코인 던전 돌파 기록',value:`${clears.coin||0}단계`},
     {id:'candy',icon:'gift',label:'이상한사탕 던전 돌파 기록',value:`${clears.candy||0}단계`},
     {id:'types',icon:'flame',label:'타입 던전 돌파 기록',value:`최고 ${Math.max(0,...EVOLUTION_TYPES.map(t=>clears[`evolution-${t.id}`]||0))}단계`},
