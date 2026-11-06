@@ -3,7 +3,7 @@ import './stage-hud.css';
 
 const ball=className=>`<span class="hud-pokeball ${className||''}" aria-hidden="true"></span>`;
 export function stageHud(icon){
-  return `<div class="stage-hud"><div class="boss-progress-ui" id="boss-progress-ui">
+  return `<div class="stage-hud"><button class="stage-speed" data-action="speed" aria-label="전투 배속 변경">1배</button><div class="boss-progress-ui" id="boss-progress-ui">
     <div id="boss-gauge" class="boss-gauge" role="progressbar" aria-label="보스 등장 진행도" aria-valuemin="0" aria-valuemax="${STAGE_KILLS}">
       <div class="stage-progress-line" aria-hidden="true"><span id="boss-gauge-fill"></span></div>
       ${Array.from({length:STAGE_KILLS},(_,step)=>`<span class="stage-wave ${step===0?'stage-start':''}" data-wave="${step}" style="--wave-position:${step/STAGE_KILLS*100}%" aria-hidden="true">${ball(step===0?'red':'')}<small>${step||''}</small></span>`).join('')}
@@ -32,5 +32,6 @@ export function updateStageHud(state,battle){
   const suffix=state.campaignCleared?'스테이지 완료':battle.boss?'턴':ready?'도전 가능!':'단계!';
   gauge.setAttribute('aria-valuetext',`${prefix}${number}${suffix}`);
   document.querySelector('#hud-boss-marker').classList.toggle('ready',ready||battle.boss);
+  document.querySelector('.stage-speed').textContent=`${state.speed}배`;
   const auto=document.querySelector('#hud-auto-boss');auto.setAttribute('aria-checked',String(state.autoBoss));auto.disabled=!!state.campaignCleared;
 }

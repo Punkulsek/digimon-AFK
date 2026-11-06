@@ -1,3 +1,4 @@
+import {battleReportRows} from './battle-report.js';
 import {installModalScrollGuard} from './modal-scroll.js';
 installModalScrollGuard();
 import {STATUS_LABELS,skillExtras} from './status-rules.js';
@@ -66,6 +67,7 @@ import {
   ExternalLink,
   Pencil,
   Camera,
+  BarChart3,
 } from "lucide";
 import { species, SPECIES, RARITIES, stageLabel, regionName } from "./data.js";
 import {
@@ -89,12 +91,14 @@ import "./region-art.css";
 import "./type-art.css";
 import "./battle-scenery.css";
 import {stageHud,updateStageHud} from './stage-hud.js';
+import './battle-controls.css';
 import {regionScenery,dungeonScenery,panoramaPosition} from './battle-scenery.js';
 import {createDungeonUI} from "./dungeon-ui.js";
 import { GameAudio } from "./audio.js";
 const iconSet = {
   Pencil,
   Camera,
+  BarChart3,
   Leaf,
   Flame,
   Droplets,
@@ -231,7 +235,7 @@ $("#app").innerHTML = `
 <main class="adventure"><button class="mission-button soft-button" data-action="missions" aria-label="미션"><svg class="mission-clipboard" viewBox="0 0 48 52" aria-hidden="true"><path d="M13 9 39 13 35 48 5 42Z" fill="#45342e" stroke="#161719" stroke-width="3"/><path d="m12 7 29 5-6 32-29-5Z" fill="#fffbed" stroke="#14191c" stroke-width="3" stroke-linejoin="round"/><path d="m21 5 3-3 6 1 2 4 4 1-1 7-18-3 1-7Z" fill="#badbd9" stroke="#16191c" stroke-width="3"/><path d="m12 21 3 3 5-5m-10 12 3 3 5-5" fill="none" stroke="#203036" stroke-width="3"/><path d="m24 23 10 2m-12 8 10 2" stroke="#203036" stroke-width="3"/></svg><span class="mission-label">미션</span><span class="mission-ready-dot" hidden aria-hidden="true"></span></button>
 <section class="battlefield" aria-label="자동 전투 화면">
 <div class="scene" id="scene"><div class="type-background" hidden aria-hidden="true"></div><div class="region-art" aria-hidden="true"></div><div class="battle-floor" aria-hidden="true"></div><div class="sunrays"></div><div class="forest-mist"></div>${Array.from({ length: 12 }, (_, n) => `<span class="forest-mote" style="--n:${n}" aria-hidden="true"></span>`).join("")}</div><div class="battle-vignette"></div>
-${stageHud(i,art)}
+${stageHud(i,art)}<button class="battle-report-button" data-action="battleReport" aria-label="딜량표">${i("bar-chart-3")}<span>딜량표</span></button>
 <div id="fighters" class="fighters"></div><div id="enemy" class="enemy-group"></div><div id="effects" aria-hidden="true"></div>
 <div class="stage-transition" id="stage-transition" role="status" aria-live="polite"><div class="clear-ribbon"><small>스테이지</small><strong>클리어!</strong><span>다음 모험을 향해 출발해요</span></div></div>
 </section>
@@ -311,6 +315,7 @@ function updateHud() {
   backdrop.dataset.atlas=artConfig.atlas;
   backdrop.style.backgroundPosition=panoramaPosition(artConfig);
   updateStageHud(state,battle);
+  updateBattleReport();
   $(".battlefield").classList.toggle("boss-active", battle.boss);
   hudText(
     "#boss-status",
@@ -753,12 +758,21 @@ function audioSettings() {
       "",
     )}<button class="music-player" data-action="music" id="music-button" aria-label="배경음악 켜기" aria-pressed="false"><div class="equalizer" aria-hidden="true"><b></b><b></b><b></b><b></b></div><span>음악 켜기</span>${i("volume-2")}</button></section>`;
 }
+function showBattleReport(){
+ modal('전투 기록 · 딜량표','BATTLE REPORT',`<p class="report-note">현재 전투 세션 누적 기록입니다. 새로 접속하거나 던전에 입장하면 새로 집계합니다.<br>실제 체력 피해와 회복만 집계하며 보호막·초과 피해·초과 회복은 제외합니다.</p><div class="battle-report-table" role="table" aria-label="포켓몬별 전투 기록"><div class="report-head" role="row"><b>포켓몬</b><b>딜량</b><b>받은 피해</b><b>받은 회복량</b></div><div id="battle-report-rows"></div></div>`,'battle-report-modal');
+}
+function updateBattleReport(){
+ const root=$('#battle-report-rows');if(!root)return;
+ const rows=battleReportRows(battle),signature=rows.map(p=>p.uid+':'+p.speciesId).join('|');
+ if(root.dataset.roster!==signature){root.dataset.roster=signature;root.innerHTML=rows.map((p,n)=>`<div class="report-row" role="row"><span>${art(species(p.speciesId))}<b>${species(p.speciesId).name}</b></span>${['damage','taken','healing'].map(key=>`<strong data-report-value="${n}-${key}">0</strong>`).join('')}</div>`).join('');}
+ rows.forEach((p,n)=>['damage','taken','healing'].forEach(key=>{root.querySelector(`[data-report-value="${n}-${key}"]`).textContent=num(Math.round(p[key]));}));
+}
 function settings() {
   active = "home";
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 2배 · 3배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 1.5배 · 2배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
     "settings-modal",
   );
 }
@@ -938,9 +952,12 @@ document.addEventListener("click", (e) => {
       persist();
       if (action === "settingAuto") settings();
       break;
+    case "battleReport":
+      showBattleReport();
+      break;
     case "speed":
     case "settingSpeed":
-      state.speed = (state.speed % 3) + 1;
+      state.speed = [1,1.5,2][([1,1.5,2].indexOf(state.speed)+1)%3];
       schedule();
       persist();
       if (action === "settingSpeed") settings();

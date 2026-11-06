@@ -1,3 +1,4 @@
+import {recordBattleEvent} from './battle-report.js';
 import {statusImmune} from './status-rules.js';
 import {typeEffectiveness} from './type-matchups.js';
 import skillData from './generated/skills.json' with {type:'json'};
@@ -16,7 +17,7 @@ const badStatuses=['poison','burn','shock','sleep','confusion','freeze','flinch'
 export class SkillRuntime {
  constructor(battle){this.battle=battle;this.time=0;this.pending=[];this.periodic=new Map();this.context=null;this.nextUid=0;this.rng=()=>battle.rng();}
  get units(){return [...this.battle.allies,...this.battle.enemies];}
- emit(event){if(this.context)event.castId=this.context.id;this.battle.events.push(event);if(this.context&&event.targetUid)this.context.targets.add(event.targetUid);}
+ emit(event){recordBattleEvent(this.battle,event);if(this.context)event.castId=this.context.id;this.battle.events.push(event);if(this.context&&event.targetUid)this.context.targets.add(event.targetUid);}
  init(unit,side){
   Object.assign(unit,{side,statuses:{},buffs:{},shield:0,shieldUntil:0,gauge:0,memory:{},castingUntil:0,holdUntil:0});
   unit.uid ||= `${side}-${++this.nextUid}`;unit.level ||=1;unit.skill=SKILL_ASSIGNMENTS[unit.speciesId];return unit;
