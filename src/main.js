@@ -249,6 +249,7 @@ function restoreOverworld(){
  if(!overworldBattle)return;
  const transition=$("#stage-transition");clearTimeout(transition.hideTimer);transition.classList.remove('visible');
  battle=overworldBattle;overworldBattle=null;
+ battle.report={};
  renderBattle();updateHud();
 }
 function enterDungeon(info){

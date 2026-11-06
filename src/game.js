@@ -64,6 +64,8 @@ export class Battle {
   for(const u of this.enemies)this.runtime.init(u,'enemy');
  }
  spawn(){
+  // Every new enemy formation is a fresh combat record, including bosses and retries.
+  this.report={};
   this.wave++;this.waveElapsed=0;this.bossTurns=0;
   this.enemies=Array.from({length:5},(_,n)=>{
    const level=Math.min(100,this.dungeon?.stage||Math.ceil(this.state.stage/4));
