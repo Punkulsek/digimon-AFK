@@ -280,7 +280,9 @@ function updateHud() {
   if($('.mission-modal')){const info=missionInfo(state,missionTab);hudText('#mission-status',`${num(info.count)} / ${num(info.target)}`);hudText('#mission-reward',num(missionTab==='repeat'?5:info.reward));const meter=$('.mission-meter>span');if(meter)meter.style.width=`${Math.min(100,info.count/info.target*100)}%`;const all=$('[data-action="claimAllMissions"]');if(all)all.disabled=!['daily','weekly','challenge','repeat'].some(tab=>missionInfo(state,tab).ready);const claim=$('.mission-modal [data-action="claimMission"]');claim.disabled=!info.ready;claim.textContent=info.claimed?'✓':info.ready?'받기':'진행 중';hudText('#mission-pending',`누적 수령 가능: 몬스터볼 ${num(info.reward)}개`);}
   hudText("#save-status", saved ? "자동 저장됨" : "저장 공간 확인 필요");
   $("#region-name").textContent = battle.dungeon ? battle.dungeon.name : regionName(state.stage);
-  $(".stage-banner").dataset.action = battle.dungeon ? "dungeonStatus" : "stages";
+  $(".stage-banner").disabled = !battle.dungeon;
+  if(battle.dungeon) $(".stage-banner").dataset.action = "dungeonStatus";
+  else delete $(".stage-banner").dataset.action;
   $("#stage-number").textContent = battle.dungeon ? `${battle.dungeon.stage}${battle.dungeon.id==='tower'?'층':'단계'}` : stageLabel(state.stage);
   hudText("#kills", `${state.kills} / 10`);
   if ($("#stage-progress"))
