@@ -1135,7 +1135,7 @@ cloudAccount=createFirebaseAccount({storage,getState:()=>state,apply:next=>{
  battle=new Battle(state);save(storage,state);renderBattle();updateHud();schedule();
 },status:(status,error)=>{
  const messages={'load-error':'서버 기록을 불러오지 못했습니다. 기존 기록은 보존됩니다. 게임 시작을 눌러 다시 시도하세요.','save-error':'서버 저장에 실패했습니다. 로컬 기록을 보존하고 자동으로 다시 시도합니다.','conflict':'다른 기기에서 저장된 기록이 있습니다. 현재 기록은 로컬에 보존했습니다. 새로고침해 동기화하세요.','local-error':'기기 저장 공간을 확인해 주세요.','recovered':'다른 기기의 최신 기록을 불러왔습니다. 이 기기의 변경 기록은 백업했습니다.'};
- if(status==='load-error'){const code=String(error?.code||error?.message||'unknown');const hint=code.includes('permission-denied')?'Firestore 보안 규칙에서 계정 접근이 거부되었습니다. 관리자에게 규칙 게시를 요청해 주세요.':code.includes('not-found')?'Firestore 기본 데이터베이스를 찾을 수 없습니다. 관리자에게 생성을 요청해 주세요.':code.includes('deadline')||code.includes('unavailable')?'서버 연결이 지연됩니다. 네트워크를 확인한 뒤 게임 시작을 눌러 다시 시도해 주세요.':'서버 기록을 불러오지 못했습니다. 관리자에게 아래 오류 코드를 전달해 주세요.';messages[status]=`${hint} (${code}) 기존 기록은 보존됩니다.`;}
+ if(status==='load-error'){const code=String(error?.code||error?.message||'unknown');const hint=code.includes('permission-denied')?'Firestore 보안 규칙에서 계정 접근이 거부되었습니다. 관리자에게 규칙 게시를 요청해 주세요.':code.includes('not-found')?'Firestore 요청 대상 리소스를 찾지 못했습니다. 아래 서버 응답을 확인해 주세요.':code.includes('deadline')||code.includes('unavailable')?'서버 연결이 지연됩니다. 네트워크를 확인한 뒤 게임 시작을 눌러 다시 시도해 주세요.':'서버 기록을 불러오지 못했습니다. 관리자에게 아래 오류 코드를 전달해 주세요.';const detail=String(error?.message||'').slice(0,450);messages[status]=`${hint} (${code}) [pokemon-eternal / (default)] ${detail} 기존 기록은 보존됩니다.`;}
  cloudNotice=messages[status]|| (status==='loading'?'계정의 진행 기록을 불러오는 중입니다.':'');
  if(messages[status]&&!titleActive)toast(messages[status]);
 }});

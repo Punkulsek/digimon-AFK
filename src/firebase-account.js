@@ -1,17 +1,15 @@
-import {initializeApp,getApps} from 'firebase/app';
+import {FIREBASE_PROJECT,FIREBASE_DATABASE,validateFirebaseConfig,readCloudSnapshot} from './firebase-config.js';
+import {initializeApp,getApps,getApp} from 'firebase/app';
 import {getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithPopup,GoogleAuthProvider} from 'firebase/auth';
-import {getFirestore,doc,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {getFirestore,doc,getDocFromServer,runTransaction,serverTimestamp} from 'firebase/firestore';
 import {CloudSaveSession} from './cloud-save.js';
 // Chunking preserves the full save even when inventory grows beyond Firestore's document limit.
 export function firestoreRemote(db){
  const ref=uid=>doc(db,'players',uid),chunk=(uid,n)=>doc(db,'players',uid,'saveChunks',String(n));
  return {
-  read:uid=>runTransaction(db,async tx=>{
-   const head=await tx.get(ref(uid));if(!head.exists())return null;
-   const data=head.data();if(data.schema!==1||!Number.isInteger(data.chunks)||data.chunks<1||data.chunks>200||!Number.isInteger(data.revision))throw Error('invalid-cloud-save');
-   const pieces=await Promise.all(Array.from({length:data.chunks},(_,n)=>tx.get(chunk(uid,n))));
-   if(pieces.some(p=>!p.exists()||p.data().revision!==data.revision||typeof p.data().text!=='string'))throw Error('incomplete-cloud-save');
-   return {revision:data.revision,payload:pieces.map(p=>p.data().text).join('')};
+  read:uid=>readCloudSnapshot(async n=>{
+   const snap=await getDocFromServer(n===null?ref(uid):chunk(uid,n));
+   return snap.exists()?snap.data():null;
   }),
   write:(uid,expected,payload)=>runTransaction(db,async tx=>{
    // 48K UTF-16 code units per document stays well below 1 MiB for every Unicode string.
@@ -42,11 +40,14 @@ export function createFirebaseAccount({storage,getState,apply,onChange,status}){
  }
  (async()=>{
   try{
-   config=globalThis.POKEMON_AUTH_CONFIG;
-   if(!config&&location.protocol!=='file:')config=await(await fetch('/auth-config.json',{cache:'no-store'})).json();
+   if(location.protocol==='file:')config=globalThis.POKEMON_AUTH_CONFIG;
+   else {const response=await fetch('/auth-config.json',{cache:'no-store'});if(!response.ok)throw Object.assign(Error('Firebase 설정 파일을 읽지 못했습니다.'),{code:'config/http-'+response.status});config=await response.json();}
+   config=validateFirebaseConfig(config);
    if(!config?.apiKey){resolveReady();notify();return;}
-   auth=getAuth(getApps()[0]||initializeApp(config));await setPersistence(auth,browserLocalPersistence);
-   session=new CloudSaveSession({storage,remote:firestoreRemote(getFirestore(auth.app)),apply,status:(state,error)=>{status(state,error);notify();}});
+   const app=getApps().some(a=>a.name==='[DEFAULT]')?getApp():initializeApp(config);
+   validateFirebaseConfig(app.options);
+   auth=getAuth(app);await setPersistence(auth,browserLocalPersistence);
+   session=new CloudSaveSession({storage,remote:firestoreRemote(getFirestore(auth.app,FIREBASE_DATABASE)),apply,status:(state,error)=>{if(error)error.firestoreTarget=`${FIREBASE_PROJECT}/${FIREBASE_DATABASE}`;status(state,error);notify();}});
    onAuthStateChanged(auth,async next=>{
     const google=next?.providerData.some(p=>p.providerId==='google.com')?next:null;
     if(!initial&&user&&user.uid!==google?.uid){session?.cancel();location.reload();return;}
