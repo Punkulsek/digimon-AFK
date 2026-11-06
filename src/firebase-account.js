@@ -28,10 +28,18 @@ export function firestoreRemote(db){
  };
 }
 export function createFirebaseAccount({storage,getState,apply,onChange,status}){
- let auth,session,user=null,initial=true,config,bootError=null;
+ let auth,session,user=null,initial=true,config,bootError=null,loading=false,opening=null;
  const listeners=new Set();let resolveReady;const ready=new Promise(resolve=>resolveReady=resolve);
  const notify=()=>{onChange?.();for(const listener of listeners)listener();};
- const api={ready,get user(){return user},get configured(){return !!auth},get canStart(){return !bootError&&(!user||!!session?.ready)},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){session?.queue(getState())},flush(){api.queue();return session?.flush()},async login(){await ready;if(!auth)throw Error('auth-unconfigured');await signInWithPopup(auth,new GoogleAuthProvider());},async retry(){if(user&&session){bootError=null;await session.open(user.uid).catch(e=>{bootError=e});notify();}},};
+ const api={ready,get user(){return user},get configured(){return !!auth},get loading(){return loading},get canStart(){return !!user&&!loading&&!bootError&&!!session?.ready},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){session?.queue(getState())},flush(){api.queue();return session?.flush()},async login(){await ready;if(!auth)throw Error('auth-unconfigured');await signInWithPopup(auth,new GoogleAuthProvider());},async retry(){if(user&&session)await openAccount()},};
+ async function openAccount(){
+  if(opening)return opening;
+  loading=true;bootError=null;notify();
+  opening=(async()=>{let timer;try{
+   await Promise.race([session.open(user.uid),new Promise((_,reject)=>{timer=setTimeout(()=>{session.cancel();reject(Object.assign(Error('cloud-timeout'),{code:'deadline-exceeded'}));},15000);})]);
+  }catch(error){bootError=error;status('load-error',error);}finally{clearTimeout(timer);loading=false;opening=null;notify();}})();
+  return opening;
+ }
  (async()=>{
   try{
    config=globalThis.POKEMON_AUTH_CONFIG;
@@ -41,9 +49,9 @@ export function createFirebaseAccount({storage,getState,apply,onChange,status}){
    session=new CloudSaveSession({storage,remote:firestoreRemote(getFirestore(auth.app)),apply,status:(state,error)=>{status(state,error);notify();}});
    onAuthStateChanged(auth,async next=>{
     const google=next?.providerData.some(p=>p.providerId==='google.com')?next:null;
-    if(!initial&&user?.uid!==google?.uid){session?.cancel();location.reload();return;}
+    if(!initial&&user&&user.uid!==google?.uid){session?.cancel();location.reload();return;}
     initial=false;user=google;bootError=null;notify();
-    if(user)try{await session.open(user.uid);}catch(e){bootError=e;}
+    if(user)await openAccount();
     resolveReady();notify();
    },error=>{bootError=error;status('load-error',error);resolveReady();notify();});
   }catch(error){bootError=error;status('load-error',error);resolveReady();notify();}

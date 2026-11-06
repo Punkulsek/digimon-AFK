@@ -21,7 +21,7 @@ Rules restrict both `players/{uid}` and `players/{uid}/saveChunks/{n}` to that a
 - Failed writes keep local progress and pending revision metadata (`pokemon-eternal-sync:{uid}`) and retry. Revision conflicts block further uploads until reload; pending data is backed up before loading the server winner (`pokemon-eternal-backup:{uid}:...`). No automatic last-write-wins overwrite.
 - Current payloads are supported up to 7 MiB / 200 chunks; exceeding the transaction budget reports a save error and retains local data, without truncating or replacing the server save.
 - Sign-in changes on an already running page reload into the title to prevent cross-account writes.
-- Offline first launch of a linked account waits for the server rather than risking stale progress. Guest play remains local.
+- Offline first launch of a linked account waits for the server rather than risking stale progress. Game entry now requires Google authentication; unlinked users see only the link button. Existing guest saves remain available for first-account migration.
 
 ## Audio
 Existing music files and mute/volume preferences are preserved. Title BGM attempts autoplay immediately, loops, and stops at entry. In-game playback attempts immediately on entry and visibility restoration. When blocked by browser policy it retries on the first pointer/key input. No browser-policy bypass is possible. The single game BGM currently assigned is Oldale Town; no per-region tracks are invented. Mode changes resolve existing optional `POKEMON_BGM_TRACKS` mappings and stop previous sources when the assigned file changes. Summon-video exclusive audio still suspends game music/effects.
@@ -30,3 +30,5 @@ Existing music files and mute/volume preferences are preserved. Title BGM attemp
 `node --test tests/cloud-save.test.js tests/audio-lifecycle.test.js` checks migration, account isolation, read/write failures, reconnects, revision conflicts and audio source races.
 `npm run test:firebase` runs ownership rules plus the real Firestore chunk transaction adapter against the local demo emulator.
 The development environment denied the emulator JAR download (HTTP 403 Domain forbidden), so emulator checks could not run here. Live sign-in, cross-device Firestore access, and rule publication must be verified after the above console setup. No live rules deployment is claimed.
+
+Login entry errors now include the Firebase error code. `permission-denied` requires checking published rules; `not-found` requires checking the default database. Loads time out after 15 seconds without overwriting records. First linking no longer forces a reload.
