@@ -25,3 +25,9 @@ test('switching account during a delayed read never applies previous account dat
 test('guest progress migrates only to its original account, never to another new account',async()=>{
  const x=setup();await x.make().open('A');await x.make().open('B');assert.equal(x.applied.gold,initialState().gold);assert.equal(JSON.parse(x.storage.read('A')).gold,12345);assert.equal(JSON.parse(x.storage.read(null)).gold,12345);
 });
+test('a slow first upload never blocks entry after the server read succeeded',async()=>{
+ const x=setup();let finish;x.remote.write=()=>new Promise(resolve=>finish=resolve);const s=x.make();await s.open('A');assert.equal(s.ready,true);assert.equal(s.running,true);assert.equal(s.dirty,true);assert.equal(x.applied.gold,12345);finish(1);await new Promise(r=>setImmediate(r));assert.equal(s.dirty,false);
+});
+test('a failed first upload retains playable loaded data and pending local changes',async()=>{
+ const x=setup();x.remote.write=async()=>{throw Error('unavailable')};const s=x.make();await s.open('A');await new Promise(r=>setImmediate(r));assert.equal(s.ready,true);assert.equal(s.dirty,true);assert.equal(JSON.parse(x.storage.read('A')).gold,12345);
+});

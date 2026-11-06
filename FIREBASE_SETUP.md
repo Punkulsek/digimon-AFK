@@ -31,10 +31,13 @@ Existing music files and mute/volume preferences are preserved. Title BGM attemp
 `npm run test:firebase` runs ownership rules plus the real Firestore chunk transaction adapter against the local demo emulator.
 The development environment denied the emulator JAR download (HTTP 403 Domain forbidden), so emulator checks could not run here. Live sign-in, cross-device Firestore access, and rule publication must be verified after the above console setup. No live rules deployment is claimed.
 
-Login entry errors now include the Firebase error code. `permission-denied` requires checking published rules; `not-found` requires checking the default database. Loads time out after 15 seconds without overwriting records. First linking no longer forces a reload.
+Login entry errors now include the Firebase error code. `permission-denied` requires checking published rules; `not-found` requires checking the default database. Server reads time out after 45 seconds without overwriting records. First linking no longer forces a reload.
 
 ## Connection diagnostics (not-found)
 Web deployments fetch `/auth-config.json` with `cache: no-store`; embedded configuration is used only for file:// builds. The expected project, auth domain and web app ID are validated before choosing the default Firebase app. Firestore uses explicit database ID `(default)`; `asia-northeast3` is a server-side database location, not a database ID or client hostname.
 
 Reads now use server-only document reads, checking metadata before/after chunk reads and retrying inconsistent revisions. Missing player documents return no save without a read-only transaction commit. Backend not-found errors are propagated, never treated as missing player data or proof that the database is absent. Writes remain revision-checked atomic transactions.
 The deployed endpoint could not be inspected from this workspace (outbound proxy HTTP 403). The actual production root cause has not been confirmed. If it persists, the updated message includes the Firebase response and explicit target for diagnosis; no database deletion/recreation is recommended.
+
+## Connection timeout correction
+The old 15-second `cloud-timeout` was an application deadline covering both reading and the first upload, not proof of a server-side timeout. Entry now waits only for the validated server read. The first upload runs separately; failures retain the dirty local snapshot for retry. Firestore Lite uses finite authenticated HTTP batchGet/commit calls instead of a Listen/WebChannel connection. Rules, database path, chunks and optimistic write revisions are unchanged. The same SDK adapter is tested against a local HTTP server, including authentication headers and the explicit default database path. This verifies request behavior, not production connectivity.

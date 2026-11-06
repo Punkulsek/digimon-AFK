@@ -36,7 +36,8 @@ export class CloudSaveSession {
    if(migratingGuest)this.storage.raw.setItem('pokemon-eternal-guest-owner',uid);
    this.storage.uid=uid;this.storage.setItem(SAVE_KEY,this.payload);this.cache();
    this.apply(decoded);this.ready=true;this.status(this.dirty?'pending':'saved');
-   if(this.dirty)await this.flush();
+   // Cloud reading is complete. Saving must not block game entry.
+   if(this.dirty)void this.flush();
   }catch(error){if(generation!==this.generation)return;this.ready=false;this.blocked=true;this.status('load-error',error);throw error;}
  }
  queue(state){if(!this.ready)return;const payload=JSON.stringify(state);if(payload===this.payload)return;this.payload=payload;this.dirty=true;try{this.cache();}catch(e){this.status('local-error',e);return;}if(!this.blocked)this.status('pending');}

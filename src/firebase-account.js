@@ -1,14 +1,14 @@
 import {FIREBASE_PROJECT,FIREBASE_DATABASE,validateFirebaseConfig,readCloudSnapshot} from './firebase-config.js';
 import {initializeApp,getApps,getApp} from 'firebase/app';
 import {getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithPopup,GoogleAuthProvider} from 'firebase/auth';
-import {getFirestore,doc,getDocFromServer,runTransaction,serverTimestamp} from 'firebase/firestore';
+import {getFirestore,doc,getDoc,runTransaction,serverTimestamp} from 'firebase/firestore/lite';
 import {CloudSaveSession} from './cloud-save.js';
 // Chunking preserves the full save even when inventory grows beyond Firestore's document limit.
 export function firestoreRemote(db){
  const ref=uid=>doc(db,'players',uid),chunk=(uid,n)=>doc(db,'players',uid,'saveChunks',String(n));
  return {
   read:uid=>readCloudSnapshot(async n=>{
-   const snap=await getDocFromServer(n===null?ref(uid):chunk(uid,n));
+   const snap=await getDoc(n===null?ref(uid):chunk(uid,n));
    return snap.exists()?snap.data():null;
   }),
   write:(uid,expected,payload)=>runTransaction(db,async tx=>{
@@ -34,7 +34,7 @@ export function createFirebaseAccount({storage,getState,apply,onChange,status}){
   if(opening)return opening;
   loading=true;bootError=null;notify();
   opening=(async()=>{let timer;try{
-   await Promise.race([session.open(user.uid),new Promise((_,reject)=>{timer=setTimeout(()=>{session.cancel();reject(Object.assign(Error('cloud-timeout'),{code:'deadline-exceeded'}));},15000);})]);
+   await Promise.race([session.open(user.uid),new Promise((_,reject)=>{timer=setTimeout(()=>{session.cancel();reject(Object.assign(Error('cloud-timeout'),{code:'deadline-exceeded'}));},45000);})]);
   }catch(error){bootError=error;status('load-error',error);}finally{clearTimeout(timer);loading=false;opening=null;notify();}})();
   return opening;
  }
