@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {initialState} from '../../src/game.js';
 test('title keeps progress paused, plays supplied assets and stops music on entry',async({page})=>{
+ await page.route('**/auth-config.json',r=>r.fulfill({json:{}}));
  const s=initialState();s.stage=45;s.gold=45678;const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(s=>{if(!localStorage.getItem('pokemon-days-v1'))localStorage.setItem('pokemon-days-v1',JSON.stringify(s));},s);
  await page.setViewportSize({width:1920,height:1080});await page.goto('/');

@@ -1,1 +1,9 @@
-{}
+{
+  "apiKey": "AIzaSyCTOIoJiG0pJ2V7yaHR24PJW_EAkk6fKQY",
+  "authDomain": "pokemon-eternal.firebaseapp.com",
+  "projectId": "pokemon-eternal",
+  "storageBucket": "pokemon-eternal.firebasestorage.app",
+  "messagingSenderId": "21127618866",
+  "appId": "1:21127618866:web:0a65a5478d53216db9b72b",
+  "measurementId": "G-LL39FJ0YBS"
+}

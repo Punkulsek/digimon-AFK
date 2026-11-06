@@ -26,6 +26,7 @@ export class GameAudio {
     this.mode = "field";
     this.context = null;
     this.lastEffect = 0;
+    this.musicGeneration=0;
   }
   async unlock() {
     if (this.hidden) return false;
@@ -80,6 +81,7 @@ export class GameAudio {
       this.storage.setItem(AUDIO_KEY, JSON.stringify(this.prefs));
     } catch {}
     this.applyVolume();
+    if(!this.prefs.music)this.stopMusic();else if(this.started)this.startMusic().catch(()=>{});
     this.changed();
   }
   async toggleMusic() {
@@ -89,12 +91,21 @@ export class GameAudio {
     } else this.set("music", !this.prefs.music);
   }
   setVideoExclusive(value) {
-    this.exclusiveVideo=value;this.applyVolume();
+    this.exclusiveVideo=value;
+    if(value){this.musicGeneration++;this.stopMusic();}else if(this.started)this.startMusic().catch(()=>{});
+    this.applyVolume();
     if(value&&this.context){for(const bus of [this.music,this.effects]){bus.gain.cancelScheduledValues(this.context.currentTime);bus.gain.setValueAtTime(0,this.context.currentTime);}}
   }
   setMode(mode) {
     this.mode = mode;
+    const tracks=globalThis.POKEMON_BGM_TRACKS||{};
+    const source=tracks[mode]||tracks[mode.split(':')[0]]||globalThis.POKEMON_BGM||'/audio/oldale-town.mp3';
+    if(source===this.musicSource)return;
+    this.musicSource=source;this.musicGeneration++;this.stopMusic();this.loading=null;
+    if(this.started&&!this.hidden&&!this.exclusiveVideo)this.startMusic().catch(()=>{});
   }
+  stopMusic(){if(this.track){try{this.track.stop();}catch{}this.track.disconnect();this.track=null;}}
+
   tone(midi, time, duration, gain = 0.15, type = "triangle", bus = this.music) {
     if (!midi || !this.context) return;
     const oscillator = this.context.createOscillator(),
@@ -114,16 +125,17 @@ export class GameAudio {
     };
   }
   async startMusic() {
-    if (this.track) return;
+    if (this.track||this.hidden||this.exclusiveVideo||!this.prefs.music||!this.context) return;
+    const generation=this.musicGeneration;
     if (!this.loading) {
       this.loading = (async () => {
-        const response = await fetch(globalThis.POKEMON_BGM || "/audio/oldale-town.mp3");
+        const response = await fetch(this.musicSource || globalThis.POKEMON_BGM || "/audio/oldale-town.mp3");
         if (!response.ok) throw new Error("BGM load failed");
         return this.context.decodeAudioData(await response.arrayBuffer());
       })().catch(error => { this.loading = null; throw error; });
     }
     const buffer = await this.loading;
-    if (this.track) return;
+    if (this.track||generation!==this.musicGeneration||this.hidden||this.exclusiveVideo||!this.prefs.music) return;
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
@@ -209,7 +221,7 @@ export class GameAudio {
     this.hidden = hidden;
     if (hidden) {
       if (this.context?.state === "running") await this.context.suspend();
-    } else if (this.started) {
+    } else {
       await this.unlock();
     }
   }

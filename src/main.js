@@ -1,3 +1,5 @@
+import {AccountStorage} from './cloud-save.js';
+import {createFirebaseAccount} from './firebase-account.js';
 import {showTitle} from './title.js';
 import {battleReportRows} from './battle-report.js';
 import {installModalScrollGuard} from './modal-scroll.js';
@@ -158,6 +160,8 @@ try {
     },
   };
 }
+storage=new AccountStorage(storage);
+let cloudAccount=null;
 let titleActive=true;
 let loaded = load(storage),
   state = loaded.state,
@@ -202,6 +206,7 @@ const partyPower = () =>
     .reduce((s, p) => s + power(p,state), 0);
 function persist() {
   saved = save(storage, state);
+  cloudAccount?.queue();
   updateHud();
 }
 function toast(msg) {
@@ -326,7 +331,7 @@ function updateHud() {
       ? `보스 제한 턴 ${Math.max(0, BOSS_TURN_LIMIT - battle.bossTurns)} · 승리 보상 다이아 100`
       : state.campaignCleared ? "관동 정복 완료 · 현재 지역에서 자동 사냥 중" : `처치 보상 ${stageGold(state.stage)} 포켓코인 · 보스 보상 다이아 100`,
   );
-  if (active !== "summon") sound.setMode(battle.boss ? "boss" : "field");
+  if (active !== "summon") sound.setMode(battle.dungeon?`dungeon:${battle.dungeon.id}`:battle.boss?"boss":`stage:${state.stage}`);
 }
 function healthBar(unit,cls){return `<div class="${cls}"><span style="width:${Math.max(0,unit.hp/unit.maxHp*100)}%"></span><i class="shield-gauge" role="progressbar" aria-label="보호막" aria-valuemin="0" aria-valuemax="${Math.max(unit.maxHp,unit.shield||0)}" aria-valuenow="${unit.shield||0}" title="보호막 ${Math.ceil(unit.shield||0)}" style="width:${Math.min(100,(unit.shield||0)/unit.maxHp*100)}%" ${unit.shield>0?'':'hidden'}></i></div>`;}
 let displayedBattle=null,displayedWave=-1;
@@ -461,6 +466,7 @@ function presentSkillImpact(event,present){
 function step() {
   if(titleActive)return;
   if (dungeonUI.isOpen()) return;
+  if(cloudAccount?.user&&!cloudAccount.canStart)return;
   const oldWave=battle.wave;
   const events = battle.tick(.1);
   if(battle.wave!==oldWave){clearSkillEffects();skillPresentations.clear();$("#effects").replaceChildren();}
@@ -1110,20 +1116,32 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
-window.addEventListener("pagehide", persist);
+window.addEventListener("pagehide", ()=>{persist();cloudAccount?.flush();});
 document.addEventListener("visibilitychange", () => {
   sound.visibility(document.hidden);
   if (document.hidden) {
     clearInterval(timer);
-    persist();
-  } else schedule();
+    persist();cloudAccount?.flush();
+  } else {schedule();if(!titleActive)sound.unlock();}
 });
 renderBattle();
 updateHud();
 updateAudio();
 icons();
 sound.setVideoExclusive(true);
-showTitle({onStart:()=>{titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
+let cloudNotice='';
+cloudAccount=createFirebaseAccount({storage,getState:()=>state,apply:next=>{
+ for(const key of Object.keys(state))delete state[key];Object.assign(state,next);
+ battle=new Battle(state);save(storage,state);renderBattle();updateHud();schedule();
+},status:(status)=>{
+ const messages={'load-error':'서버 기록을 불러오지 못했습니다. 기존 기록은 보존됩니다. 게임 시작을 눌러 다시 시도하세요.','save-error':'서버 저장에 실패했습니다. 로컬 기록을 보존하고 자동으로 다시 시도합니다.','conflict':'다른 기기에서 저장된 기록이 있습니다. 현재 기록은 로컬에 보존했습니다. 새로고침해 동기화하세요.','local-error':'기기 저장 공간을 확인해 주세요.','recovered':'다른 기기의 최신 기록을 불러왔습니다. 이 기기의 변경 기록은 백업했습니다.'};
+ cloudNotice=messages[status]|| (status==='loading'?'계정의 진행 기록을 불러오는 중입니다.':'');
+ if(messages[status]&&!titleActive)toast(messages[status]);
+}});
+showTitle({account:cloudAccount,getNotice:()=>cloudNotice,onStart:()=>{titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
+setInterval(()=>{if(!titleActive)cloudAccount.flush();},5000);
+for(const event of ['pointerdown','keydown'])document.addEventListener(event,()=>{if(!titleActive&&sound.context?.state!=='running')sound.unlock();},{capture:true});
+window.addEventListener('online',()=>{if(!titleActive)cloudAccount.flush();});
 schedule();
 if (loaded.status === "invalid")
   toast("저장 데이터를 읽을 수 없어 새 모험을 시작했어요.");
