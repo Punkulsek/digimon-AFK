@@ -758,14 +758,22 @@ function audioSettings() {
       "",
     )}<button class="music-player" data-action="music" id="music-button" aria-label="배경음악 켜기" aria-pressed="false"><div class="equalizer" aria-hidden="true"><b></b><b></b><b></b><b></b></div><span>음악 켜기</span>${i("volume-2")}</button></section>`;
 }
+let reportMetric='damage';
 function showBattleReport(){
- modal('전투 기록 · 딜량표','BATTLE REPORT',`<p class="report-note">현재 전투 세션 누적 기록입니다. 새로 접속하거나 던전에 입장하면 새로 집계합니다.<br>실제 체력 피해와 회복만 집계하며 보호막·초과 피해·초과 회복은 제외합니다.</p><div class="battle-report-table" role="table" aria-label="포켓몬별 전투 기록"><div class="report-head" role="row"><b>포켓몬</b><b>딜량</b><b>받은 피해</b><b>받은 회복량</b></div><div id="battle-report-rows"></div></div>`,'battle-report-modal');
+ const existing=$('#battle-report-panel');
+ if(existing){existing.remove();$('.battle-report-button').hidden=false;return;}
+ $('.battle-report-button').hidden=true;
+ $('.battlefield').insertAdjacentHTML('beforeend',`<section id="battle-report-panel" class="battle-report-panel" aria-label="실시간 딜량표"><header><h3>${i('bar-chart-3')} 딜량표</h3><button data-action="battleReport" aria-label="딜량표 접기">−</button></header><div class="report-tabs" role="tablist">${[['damage','swords','딜량'],['taken','shield','받은 피해'],['healing','plus','받은 회복량']].map(([key,icon,label])=>`<button role="tab" data-action="reportMetric" data-metric="${key}" aria-selected="${reportMetric===key}">${i(icon)}${label}</button>`).join('')}</div><div id="battle-report-rows"></div></section>`);
+ icons();updateBattleReport();
 }
 function updateBattleReport(){
  const root=$('#battle-report-rows');if(!root)return;
- const rows=battleReportRows(battle),signature=rows.map(p=>p.uid+':'+p.speciesId).join('|');
- if(root.dataset.roster!==signature){root.dataset.roster=signature;root.innerHTML=rows.map((p,n)=>`<div class="report-row" role="row"><span>${art(species(p.speciesId))}<b>${species(p.speciesId).name}</b></span>${['damage','taken','healing'].map(key=>`<strong data-report-value="${n}-${key}">0</strong>`).join('')}</div>`).join('');}
- rows.forEach((p,n)=>['damage','taken','healing'].forEach(key=>{root.querySelector(`[data-report-value="${n}-${key}"]`).textContent=num(Math.round(p[key]));}));
+ const rows=battleReportRows(battle).filter(p=>battle.allies.some(a=>a.uid===p.uid)).sort((a,b)=>b[reportMetric]-a[reportMetric]);
+ const total=rows.reduce((sum,p)=>sum+p[reportMetric],0),signature=rows.map(p=>p.uid+':'+p.speciesId).join('|');
+ root.parentElement.dataset.metric=reportMetric;
+ root.parentElement.querySelectorAll('[data-metric]').forEach(el=>el.setAttribute('aria-selected',String(el.dataset.metric===reportMetric)));
+ if(root.dataset.roster!==signature){root.dataset.roster=signature;root.innerHTML=rows.map(p=>`<div class="report-meter-row"><div class="report-portrait" title="${species(p.speciesId).name}">${art(species(p.speciesId))}</div><div class="report-meter-data"><strong></strong><div class="report-meter-track"><span></span></div></div></div>`).join('');}
+ rows.forEach((p,n)=>{const row=root.children[n],pct=total?p[reportMetric]/total*100:0;row.querySelector('strong').textContent=`${num(Math.round(p[reportMetric]))} (${pct.toFixed(1)}%)`;row.querySelector('.report-meter-track>span').style.width=`${pct}%`;});
 }
 function settings() {
   active = "home";
@@ -952,6 +960,8 @@ document.addEventListener("click", (e) => {
       persist();
       if (action === "settingAuto") settings();
       break;
+    case "reportMetric":
+      reportMetric=btn.dataset.metric;updateBattleReport();break;
     case "battleReport":
       showBattleReport();
       break;
