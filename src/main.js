@@ -1,3 +1,4 @@
+import {showTitle} from './title.js';
 import {battleReportRows} from './battle-report.js';
 import {installModalScrollGuard} from './modal-scroll.js';
 installModalScrollGuard();
@@ -157,6 +158,7 @@ try {
     },
   };
 }
+let titleActive=true;
 let loaded = load(storage),
   state = loaded.state,
   battle = new Battle(state),
@@ -457,6 +459,7 @@ function presentSkillImpact(event,present){
 }
 
 function step() {
+  if(titleActive)return;
   if (dungeonUI.isOpen()) return;
   const oldWave=battle.wave;
   const events = battle.tick(.1);
@@ -781,7 +784,7 @@ function settings() {
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 1.5배 · 2배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 1.5배 · 2배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><div class="setting-row"><div><b>진행 기록 옮기기</b><p>기존 기기에서 내보낸 파일을 새 웹사이트에서 불러오세요.</p></div><button class="soft-button" data-action="exportSave">내보내기</button><button class="soft-button" data-action="importSave">불러오기</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
     "settings-modal",
   );
 }
@@ -963,6 +966,13 @@ document.addEventListener("click", (e) => {
       break;
     case "reportMetric":
       reportMetric=btn.dataset.metric;updateBattleReport();break;
+    case "exportSave": {
+      persist();const url=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='pokemon-eternal-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;
+    }
+    case "importSave": {
+      const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
+      input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>10000000)throw Error();const raw=await file.text();const restored=load({getItem:key=>key==='pokemon-days-v1'?raw:null,setItem(){}});if(restored.status!=='loaded')throw Error();if(!confirm('선택한 저장 기록으로 현재 진행을 바꿀까요? 현재 기록은 브라우저에 백업됩니다.'))return;storage.setItem('pokemon-days-before-import',JSON.stringify(state));Object.assign(state,restored.state);persist();location.reload();}catch{toast('저장 파일을 불러오지 못했습니다. 기존 기록은 유지됩니다.');}};input.click();break;
+    }
     case "battleReport":
       showBattleReport();
       break;
@@ -1112,6 +1122,8 @@ renderBattle();
 updateHud();
 updateAudio();
 icons();
+sound.setVideoExclusive(true);
+showTitle({onStart:()=>{titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
 schedule();
 if (loaded.status === "invalid")
   toast("저장 데이터를 읽을 수 없어 새 모험을 시작했어요.");

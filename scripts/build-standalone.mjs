@@ -89,11 +89,14 @@ const statusAtlas=await readFile(resolve(root,'public/ui/status-icons.png'));
 offlineCss=offlineCss.replaceAll('/ui/status-icons.png',`data:image/png;base64,${statusAtlas.toString('base64')}`);
 const effectData={};
 for(const file of await readdir(resolve(root,'public/effects'))){if(!file.endsWith('.png'))continue;const bytes=await readFile(resolve(root,'public/effects',file));effectData[file.slice(0,-4)]=`data:image/png;base64,${bytes.toString('base64')}`;}
+const titleAssets={};
+for(const [key,file,mime] of [['logo','logo.png','image/png'],['background','background.png','image/png'],['bgm','bgm.mp3','audio/mpeg']]){const bytes=await readFile(resolve(root,'public/title',file));titleAssets[key]=`data:${mime};base64,${bytes.toString('base64')}`;}
+const authConfig=JSON.parse(await readFile(resolve(root,'public/auth-config.json'),'utf8'));
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>포켓몬 데이즈 · 바로 플레이</title><style>${offlineCss}</style></head>
+<title>포켓몬 이터널</title><style>${offlineCss}</style></head>
 <body><div id="app"></div>
-<script>window.POKEMON_SETTINGS_GEAR="data:image/png;base64,${settingsGear.toString("base64")}";window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
+<script>window.POKEMON_TITLE=${JSON.stringify(titleAssets)};window.POKEMON_AUTH_CONFIG=${JSON.stringify(authConfig)};window.POKEMON_SETTINGS_GEAR="data:image/png;base64,${settingsGear.toString("base64")}";window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
 <script type="module">${safeScript}</script>
 <!-- PokeAPI data attribution and license:\n${license.replace(/-->/g, "-- >")}-->
 <!-- Asset credits:\n${credits.replace(/-->/g, "-- >")}-->
