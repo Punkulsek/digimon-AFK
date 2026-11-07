@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {validateFirebaseConfig,readCloudSnapshot,FIREBASE_DATABASE} from '../src/firebase-config.js';
 test('production configuration and explicit default database match the supplied project',async()=>{
- const c=JSON.parse(await readFile('public/auth-config.json','utf8'));assert.equal(validateFirebaseConfig(c).projectId,'pokemon-eternal');assert.equal(FIREBASE_DATABASE,'(default)');assert.throws(()=>validateFirebaseConfig({...c,projectId:'other'}),/일치/);
+ const c=JSON.parse(await readFile('public/auth-config.json','utf8'));assert.equal(validateFirebaseConfig(c).projectId,'pokemon-eternal');assert.equal(FIREBASE_DATABASE,'default');const deploy=JSON.parse(await readFile('firebase.json','utf8'));assert.deepEqual(deploy.firestore,[{database:'default',rules:'firestore.rules'}]);assert.throws(()=>validateFirebaseConfig({...c,projectId:'other'}),/일치/);
 });
 test('missing player is distinct from an actual backend not-found error',async()=>{
  let reads=0;assert.equal(await readCloudSnapshot(async()=>{reads++;return null}),null);assert.equal(reads,1);

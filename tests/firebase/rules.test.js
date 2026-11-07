@@ -1,3 +1,5 @@
+// The rules emulator fixture uses its built-in (default) DB. Production's named
+// default DB target is verified by firebase-transport.test.js and firebase-config.test.js.
 import {initializeApp,deleteApp} from 'firebase/app';
 import {getFirestore as getLite,connectFirestoreEmulator} from 'firebase/firestore/lite';
 import assert from 'node:assert/strict';

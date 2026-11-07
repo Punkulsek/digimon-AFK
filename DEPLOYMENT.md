@@ -15,6 +15,6 @@ Use the multi-file `dist` build: `play.html` exceeds the Pages per-file limit. I
 Browser localStorage is origin-specific. A local play.html save cannot be read automatically by a pages.dev website. Keep the original file/browser data. Replace the existing play.html at the SAME path with the updated version, enter game → Settings → 진행 기록 옮기기 → 내보내기. On the website use 불러오기 with that JSON. Import validates the save, requests overwrite confirmation and retains a local pre-import backup. Google sign-in synchronizes linked saves through Firestore after the required Firebase setup.
 
 ## Google authentication and cloud saves
-See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for the supplied pokemon-eternal configuration, required Google authorized domains, Firestore database creation and security rule publication. Account saves now synchronize through Firestore; existing browser guest data is preserved. Pages deployment does not deploy Firestore rules.
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for the supplied pokemon-eternal configuration, required Google authorized domains, the existing named `default` Firestore database and security rule publication. Do not create another database or change billing. Account saves synchronize through Firestore; existing browser guest data is preserved. Pages deployment does not deploy Firestore rules.
 
 Title music autoplay is attempted; browsers may require the first user gesture. It loops until game entry. The title pauses game simulation and blocks interaction with the underlying game.

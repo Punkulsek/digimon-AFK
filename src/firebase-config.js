@@ -1,5 +1,6 @@
 export const FIREBASE_PROJECT='pokemon-eternal';
-export const FIREBASE_DATABASE='(default)';
+// Existing Enterprise Native database. "default" and "(default)" are distinct IDs.
+export const FIREBASE_DATABASE='default';
 export function validateFirebaseConfig(config){
  if(!config?.apiKey)return null;
  if(config.projectId!==FIREBASE_PROJECT||config.authDomain!=='pokemon-eternal.firebaseapp.com'||config.appId!=='1:21127618866:web:0a65a5478d53216db9b72b')throw Object.assign(Error('배포된 Firebase 설정이 pokemon-eternal 웹 앱과 일치하지 않습니다.'),{code:'config/project-mismatch'});
