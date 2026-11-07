@@ -1,8 +1,9 @@
 import {FIREBASE_PROJECT,FIREBASE_DATABASE,validateFirebaseConfig,readCloudSnapshot} from './firebase-config.js';
 import {initializeApp,getApps,getApp} from 'firebase/app';
-import {getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithPopup,GoogleAuthProvider} from 'firebase/auth';
+import {getAuth,setPersistence,browserLocalPersistence,onAuthStateChanged,signInWithPopup,signOut,GoogleAuthProvider} from 'firebase/auth';
 import {getFirestore,doc,getDoc,runTransaction,serverTimestamp} from 'firebase/firestore/lite';
 import {CloudSaveSession} from './cloud-save.js';
+import {prepareAccountLogout} from './account-logout.js';
 // Chunking preserves the full save even when inventory grows beyond Firestore's document limit.
 export function firestoreRemote(db){
  const ref=uid=>doc(db,'players',uid),chunk=(uid,n)=>doc(db,'players',uid,'saveChunks',String(n));
@@ -26,10 +27,15 @@ export function firestoreRemote(db){
  };
 }
 export function createFirebaseAccount({storage,getState,apply,onChange,status}){
- let auth,session,user=null,initial=true,config,bootError=null,loading=false,opening=null;
+ let auth,session,user=null,initial=true,config,bootError=null,loading=false,opening=null,loggingOut=false;
  const listeners=new Set();let resolveReady;const ready=new Promise(resolve=>resolveReady=resolve);
  const notify=()=>{onChange?.();for(const listener of listeners)listener();};
- const api={ready,get user(){return user},get configured(){return !!auth},get loading(){return loading},get canStart(){return !!user&&!loading&&!bootError&&!!session?.ready},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){session?.queue(getState())},flush(){api.queue();return session?.flush()},async login(){await ready;if(!auth)throw Error('auth-unconfigured');await signInWithPopup(auth,new GoogleAuthProvider());},async retry(){if(user&&session)await openAccount()},};
+ const api={ready,get user(){return user},get configured(){return !!auth},get loading(){return loading||loggingOut},get canStart(){return !!user&&!loading&&!loggingOut&&!bootError&&!!session?.ready},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){if(!loggingOut)session?.queue(getState())},flush(){if(loggingOut)return;api.queue();return session?.flush()},async login(){await ready;if(!auth)throw Error('auth-unconfigured');const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,provider);},async retry(){if(user&&session&&!loggingOut)await openAccount()},async logout(){
+  await ready;if(!auth||!user||loggingOut)return;
+  loggingOut=true;notify();
+  try{await prepareAccountLogout(session,getState());await signOut(auth);session?.cancel();location.reload();}
+  catch(error){loggingOut=false;notify();throw error;}
+ }};
  async function openAccount(){
   if(opening)return opening;
   loading=true;bootError=null;notify();

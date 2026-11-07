@@ -1,3 +1,4 @@
+import {BattleClock} from './battle-clock.js';
 import {FIREBASE_PROJECT,FIREBASE_DATABASE} from './firebase-config.js';
 import {AccountStorage} from './cloud-save.js';
 import {createFirebaseAccount} from './firebase-account.js';
@@ -208,7 +209,7 @@ const partyPower = () =>
 function persist() {
   saved = save(storage, state);
   cloudAccount?.queue();
-  updateHud();
+  if(!document.hidden)updateHud();
 }
 function toast(msg) {
   const el = $("#toast");
@@ -464,12 +465,15 @@ function presentSkillImpact(event,present){
   }else if(battlefieldVisible())present();
 }
 
-function step() {
-  if(titleActive)return;
-  if (dungeonUI.isOpen()) return;
-  if(cloudAccount?.user&&!cloudAccount.canStart)return;
+function canAdvanceBattle(){
+ return !titleActive&&!dungeonUI.isOpen()&&(!cloudAccount?.user||cloudAccount.canStart)&&battle.status==='fighting'&&(!!battle.dungeon||state.auto);
+}
+let pendingDungeonResult=null;
+function step(silent=false,now=Date.now()) {
+  if(!canAdvanceBattle())return false;
   const oldWave=battle.wave;
-  const events = battle.tick(.1);
+  const events = battle.tick(.1,now);
+  if(silent){if(events.some(e=>e.type==='dungeonResult'))pendingDungeonResult=battle;return canAdvanceBattle();}
   if(battle.wave!==oldWave){clearSkillEffects();skillPresentations.clear();$("#effects").replaceChildren();}
   for(const [key,entry] of skillPresentations)if(entry.until<performance.now()||entry.effect.cancelled)skillPresentations.delete(key);
   let refresh = false;
@@ -535,9 +539,13 @@ function step() {
     persist();
   } else paintHealth();
   updateHud();
-  if (dungeonEnded) {
+  if(dungeonEnded)showDungeonResult(battle);
+  return canAdvanceBattle();
+}
+function showDungeonResult(completed){
+    if(battle!==completed)return;
     $("#modal-root").innerHTML="";persist();
-    const completed=battle,d=completed.dungeon,won=completed.status==='won',t=$("#stage-transition");
+    const d=completed.dungeon,won=completed.status==='won',t=$("#stage-transition");
     clearTimeout(t.hideTimer);
     t.querySelector('small').textContent=`${d.name} · ${d.stage}${d.id==='tower'?'층':'단계'}`;
     t.querySelector('strong').textContent=won?'클리어!':'도전 실패';
@@ -546,13 +554,42 @@ function step() {
     loot.innerHTML=won?`${rewardIcon}<b>${d.reward} ${num(d.amount)}개 획득</b>`:'획득 보상 없음';
     t.classList.add('visible');sound.effect(won?'clear':'defeat');
     t.hideTimer=setTimeout(()=>{t.classList.remove('visible');if(battle===completed){dungeonUI.returnToChallenge(d.id,d.id==='tower'&&won?Math.min(200,d.stage+1):d.stage);active='dungeons';updateNavigation();}},2200);
-  }
 }
-let timer;
+const battleClock=new BattleClock();
+let timer,catchupTimer,needsBattlePaint=false;
+const clockOptions=()=>({enabled:canAdvanceBattle(),speed:state.speed});
+function pumpBattle(){
+  clearTimeout(catchupTimer);
+  battleClock.sync(Date.now(),clockOptions());
+  const silent=document.hidden||battleClock.steps>1;
+  const count=battleClock.drain((dt,now)=>step(silent,now));
+  if(count&&silent){
+    needsBattlePaint=true;clearSkillEffects();skillPresentations.clear();periodicFloats.clear();
+    $("#effects").replaceChildren();persist();
+  }
+  if(!document.hidden){
+    if(needsBattlePaint){renderBattle();updateHud();needsBattlePaint=false;}
+    if(pendingDungeonResult){const completed=pendingDungeonResult;pendingDungeonResult=null;showDungeonResult(completed);}
+  }
+  // Long suspensions are processed in small batches without discarding time.
+  const catchingUp=battleClock.steps>0;
+  if(!titleActive)$(".game-shell").inert=catchingUp;
+  $("#modal-root").inert=catchingUp;
+  if(catchingUp)catchupTimer=setTimeout(pumpBattle,0);
+}
 function schedule() {
   clearInterval(timer);
-  timer = setInterval(step, 100 / state.speed);
+  battleClock.sync(Date.now(),clockOptions());
+  timer = setInterval(pumpBattle, 100 / state.speed);
 }
+// Settle elapsed combat before a click changes speed, team or battle mode.
+// The post-event sync starts/stops the clock at the actual interaction time.
+for(const eventType of ['click','keydown'])document.addEventListener(eventType,event=>{
+  if(titleActive)return;
+  pumpBattle();
+  if(battleClock.steps>0||cloudAccount?.loading){event.preventDefault();event.stopImmediatePropagation();return;}
+  queueMicrotask(()=>battleClock.sync(Date.now(),clockOptions()));
+},true);
 let replaceSlot = null;
 function leaveCollection() {
   formationSelection = null;
@@ -791,7 +828,7 @@ function settings() {
   modal(
     "나만의 모험 설정",
     "설정",
-    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 1.5배 · 2배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><div class="setting-row"><div><b>진행 기록 옮기기</b><p>기존 기기에서 내보낸 파일을 새 웹사이트에서 불러오세요.</p></div><button class="soft-button" data-action="exportSave">내보내기</button><button class="soft-button" data-action="importSave">불러오기</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
+    `${audioSettings()}<div class="setting-row"><div><b>자동 전투</b><p>탐험대가 자동으로 야생 포켓몬을 공격해요.</p></div><button class="toggle ${state.auto ? "on" : ""}" data-action="settingAuto" aria-label="자동 전투 전환" aria-pressed="${state.auto}"><span></span></button></div><div class="setting-row"><div><b>자동 보스 도전</b><p>일반 전투 10회 완료 후 자동으로 도전해요. (매 전투 적 5마리)</p></div><button class="toggle ${state.autoBoss ? "on" : ""}" data-action="settingBoss" aria-label="자동 보스 전환" aria-pressed="${state.autoBoss}"><span></span></button></div><div class="setting-row"><div><b>전투 배속</b><p>1배 · 1.5배 · 2배</p></div><button class="soft-button" data-action="settingSpeed" aria-label="전투 배속">${state.speed}×</button></div><div class="save-info">${i("check-check")} <span id="save-status"></span><br>브라우저 데이터를 지우면 진행 상황도 삭제됩니다.</div><div class="setting-row"><div><b>게임 진행 초기화</b><p>진행 기록과 포켓몬 성장을 지우고 새 모험을 시작합니다.</p></div><button class="soft-button" data-action="resetPrompt">초기화</button></div><div class="setting-row"><div><b>Google 계정</b><p>로그아웃해도 계정의 진행 기록은 유지됩니다.</p></div><button class="soft-button" data-action="logout">로그아웃</button></div><p class="asset-credit">스프라이트: PokeAPI / sprites · 포켓몬: Nintendo / Creatures / GAME FREAK<br>음악: Oldale Town · 사용자 제공 음원</p>`,
     "settings-modal",
   );
 }
@@ -973,12 +1010,10 @@ document.addEventListener("click", (e) => {
       break;
     case "reportMetric":
       reportMetric=btn.dataset.metric;updateBattleReport();break;
-    case "exportSave": {
-      persist();const url=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='pokemon-eternal-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;
-    }
-    case "importSave": {
-      const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
-      input.onchange=async()=>{try{const file=input.files[0];if(!file||file.size>10000000)throw Error();const raw=await file.text();const restored=load({getItem:key=>key==='pokemon-days-v1'?raw:null,setItem(){}});if(restored.status!=='loaded')throw Error();if(!confirm('선택한 저장 기록으로 현재 진행을 바꿀까요? 현재 기록은 브라우저에 백업됩니다.'))return;storage.setItem('pokemon-days-before-import',JSON.stringify(state));Object.assign(state,restored.state);persist();location.reload();}catch{toast('저장 파일을 불러오지 못했습니다. 기존 기록은 유지됩니다.');}};input.click();break;
+    case "logout": {
+      persist();btn.disabled=true;btn.textContent='로그아웃 중…';
+      cloudAccount.logout().catch(()=>{btn.disabled=false;btn.textContent='로그아웃';toast('로그아웃하지 못했습니다. 연결 상태를 확인하고 다시 시도해 주세요. 기록은 유지됩니다.');});
+      break;
     }
     case "battleReport":
       showBattleReport();
@@ -1121,9 +1156,8 @@ window.addEventListener("pagehide", ()=>{persist();cloudAccount?.flush();});
 document.addEventListener("visibilitychange", () => {
   sound.visibility(document.hidden);
   if (document.hidden) {
-    clearInterval(timer);
-    persist();cloudAccount?.flush();
-  } else {schedule();if(!titleActive)sound.unlock();}
+    pumpBattle();persist();cloudAccount?.flush();
+  } else {pumpBattle();if(!titleActive)sound.unlock();}
 });
 renderBattle();
 updateHud();
@@ -1133,6 +1167,7 @@ sound.setVideoExclusive(true);
 let cloudNotice='';
 cloudAccount=createFirebaseAccount({storage,getState:()=>state,apply:next=>{
  for(const key of Object.keys(state))delete state[key];Object.assign(state,next);
+ battleClock.reset();pendingDungeonResult=null;
  battle=new Battle(state);save(storage,state);renderBattle();updateHud();schedule();
 },status:(status,error)=>{
  const messages={'load-error':'서버 기록을 불러오지 못했습니다. 기존 기록은 보존됩니다. 게임 시작을 눌러 다시 시도하세요.','save-error':'서버 저장에 실패했습니다. 로컬 기록을 보존하고 자동으로 다시 시도합니다.','conflict':'다른 기기에서 저장된 기록이 있습니다. 현재 기록은 로컬에 보존했습니다. 새로고침해 동기화하세요.','local-error':'기기 저장 공간을 확인해 주세요.','recovered':'다른 기기의 최신 기록을 불러왔습니다. 이 기기의 변경 기록은 백업했습니다.'};
@@ -1140,7 +1175,7 @@ cloudAccount=createFirebaseAccount({storage,getState:()=>state,apply:next=>{
  cloudNotice=messages[status]|| (status==='loading'?'계정의 진행 기록을 불러오는 중입니다.':'');
  if(messages[status]&&!titleActive)toast(messages[status]);
 }});
-showTitle({account:cloudAccount,getNotice:()=>cloudNotice,onStart:()=>{titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
+showTitle({account:cloudAccount,getNotice:()=>cloudNotice,onStart:()=>{battleClock.reset();titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
 setInterval(()=>{if(!titleActive)cloudAccount.flush();},5000);
 for(const event of ['pointerdown','keydown'])document.addEventListener(event,()=>{if(!titleActive&&sound.context?.state!=='running')sound.unlock();},{capture:true});
 window.addEventListener('online',()=>{if(!titleActive)cloudAccount.flush();});

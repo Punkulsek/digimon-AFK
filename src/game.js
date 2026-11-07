@@ -79,7 +79,8 @@ export class Battle {
   this.resetRuntime();
  }
  challenge(){if(this.dungeon||this.boss||this.state.campaignCleared||this.state.kills<STAGE_KILLS)return false;this.boss=true;this.resetParty();this.spawn();return true;}
- tick(dt=.85){
+ tick(dt=.85,now=Date.now()){
+  this.now=now;
   this.events=[];if(this.status!=='fighting'||(!this.dungeon&&!this.state.auto)||!Number.isFinite(dt)||dt<=0)return this.events;
   // Small simulation slices keep charge/duration timing independent of rendering speed.
   let remaining=Math.min(dt,10);const wave=this.wave;
@@ -99,7 +100,7 @@ export class Battle {
     if(actor.hp<=0)break;
    }
   }
-  for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;const balls=this.dungeon?0:recordMissionKill(this.state);if(balls)this.events.push({type:'missionReward',balls});if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
+  for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;const balls=this.dungeon?0:recordMissionKill(this.state,this.now);if(balls)this.events.push({type:'missionReward',balls});if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
   if(this.enemies.every(e=>e.hp<=0)){
    if(this.dungeon){this.finishDungeon('won');return;}
    const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.events.push({type:'reward',gold});

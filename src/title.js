@@ -1,9 +1,10 @@
 import './title.css';
+import {googleLogo} from './google-logo.js';
 export function showTitle({onStart,account,getNotice=()=>''}){
  const assets=globalThis.POKEMON_TITLE||{logo:'/title/logo.png',background:'/title/background.png',bgm:'/title/bgm.mp3'};
  const shell=document.querySelector('.game-shell');shell.inert=true;
  const root=document.createElement('section');root.className='eternal-title';root.setAttribute('aria-label','포켓몬 이터널 타이틀');
- root.innerHTML=`<div class="title-landscape"><img class="title-background" alt="" src="${assets.background}"><img class="eternal-logo" src="${assets.logo}" alt="포켓몬 이터널"><div class="title-flash" aria-hidden="true"></div><div class="title-actions"><button class="title-start" hidden>게임 시작</button><button class="title-link">계정 연동 <small>Google</small></button><p class="title-message" role="status"></p></div></div>`;
+ root.innerHTML=`<div class="title-landscape"><img class="title-background" alt="" src="${assets.background}"><img class="eternal-logo" src="${assets.logo}" alt="포켓몬 이터널"><div class="title-flash" aria-hidden="true"></div><div class="title-actions"><button class="title-start" hidden>게임 시작</button><button class="title-link">${googleLogo}<span>Google 계정 연동</span></button><p class="title-message" role="status"></p></div></div>`;
  document.body.append(root);document.title='포켓몬 이터널';
  const music=new Audio(assets.bgm);music.loop=true;music.volume=.45;music.preload='auto';music.dataset.titleBgm='true';root.append(music);
  let closed=false,unsubscribe=()=>{};

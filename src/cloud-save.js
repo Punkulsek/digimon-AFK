@@ -41,8 +41,12 @@ export class CloudSaveSession {
   }catch(error){if(generation!==this.generation)return;this.ready=false;this.blocked=true;this.status('load-error',error);throw error;}
  }
  queue(state){if(!this.ready)return;const payload=JSON.stringify(state);if(payload===this.payload)return;this.payload=payload;this.dirty=true;try{this.cache();}catch(e){this.status('local-error',e);return;}if(!this.blocked)this.status('pending');}
- async flush(){
-  if(!this.ready||!this.dirty||this.running||this.blocked)return;
+ flush(){
+  if(this.running)return this.inFlight;
+  if(!this.ready||!this.dirty||this.blocked)return Promise.resolve();
+  this.inFlight=this.writePending();return this.inFlight;
+ }
+ async writePending(){
   this.running=true;const generation=this.generation,uid=this.uid,payload=this.payload,revision=this.revision;
   try{const next=await this.remote.write(uid,revision,payload);if(generation!==this.generation)return;this.revision=next;this.dirty=this.payload!==payload;this.cache();this.status(this.dirty?'pending':'saved');}
   catch(error){if(generation!==this.generation)return;if(error.message==='save-conflict')this.blocked=true;this.status(this.blocked?'conflict':'save-error',error);}

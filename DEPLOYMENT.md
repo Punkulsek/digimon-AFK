@@ -12,7 +12,7 @@ Use the existing GitHub → Cloudflare Pages integration. No direct Cloudflare a
 Use the multi-file `dist` build: `play.html` exceeds the Pages per-file limit. Images, music and summon video are retained in dist. No save key changes or storage-clearing operations are included.
 
 ## Existing saves
-Browser localStorage is origin-specific. A local play.html save cannot be read automatically by a pages.dev website. Keep the original file/browser data. Replace the existing play.html at the SAME path with the updated version, enter game → Settings → 진행 기록 옮기기 → 내보내기. On the website use 불러오기 with that JSON. Import validates the save, requests overwrite confirmation and retains a local pre-import backup. Google sign-in synchronizes linked saves through Firestore after the required Firebase setup.
+Browser localStorage is origin-specific. Keep existing browser data. Google sign-in synchronizes linked saves through Firestore after the required Firebase setup; a different device resumes with the same Google account. Manual save-file export/import has been removed. This removal does not delete existing local saves or backups.
 
 ## Google authentication and cloud saves
 See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for the supplied pokemon-eternal configuration, required Google authorized domains, the existing named `default` Firestore database and security rule publication. Do not create another database or change billing. Account saves synchronize through Firestore; existing browser guest data is preserved. Pages deployment does not deploy Firestore rules.

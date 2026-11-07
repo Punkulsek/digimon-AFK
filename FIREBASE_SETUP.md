@@ -21,10 +21,16 @@ Rules restrict both `players/{uid}` and `players/{uid}/saveChunks/{n}` to that a
 - Failed writes keep local progress and pending revision metadata (`pokemon-eternal-sync:{uid}`) and retry. Revision conflicts block further uploads until reload; pending data is backed up before loading the server winner (`pokemon-eternal-backup:{uid}:...`). No automatic last-write-wins overwrite.
 - Current payloads are supported up to 7 MiB / 200 chunks; exceeding the transaction budget reports a save error and retains local data, without truncating or replacing the server save.
 - Sign-in changes on an already running page reload into the title to prevent cross-account writes.
+- Settings → 로그아웃 queues the final snapshot, waits for the in-flight write and then the latest snapshot (up to 8 seconds), signs out of Firebase and returns to the title. Failed uploads remain pending in that account's local slot; no save, backup or cloud document is deleted. Google login explicitly opens the account picker. Manual save-file export/import is no longer available.
 - Offline first launch of a linked account waits for the server rather than risking stale progress. Game entry now requires Google authentication; unlinked users see only the link button. Existing guest saves remain available for first-account migration.
 
 ## Audio
 Existing music files and mute/volume preferences are preserved. Title BGM attempts autoplay immediately, loops, and stops at entry. In-game playback attempts immediately on entry and visibility restoration. When blocked by browser policy it retries on the first pointer/key input. No browser-policy bypass is possible. The single game BGM currently assigned is Oldale Town; no per-region tracks are invented. Mode changes resolve existing optional `POKEMON_BGM_TRACKS` mappings and stop previous sources when the assigned file changes. Summon-video exclusive audio still suspends game music/effects.
+
+## Background combat
+The combat scheduler accounts for wall-clock time at the selected 1× / 1.5× / 2× speed, using the existing 0.1-second battle ticks. Hidden tabs continue on browser-permitted timer callbacks; suspended callbacks catch up in batches on resume, without estimating rewards or dropping elapsed time. Visual effects are skipped during catch-up. All stage/dungeon outcomes, mission kill counts and rewards still come from the battle engine, with kill timestamps reflecting the simulated time across daily/weekly boundaries. Title, paused combat and dungeon selection remain paused. A completed dungeon grants its result once and presents it on return. This applies to a page that remains loaded; browser process termination or tab discarding is not a server-side offline battle service.
+
+`tests/battle-clock.test.js` compares regular and throttled combat at every speed and in every dungeon. `tests/browser/account-session.spec.js` exercises logout, account switching, removal of file transfer, and hidden-tab recovery using mocked Firebase services; it does not establish live Firebase connectivity.
 
 ## Validation and remaining live verification
 `node --test tests/cloud-save.test.js tests/audio-lifecycle.test.js` checks migration, account isolation, read/write failures, reconnects, revision conflicts and audio source races.

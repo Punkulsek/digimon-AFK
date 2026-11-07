@@ -6,7 +6,7 @@ export function syncMissions(state,now=Date.now()){
  for(const [key,period] of [['daily',day],['weekly',week]])if(state.missionBook[key]?.period!==period)state.missionBook[key]={period,kills:0,claimed:false};
  return state.missionBook;
 }
-export function recordMissionKill(state){const book=syncMissions(state);state.missionKills=(state.missionKills||0)+1;book.total++;book.daily.kills++;book.weekly.kills++;return 0;}
+export function recordMissionKill(state,now=Date.now()){const book=syncMissions(state,now);state.missionKills=(state.missionKills||0)+1;book.total++;book.daily.kills++;book.weekly.kills++;return 0;}
 export function missionInfo(state,tab){const b=syncMissions(state);
  if(tab==='repeat')return {title:'포켓몬 100마리 처치',count:state.missionKills||0,target:100,reward:Math.floor((state.missionKills||0)/100)*5,ready:(state.missionKills||0)>=100};
  if(tab==='challenge'){const target=(b.challenge+1)*1000;return {title:`누적 포켓몬 ${target.toLocaleString()}마리 처치`,count:b.total,target,reward:100,ready:b.total>=target};}

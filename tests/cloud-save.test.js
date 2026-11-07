@@ -31,3 +31,27 @@ test('a slow first upload never blocks entry after the server read succeeded',as
 test('a failed first upload retains playable loaded data and pending local changes',async()=>{
  const x=setup();x.remote.write=async()=>{throw Error('unavailable')};const s=x.make();await s.open('A');await new Promise(r=>setImmediate(r));assert.equal(s.ready,true);assert.equal(s.dirty,true);assert.equal(JSON.parse(x.storage.read('A')).gold,12345);
 });
+
+test('logout waits for an older in-flight upload then saves the final snapshot before switching accounts',async()=>{
+ const {prepareAccountLogout}=await import('../src/account-logout.js');
+ const x=setup(),s=x.make();await s.open('A');await s.flush();
+ const write=x.remote.write;let release;
+ x.remote.write=(...args)=>new Promise(resolve=>{release=()=>write(...args).then(resolve)});
+ x.applied.gold=20000;s.queue(x.applied);const old=s.flush();
+ x.applied.gold=25000;const logout=prepareAccountLogout(s,x.applied);
+ x.remote.write=write;await release();await old;await logout;s.cancel();
+ assert.equal(JSON.parse(x.documents.get('A').payload).gold,25000);
+ await x.make().open('B');assert.equal(x.applied.gold,10000);
+ await x.make().open('A');assert.equal(x.applied.gold,25000);
+});
+test('logout with failed or timed-out saving retains a pending account snapshot and never clears other saves',async()=>{
+ const {prepareAccountLogout}=await import('../src/account-logout.js');
+ const x=setup(),s=x.make();await s.open('A');await s.flush();x.applied.gold=44444;x.offline(true);
+ await prepareAccountLogout(s,x.applied,20);s.cancel();assert.equal(JSON.parse(x.raw.getItem(s.cacheKey('A'))).dirty,true);
+ x.offline(false);const next=x.make();await next.open('A');assert.equal(x.applied.gold,44444);await next.flush();
+ const write=x.remote.write;let release;x.remote.write=()=>new Promise(r=>release=r);x.applied.gold=55555;
+ await prepareAccountLogout(next,x.applied,5);next.cancel();
+ assert.equal(JSON.parse(x.raw.getItem(next.cacheKey('A'))).payload.includes('55555'),true);
+ release(3);x.remote.write=write;
+ assert.equal(JSON.parse(x.storage.read(null)).gold,12345);
+});
