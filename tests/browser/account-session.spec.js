@@ -2,21 +2,22 @@ import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 import {initialState} from '../../src/game.js';
 async function mockFirebase(page){
+ await page.route('**/src/asset-preload.js',r=>r.fulfill({contentType:'text/javascript',body:'export async function preloadGameAssets({onProgress}){onProgress({percent:100})}'}));
  const source=(await readFile('src/firebase-account.js','utf8')).replaceAll("from 'firebase/app'","from '/test-app.js'").replaceAll("from 'firebase/auth'","from '/test-auth.js'").replaceAll("from 'firebase/firestore/lite'","from '/test-firestore.js'");
  await page.route('**/src/firebase-account.js',r=>r.fulfill({contentType:'text/javascript',body:source}));
  await page.route('**/test-app.js',r=>r.fulfill({contentType:'text/javascript',body:`let app;export const getApps=()=>app?[app]:[];export const getApp=()=>app;export const initializeApp=options=>(app={options,name:'[DEFAULT]'});`}));
  await page.route('**/test-auth.js',r=>r.fulfill({contentType:'text/javascript',body:`
  let listener;const user=()=>{const uid=sessionStorage.getItem('test-auth');return uid?{uid,providerData:[{providerId:'google.com'}]}:null};
  export const getAuth=app=>({app});export const browserLocalPersistence={};export const setPersistence=async()=>{};
- export function onAuthStateChanged(auth,fn){listener=fn;queueMicrotask(()=>fn(user()));return()=>{};}
+ export function onAuthStateChanged(auth,fn){listener=fn;setTimeout(()=>fn(user()),window.testAuthDelay||0);return()=>{};}
  export class GoogleAuthProvider{setCustomParameters(value){this.parameters=value;}}
- export async function signInWithPopup(auth,provider){if(provider.parameters.prompt!=='select_account')throw Error('missing account picker');sessionStorage.setItem('test-auth',window.nextGoogleUid||'A');await listener(user());}
+ export async function signInWithPopup(auth,provider){window.popupCount=(window.popupCount||0)+1;if(provider.parameters.prompt!=='select_account')throw Error('missing account picker');sessionStorage.setItem('test-auth',window.nextGoogleUid||'A');await listener(user());}
  export async function signOut(){sessionStorage.removeItem('test-auth');listener(null);}
  `}));
  await page.route('**/test-firestore.js',r=>r.fulfill({contentType:'text/javascript',body:`
  const read=()=>JSON.parse(localStorage.getItem('test-cloud')||'{}');const snap=data=>({exists:()=>!!data,data:()=>data});
  export const getFirestore=(app,id)=>{if(id!=='default')throw Error('wrong database');return {}};
- export const doc=(db,...parts)=>parts.join('/');export const getDoc=async ref=>snap(read()[ref]);export const serverTimestamp=()=>Date.now();
+ export const doc=(db,...parts)=>parts.join('/');export const getDoc=async ref=>{await new Promise(r=>setTimeout(r,window.testReadDelay||0));return snap(read()[ref])};export const serverTimestamp=()=>Date.now();
  export async function runTransaction(db,fn){const store=read();const result=await fn({get:async ref=>snap(store[ref]),set:(ref,data)=>{store[ref]=data},delete:ref=>{delete store[ref]}});localStorage.setItem('test-cloud',JSON.stringify(store));return result;}
  `}));
 }
@@ -61,4 +62,22 @@ test('returning from a suspended hidden tab catches up combat without replaying 
  const paused=await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1:account:A')).gold);
  await page.clock.fastForward(60000);
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('pokemon-days-v1:account:A')).gold)).toBe(paused);
+});
+test('existing Google identity restores on first visit despite transient config failure and delayed persistence',async({page})=>{
+ await mockFirebase(page);const config=JSON.parse(await readFile('public/auth-config.json','utf8'));let attempts=0;
+ await page.route('**/auth-config.json',r=>++attempts===1?r.fulfill({status:503,body:'temporary'}):r.fulfill({json:config}));
+ await page.addInitScript(()=>{sessionStorage.setItem('test-auth','A');window.testAuthDelay=1200;window.testReadDelay=200;});
+ await page.goto('/');await expect(page.locator('.title-link')).toBeHidden();await expect(page.locator('.title-start')).toBeHidden();
+ await expect(page.locator('.title-start')).toBeVisible();await expect(page.locator('.title-start')).toBeEnabled();
+ await expect(page.locator('.title-link')).toBeHidden();await expect(page.locator('.title-message')).not.toContainText('설정을 확인');
+ expect(attempts).toBe(2);expect(await page.evaluate(()=>window.popupCount||0)).toBe(0);
+ await page.locator('.title-start').click();await expect(page.locator('.eternal-title')).toHaveCount(0);
+});
+test('failed Firebase startup can be retried without reloading or opening Google popup for an existing account',async({page})=>{
+ await mockFirebase(page);const config=JSON.parse(await readFile('public/auth-config.json','utf8'));let available=false;
+ await page.route('**/auth-config.json',r=>available?r.fulfill({json:config}):r.fulfill({status:503,body:'temporary'}));
+ await page.addInitScript(()=>sessionStorage.setItem('test-auth','A'));
+ await page.goto('/');await expect(page.locator('.title-link')).toBeVisible();await expect(page.locator('.title-link')).toBeEnabled();
+ available=true;await page.locator('.title-link').click();await expect(page.locator('.title-start')).toBeEnabled();expect(await page.evaluate(()=>window.popupCount||0)).toBe(0);
+ await page.locator('.title-start').click();await expect(page.locator('.eternal-title')).toHaveCount(0);
 });

@@ -27,10 +27,10 @@ export function firestoreRemote(db){
  };
 }
 export function createFirebaseAccount({storage,getState,apply,onChange,status}){
- let auth,session,user=null,initial=true,config,bootError=null,loading=false,opening=null,loggingOut=false;
+ let auth,session,user=null,initial=true,config,bootError=null,loading=false,opening=null,loggingOut=false,initializing=true,initialized=false,initializationError=null,bootstrap=null,unsubscribeAuth=null;
  const listeners=new Set();let resolveReady;const ready=new Promise(resolve=>resolveReady=resolve);
  const notify=()=>{onChange?.();for(const listener of listeners)listener();};
- const api={ready,get user(){return user},get configured(){return !!auth},get loading(){return loading||loggingOut},get canStart(){return !!user&&!loading&&!loggingOut&&!bootError&&!!session?.ready},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){if(!loggingOut)session?.queue(getState())},flush(){if(loggingOut)return;api.queue();return session?.flush()},async login(){await ready;if(!auth)throw Error('auth-unconfigured');const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,provider);},async retry(){if(user&&session&&!loggingOut)await openAccount()},async logout(){
+ const api={ready,get user(){return user},get configured(){return !!auth&&initialized},get initializing(){return initializing},get initializationError(){return initializationError},get loading(){return loading||loggingOut||initializing},get canStart(){return initialized&&!!user&&!loading&&!loggingOut&&!bootError&&!!session?.ready},subscribe(fn){listeners.add(fn);return()=>listeners.delete(fn)},queue(){if(!loggingOut)session?.queue(getState())},flush(){if(loggingOut)return;api.queue();return session?.flush()},async login(){if(!initialized)await initialize();if(user)return;if(!auth)throw Error('auth-unconfigured');const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});await signInWithPopup(auth,provider);},async retry(){if(user&&session&&!loggingOut)await openAccount()},async logout(){
   await ready;if(!auth||!user||loggingOut)return;
   loggingOut=true;notify();
   try{await prepareAccountLogout(session,getState());await signOut(auth);session?.cancel();location.reload();}
@@ -44,24 +44,47 @@ export function createFirebaseAccount({storage,getState,apply,onChange,status}){
   }catch(error){bootError=error;status('load-error',error);}finally{clearTimeout(timer);loading=false;opening=null;notify();}})();
   return opening;
  }
- (async()=>{
-  try{
-   if(location.protocol==='file:')config=globalThis.POKEMON_AUTH_CONFIG;
-   else {const response=await fetch('/auth-config.json',{cache:'no-store'});if(!response.ok)throw Object.assign(Error('Firebase 설정 파일을 읽지 못했습니다.'),{code:'config/http-'+response.status});config=await response.json();}
-   config=validateFirebaseConfig(config);
-   if(!config?.apiKey){resolveReady();notify();return;}
-   const app=getApps().some(a=>a.name==='[DEFAULT]')?getApp():initializeApp(config);
-   validateFirebaseConfig(app.options);
-   auth=getAuth(app);await setPersistence(auth,browserLocalPersistence);
-   session=new CloudSaveSession({storage,remote:firestoreRemote(getFirestore(auth.app,FIREBASE_DATABASE)),apply,status:(state,error)=>{if(error)error.firestoreTarget=`${FIREBASE_PROJECT}/${FIREBASE_DATABASE}`;status(state,error);notify();}});
-   onAuthStateChanged(auth,async next=>{
-    const google=next?.providerData.some(p=>p.providerId==='google.com')?next:null;
-    if(!initial&&user&&user.uid!==google?.uid){session?.cancel();location.reload();return;}
-    initial=false;user=google;bootError=null;notify();
-    if(user)await openAccount();
-    resolveReady();notify();
-   },error=>{bootError=error;status('load-error',error);resolveReady();notify();});
-  }catch(error){bootError=error;status('load-error',error);resolveReady();notify();}
- })();
+ async function readConfig(){
+  if(location.protocol==='file:')return validateFirebaseConfig(globalThis.POKEMON_AUTH_CONFIG);
+  let lastError;
+  for(let attempt=0;attempt<3;attempt++){
+   try{
+    const response=await fetch('/auth-config.json',{cache:'no-store',signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw Object.assign(Error('Firebase 설정 파일을 읽지 못했습니다.'),{code:'config/http-'+response.status});
+    const value=validateFirebaseConfig(await response.json());
+    if(!value?.apiKey)throw Object.assign(Error('Google 계정 연동 설정을 확인해 주세요.'),{code:'auth-unconfigured'});
+    return value;
+   }catch(error){lastError=error;if(error.code==='config/project-mismatch')throw error;if(attempt<2)await new Promise(r=>setTimeout(r,300*2**attempt));}
+  }
+  throw lastError;
+ }
+ function initialize(){
+  if(initialized)return Promise.resolve();
+  if(bootstrap)return bootstrap;
+  initializing=true;initializationError=null;notify();
+  bootstrap=(async()=>{
+   try{
+    config=await readConfig();
+    if(!config?.apiKey)throw Object.assign(Error('Google 계정 연동 설정을 확인해 주세요.'),{code:'auth-unconfigured'});
+    const app=getApps().some(a=>a.name==='[DEFAULT]')?getApp():initializeApp(config);
+    validateFirebaseConfig(app.options);
+    auth=getAuth(app);await setPersistence(auth,browserLocalPersistence);
+    session ||= new CloudSaveSession({storage,remote:firestoreRemote(getFirestore(auth.app,FIREBASE_DATABASE)),apply,status:(state,error)=>{if(error)error.firestoreTarget=`${FIREBASE_PROJECT}/${FIREBASE_DATABASE}`;status(state,error);notify();}});
+    unsubscribeAuth?.();
+    await new Promise((resolve,reject)=>{
+     unsubscribeAuth=onAuthStateChanged(auth,next=>{
+      const google=next?.providerData.some(p=>p.providerId==='google.com')?next:null;
+      if(!initial&&user&&user.uid!==google?.uid){session?.cancel();location.reload();return;}
+      initial=false;user=google;bootError=null;initialized=true;initializing=false;initializationError=null;
+      // Publish the restored identity immediately; cloud loading has its own gate.
+      if(user)void openAccount();
+      resolveReady();resolve();notify();
+     },error=>{initializationError=error;bootError=error;initialized=false;initializing=false;status('auth-error',error);resolveReady();notify();reject(error);});
+    });
+   }catch(error){initializationError=error;bootError=error;initializing=false;status('auth-error',error);resolveReady();notify();throw error;}
+   finally{bootstrap=null;}
+  })();return bootstrap;
+ }
+ void initialize().catch(()=>{});
  return api;
 }

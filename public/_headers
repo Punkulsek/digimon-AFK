@@ -6,3 +6,26 @@
   Cache-Control: no-cache
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+/asset-worker.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+/asset-manifest.json
+  Cache-Control: no-store
+/pokemon/*
+  Cache-Control: no-cache
+/scene/*
+  Cache-Control: no-cache
+/title/*
+  Cache-Control: no-cache
+/ui/*
+  Cache-Control: no-cache
+/currency/*
+  Cache-Control: no-cache
+/effects/*
+  Cache-Control: no-cache
+/fonts/*
+  Cache-Control: no-cache
+/audio/*
+  Cache-Control: no-cache
+/video/*
+  Cache-Control: no-cache

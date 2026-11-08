@@ -153,3 +153,6 @@ structure. These assets are embedded in the standalone HTML for offline play.
 - `public/ui/settings-gear.png`: generated transparent settings icon; outer background and centre hole use alpha transparency.
 
 - `src/rune-ui.js`: original interactive eight-segment Poké Ball rune frame drawn with SVG paths, in the game's teal UI palette.
+
+## Self-hosted font
+Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].ttf`), losslessly converted to WOFF2 for delivery from this site. SIL Open Font License 1.1 is included at `public/fonts/OFL.txt`. The typeface and weights are unchanged.

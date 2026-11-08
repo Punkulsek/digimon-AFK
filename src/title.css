@@ -14,3 +14,7 @@
 @media(max-height:550px) and (orientation:landscape){.title-actions{gap:7px;bottom:9%;}.title-actions button{font-size:16px;padding:9px;}}
 @media(prefers-reduced-motion:reduce){.eternal-logo,.title-flash{animation:none;}}
 @media(orientation:portrait){.title-actions .title-link{gap:6px;}.title-link .google-logo{flex-basis:20px;width:20px;height:20px;}.title-link .google-logo svg{width:16px;height:16px;}}
+.title-download{position:absolute;left:50%;bottom:calc(11% + 155px);transform:translateX(-50%);width:min(330px,40%);height:22px;background:#030c17d9;border:1px solid #ffffffa1;border-radius:6px;overflow:hidden;box-shadow:0 3px 10px #05243e55;color:#fff;}
+.title-download[hidden]{display:none;}.title-download-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(#ffe56b,#f0b626);}.title-download b{position:relative;display:block;text-align:center;line-height:20px;font-size:12px;text-shadow:0 1px 3px #000,0 0 3px #000;}
+@media(max-height:550px) and (orientation:landscape){.title-download{bottom:calc(9% + 110px);height:18px;}.title-download b{line-height:16px;font-size:11px;}}
+@media(orientation:portrait){.title-download{bottom:calc(9% + 72px);width:32%;height:12px;}.title-download b{line-height:10px;font-size:9px;}}

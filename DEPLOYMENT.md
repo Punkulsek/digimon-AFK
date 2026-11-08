@@ -18,3 +18,10 @@ Browser localStorage is origin-specific. Keep existing browser data. Google sign
 See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for the supplied pokemon-eternal configuration, required Google authorized domains, the existing named `default` Firestore database and security rule publication. Do not create another database or change billing. Account saves synchronize through Firestore; existing browser guest data is preserved. Pages deployment does not deploy Firestore rules.
 
 Title music autoplay is attempted; browsers may require the first user gesture. It loops until game entry. The title pauses game simulation and blocks interaction with the underlying game.
+
+## Asset download and updates
+The Vite plugin in `vite.config.js` creates `dist/asset-manifest.json` on every build. Each local image, font, audio/video file and built JS/CSS asset has a SHA-256 hash and byte length. The existing `npm run build:web` command still produces the complete Pages output; no separate deployment step is required.
+
+The original title shows a byte-based 0–100% download bar. Login and game entry remain disabled until the required files are verified and cached. `/asset-worker.js` uses Cache Storage under the `pokemon-eternal-assets-*` names. Cached hashes are reused; only missing or changed files download. Transfers retry after failures, never store partial/corrupt bodies, and support media Range requests. On subsequent visits the manifest is checked again. Stale asset versions are pruned only when no open game tab needs them. Browser storage eviction naturally requires missing assets to be downloaded again.
+
+HTML, `/auth-config.json`, Firebase authentication requests and player saves are never stored by this worker. It does not delete localStorage, IndexedDB, or other applications' caches. Public fonts now come from this same site. Standalone `play.html` already embeds assets and bypasses the downloader. HTTPS (or localhost) and browser Service Worker/Cache Storage support are required for web precaching.
