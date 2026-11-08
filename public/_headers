@@ -29,3 +29,5 @@
   Cache-Control: no-cache
 /video/*
   Cache-Control: no-cache
+/version.json
+  Cache-Control: no-store

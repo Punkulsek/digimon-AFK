@@ -81,6 +81,8 @@ self.addEventListener('message',event=>{
 });
 self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);
+ // Entry documents and code always use the current deployment, not asset manifests.
+ if(url.origin===self.location.origin&&(request.mode==='navigate'||/\.(js|css)$/.test(url.pathname))){event.respondWith(fetch(request,{cache:'no-cache'}));return;}
  if(request.method!=='GET'||url.origin!==self.location.origin||url.search||!event.clientId||!(/\.(png|gif|jpe?g|webp|svg|mp3|mp4|ogg|wav|woff2?|ttf)$/i.test(url.pathname)||/^\/assets\/.*\.(js|css)$/.test(url.pathname)))return;
  event.respondWith((async()=>{
   const m=await getManifest(event.clientId),a=m.assets.find(a=>a.url===url.pathname);
