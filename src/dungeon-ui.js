@@ -1,3 +1,4 @@
+import {syncKeys,keyType,spendKey,sweepDungeon} from './activity-rewards.js';
 import {typeIcon} from './type-icons.js';
 import './tower-ui.css';
 import {dungeonScenery,panoramaStyle} from './battle-scenery.js';
@@ -5,7 +6,7 @@ import {DUNGEONS,EVOLUTION_TYPES,DUNGEON_STAGES,dungeonLimit} from './dungeon-co
 import {dungeonInfo,canEnterDungeon} from './dungeon.js';
 import {species} from './data.js';
 import {power} from './game.js';
-export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sound}) {
+export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sound,persist}) {
   const root=document.querySelector('#dungeon-page');
   let dungeonTab="daily";
   let opened=false,run=null,selectedId=null,selectedStage=1,towerResizeObserver=null;
@@ -26,7 +27,7 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
     const partyPower=state.inventory.filter(p=>state.party.includes(p.uid)).reduce((v,p)=>v+power(p,state),0);
     root.dataset.challenge=id;
     const party=state.party.map(uid=>state.inventory.find(p=>p.uid===uid));
-    show(header(d.name,id.startsWith('evolution-')?'dungeonTypes':'dungeonMenu')+`<div class="challenge-layout"><div class="dungeon-preview challenge-hero">${typeBackground(EVOLUTION_TYPES.find(t=>id===`evolution-${t.id}`))}<div class="challenge-enemy-name">${id==='tower'?`${stage}층 · ${d.boss?'보스 층':'일반 층'} · `:''}${species(d.enemy).name}</div><div class="challenge-reward"><span>${id.startsWith('evolution-')?typeIcon(id.slice(10)):icon(id==='coin'?'coins':'sparkles')}</span><strong>${n(d.amount)}</strong><small>${d.reward}</small></div><div class="challenge-enemy-art">${art(species(d.enemy),'field-art')}</div><div class="challenge-controls"><div class="challenge-enemy-power">${icon('swords')} ${n(d.power)}</div><span>스테이지 선택</span><div class="challenge-stepper"><button data-action="dungeonStep" data-delta="-1" aria-label="이전 단계" ${stage<=1?'disabled':''}>−</button><b>${stage}</b><button data-action="dungeonStep" data-delta="1" aria-label="다음 단계" ${stage>=limit||!canEnterDungeon(state,id,stage+1)?'disabled':''}>+</button></div></div><p class="dungeon-reward challenge-reward-caption">예상 보상 · ${d.reward} ${n(d.amount)}개</p></div><section class="challenge-team"><div class="challenge-team-heading"><strong>${icon('swords')} 전투력 ${n(partyPower)}</strong><button class="soft-button" data-action="collection">편성하기</button></div><div class="challenge-party">${Array.from({length:5},(_,i)=>{const p=party[i];return p?`<div class="challenge-party-card"><small>Lv.${p.level}</small>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong></div>`:'<div class="challenge-party-card empty">+</div>';}).join('')}</div><div class="challenge-stage-heading">스테이지 <small>${state.dungeonClears[id]} / ${DUNGEON_STAGES} 클리어</small></div><div class="dungeon-stage-list">${Array.from({length:limit},(_,i)=>`<button class="soft-button ${stage===i+1?'selected':''}" data-action="dungeonStage" data-stage="${i+1}" aria-label="${i+1}단계" aria-pressed="${stage===i+1}" ${canEnterDungeon(state,id,i+1)?'':'disabled'}>${i+1}</button>`).join('')}</div><div class="challenge-footer"><button class="primary-button challenge-enter" data-action="dungeonEnter" aria-label="던전 입장">${icon('swords')}<span>도전하기!<small>입장 비용 없음</small></span></button></div></section></div>`);
+    show(header(d.name,id.startsWith('evolution-')?'dungeonTypes':'dungeonMenu')+`<div class="challenge-layout"><div class="dungeon-preview challenge-hero">${typeBackground(EVOLUTION_TYPES.find(t=>id===`evolution-${t.id}`))}<div class="challenge-enemy-name">${id==='tower'?`${stage}층 · ${d.boss?'보스 층':'일반 층'} · `:''}${species(d.enemy).name}</div><div class="challenge-reward"><span>${id.startsWith('evolution-')?typeIcon(id.slice(10)):icon(id==='coin'?'coins':'sparkles')}</span><strong>${n(d.amount)}</strong><small>${d.reward}</small></div><div class="challenge-enemy-art">${art(species(d.enemy),'field-art')}</div><div class="challenge-controls"><div class="challenge-enemy-power">${icon('swords')} ${n(d.power)}</div><span>스테이지 선택</span><div class="challenge-stepper"><button data-action="dungeonStep" data-delta="-1" aria-label="이전 단계" ${stage<=1?'disabled':''}>−</button><b>${stage}</b><button data-action="dungeonStep" data-delta="1" aria-label="다음 단계" ${stage>=limit||!canEnterDungeon(state,id,stage+1)?'disabled':''}>+</button></div></div><p class="dungeon-reward challenge-reward-caption">예상 보상 · ${d.reward} ${n(d.amount)}개</p></div><section class="challenge-team"><div class="challenge-team-heading"><strong>${icon('swords')} 전투력 ${n(partyPower)}</strong><button class="soft-button" data-action="collection">편성하기</button></div><div class="challenge-party">${Array.from({length:5},(_,i)=>{const p=party[i];return p?`<div class="challenge-party-card"><small>Lv.${p.level}</small>${art(species(p.speciesId))}<strong>${species(p.speciesId).name}</strong></div>`:'<div class="challenge-party-card empty">+</div>';}).join('')}</div><div class="challenge-stage-heading">스테이지 <small>${state.dungeonClears[id]} / ${DUNGEON_STAGES} 클리어</small></div><div class="dungeon-stage-list">${Array.from({length:limit},(_,i)=>`<button class="soft-button ${stage===i+1?'selected':''}" data-action="dungeonStage" data-stage="${i+1}" aria-label="${i+1}단계" aria-pressed="${stage===i+1}" ${canEnterDungeon(state,id,i+1)?'':'disabled'}>${i+1}</button>`).join('')}</div><div class="challenge-footer"><button class="soft-button" data-action="dungeonSweep" ${state.dungeonClears[id]>=stage&&syncKeys(state)[keyType(id)]>0?'':'disabled'}>소탕 · 열쇠 1개</button><button class="primary-button challenge-enter" data-action="dungeonEnter" aria-label="던전 입장">${icon('swords')}<span>도전하기!<small>열쇠 1개 · 보유 <b data-key-count>${syncKeys(state)[keyType(id)]}</b>개</small></span></button></div></section></div>`);
 
   }
   const towerCurrent=()=>Math.min(dungeonLimit('tower'),(state.dungeonClears.tower||0)+1);
@@ -70,12 +71,14 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
   function start(){
     if(!canEnterDungeon(state,selectedId,selectedStage))return;
     if(selectedId==='tower'&&towerStatus(selectedStage)!=='current')return;
+    if(!spendKey(state,selectedId)){stages(selectedId,selectedStage);return;}persist();
     run=null;opened=false;root.hidden=true;
     document.querySelector('.game-shell').classList.remove('in-dungeon');
     onEnter(dungeonInfo(selectedId,selectedStage));
   }
 
   return {
+    refreshKeys(){if(!opened||!selectedId||selectedId==='tower')return;const count=syncKeys(state)[keyType(selectedId)];root.querySelectorAll('[data-key-count]').forEach(el=>el.textContent=count);const sweep=root.querySelector('[data-action="dungeonSweep"]');if(sweep)sweep.disabled=!(count>0&&state.dungeonClears[selectedId]>=selectedStage);const enter=root.querySelector('[data-action="dungeonEnter"]');if(enter)enter.disabled=!(count>0);},
     isOpen:()=>opened,
     open(){onLeave();opened=true;root.hidden=false;document.querySelector('.game-shell').classList.add('in-dungeon');menu();},
     close(){onLeave();opened=false;run=null;towerResizeObserver?.disconnect();root.hidden=true;root.innerHTML='';document.querySelector('.game-shell').classList.remove('in-dungeon');},
@@ -91,6 +94,7 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
         case 'dungeonStage':if(selectedId==='tower'||canEnterDungeon(state,selectedId,Number(btn.dataset.stage)))stages(selectedId,Number(btn.dataset.stage));break;
         case 'towerCurrent':tower();centerTowerSelection();break;
         case 'dungeonStages':case 'dungeonRetreat':stages(selectedId,selectedStage);break;
+        case 'dungeonSweep':if(sweepDungeon(state,selectedId,selectedStage)){persist();stages(selectedId,selectedStage);}break;
         case 'dungeonEnter':start();break;
         default:return false;
       }return true;

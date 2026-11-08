@@ -1,3 +1,4 @@
+import {grantDungeon,stageCandy} from './activity-rewards.js';
 import {maxLevel} from './growth.js';
 import {createTrainer,normalizeTrainer} from './trainer.js';
 import {recordMissionKill,summonPayment} from './missions.js';
@@ -103,7 +104,7 @@ export class Battle {
   for(const enemy of this.enemies)if(enemy.hp<=0&&!enemy.counted){enemy.counted=true;const balls=this.dungeon?0:recordMissionKill(this.state,this.now);if(balls)this.events.push({type:'missionReward',balls});if(!this.dungeon)this.state.totalKills++;this.events.push({type:'enemyDefeated',targetUid:enemy.uid});}
   if(this.enemies.every(e=>e.hp<=0)){
    if(this.dungeon){this.finishDungeon('won');return;}
-   const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;this.events.push({type:'reward',gold});
+   const gold=stageGold(this.state.stage,this.boss)+stageGold(this.state.stage,false)*4;this.state.gold+=gold;const candies=stageCandy(this.state.stage);this.state.candies+=candies;this.events.push({type:'reward',gold,candies});
    if(this.boss){if(this.state.stage===MAX_STAGE){this.state.campaignCleared=true;this.events.push({type:'campaignComplete'});}else{this.state.stage++;this.events.push({type:'stage'});}this.state.kills=0;this.state.gems+=100;this.boss=false;}
    else this.state.kills=Math.min(STAGE_KILLS,this.state.kills+1);
    if(this.state.kills===STAGE_KILLS&&this.state.autoBoss&&this.challenge())this.events.push({type:'boss'});else this.spawn();
@@ -117,10 +118,7 @@ export class Battle {
  this.status=status;
  if(status==='won'){
  const d=this.dungeon;
- if(d.id==='coin'||d.id==='tower')this.state.gold+=d.amount;
- else if(d.id==='rune')this.state.runeDust+=d.amount;
- else if(d.id==='candy')this.state.candies+=d.amount;
- else this.state.materials[d.material]+=d.amount;
+ grantDungeon(this.state,d);
  this.state.dungeonClears[d.id]=Math.max(this.state.dungeonClears[d.id],d.stage);
  }
  this.events.push({type:'dungeonResult',status});

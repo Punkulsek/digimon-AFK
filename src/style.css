@@ -2931,3 +2931,4 @@ h1 {
 .party-grid .placeholder small {
   display: none;
 }
+.offline-chest{position:absolute;top:106px;left:24px;z-index:20;display:flex;flex-direction:column;align-items:center;background:#122b39d9;border:1px solid #cce6c2;border-radius:12px;padding:8px 12px;color:white;font-size:30px;cursor:pointer}.offline-chest small{font-size:11px}@media(max-height:550px){.offline-chest{top:85px;left:12px;font-size:22px;padding:4px 8px}}

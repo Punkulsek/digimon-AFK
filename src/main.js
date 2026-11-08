@@ -1,3 +1,4 @@
+import {accrueOffline,heartbeat,claimOffline,stageCandy} from './activity-rewards.js';
 import {BattleClock} from './battle-clock.js';
 import {FIREBASE_PROJECT,FIREBASE_DATABASE} from './firebase-config.js';
 import {AccountStorage} from './cloud-save.js';
@@ -207,6 +208,7 @@ const partyPower = () =>
     .filter((p) => state.party.includes(p.uid))
     .reduce((s, p) => s + power(p,state), 0);
 function persist() {
+  if(!titleActive)heartbeat(state);
   saved = save(storage, state);
   cloudAccount?.queue();
   if(!document.hidden)updateHud();
@@ -253,6 +255,7 @@ ${stageHud(i,art)}<button class="battle-report-button" data-action="battleReport
 <section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
 <nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection"><svg class="menu-emblem" viewBox="0 0 48 48" aria-hidden="true"><path d="M13 18 9 4l13 8 5-2L39 4l-3 16q7 8 1 16l4 8-11-3q-7 4-15 0L5 44l5-12q-5-8 3-14Z"/><path d="m17 25 2 1m11-1 2-1M21 33q3 3 6 0" fill="none" stroke="#84715a" stroke-width="3"/></svg><span>포켓몬</span></button><button class="nav-button" data-action="upgrades"><svg class="menu-emblem" viewBox="0 0 48 48" aria-hidden="true"><path d="m24 2 9 11 12 7-8 19-13 7L11 39 3 20l12-7Z"/><path d="m24 10 7 13-7 17-7-17Z" fill="#b4a088"/><path d="m4 26 13 5M44 26l-13 5" fill="none" stroke="#84715a" stroke-width="3"/></svg><span>강화</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="dungeons">${i("swords")}<span>던전</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
+const offlineChest=document.createElement('button');offlineChest.className='offline-chest';offlineChest.dataset.action='offlineRewards';offlineChest.setAttribute('aria-label','오프라인 보상');offlineChest.innerHTML='📦<small>오프라인 보상</small>';$('.game-shell').append(offlineChest);
 let overworldBattle = null;
 function restoreOverworld(){
  if(!overworldBattle)return;
@@ -268,7 +271,7 @@ function enterDungeon(info){
  active="dungeons";
  renderBattle();updateHud();updateNavigation();
 }
-const dungeonUI = createDungeonUI({state,art,icon:i,icons,onEnter:enterDungeon,onLeave:restoreOverworld,onHome:closeModal,sound});
+const dungeonUI = createDungeonUI({state,art,icon:i,icons,onEnter:enterDungeon,onLeave:restoreOverworld,onHome:closeModal,sound,persist});
 const trainerUI = createTrainerUI({state,art,icon:i,icons,modal,persist,toast});
 function hudText(selector, value) {
   const element = $(selector);
@@ -331,7 +334,7 @@ function updateHud() {
     "#boss-status",
     battle.boss
       ? `보스 제한 턴 ${Math.max(0, BOSS_TURN_LIMIT - battle.bossTurns)} · 승리 보상 다이아 100`
-      : state.campaignCleared ? "관동 정복 완료 · 현재 지역에서 자동 사냥 중" : `처치 보상 ${stageGold(state.stage)} 포켓코인 · 보스 보상 다이아 100`,
+      : state.campaignCleared ? "관동 정복 완료 · 현재 지역에서 자동 사냥 중" : `처치 보상 ${stageGold(state.stage)} 포켓코인 · 사탕 ${stageCandy(state.stage)}개 · 보스 다이아 100`,
   );
   if (active !== "summon") sound.setMode(battle.dungeon?`dungeon:${battle.dungeon.id}`:battle.boss?"boss":`stage:${state.stage}`);
 }
@@ -506,7 +509,7 @@ function step(silent=false,now=Date.now()) {
     if(e.type==='target'||e.type==='enemyDefeated')refresh=true;
     if (e.type === "reward") {
       sound.effect("reward");
-      floatDamage(`+${e.gold} 포켓코인`, $("#enemy-fighter"), "gold-reward");
+      floatDamage(`+${e.gold} 포켓코인 · 사탕 ${e.candies||0}개`, $("#enemy-fighter"), "gold-reward");
       refresh = true;
     }
     if (e.type === "stage" || e.type === "campaignComplete") {
@@ -993,6 +996,11 @@ document.addEventListener("click", (e) => {
       const key=btn.dataset.synergy,info=SYNERGIES[key],current=partySynergies(state).find(s=>s.key===key);
       modal(`${info.icon} ${key} 시너지`,`${current.count}마리 편성 · ${current.tier?current.tier+'마리 단계 활성':'미활성'}`,`<p>활성 효과는 아군 전체에 적용됩니다. 가장 높은 단계 하나만 적용합니다.</p>${info.labels.map((label,n)=>`<div class="synergy-effect ${current.index===n?'enabled':''}"><b>${[2,3,5][n]}마리</b><span>${label}</span>${current.index===n?' ✓':''}</div>`).join('')}<button class="primary-button full" data-action="collection">편성으로 돌아가기</button>`,'settings-modal');break;
     }
+    case "offlineRewards":{
+      const r=state.offlineRewards||{seconds:0,gold:0,candies:0};
+      modal('오프라인 보상','최대 8시간 누적',`<p>누적 시간 ${Math.floor(r.seconds/3600)}시간 ${Math.floor(r.seconds%3600/60)}분</p><p>포켓코인 ${num(r.gold)} · 이상한사탕 ${num(r.candies)}</p><button class="primary-button full" data-action="claimOffline" ${r.gold||r.candies?'':'disabled'}>보상 받기</button>`);break;
+    }
+    case "claimOffline":if(claimOffline(state)){persist();closeModal();toast('오프라인 보상을 받았습니다.');}break;
     case "settings":
       settings();
       break;
@@ -1175,10 +1183,10 @@ cloudAccount=createFirebaseAccount({storage,getState:()=>state,apply:next=>{
  cloudNotice=messages[status]|| (status==='loading'?'계정의 진행 기록을 불러오는 중입니다.':'');
  if(messages[status]&&!titleActive)toast(messages[status]);
 }});
-showTitle({account:cloudAccount,getNotice:()=>cloudNotice,onStart:()=>{battleClock.reset();titleActive=false;sound.setVideoExclusive(false);sound.unlock();schedule();}});
-setInterval(()=>{if(!titleActive)cloudAccount.flush();},5000);
+showTitle({account:cloudAccount,getNotice:()=>cloudNotice,onStart:()=>{accrueOffline(state);battleClock.reset();titleActive=false;persist();sound.setVideoExclusive(false);sound.unlock();schedule();}});
+setInterval(()=>{if(!titleActive){heartbeat(state);dungeonUI.refreshKeys();save(storage,state);cloudAccount.flush();}},5000);
 for(const event of ['pointerdown','keydown'])document.addEventListener(event,()=>{if(!titleActive&&sound.context?.state!=='running')sound.unlock();},{capture:true});
-window.addEventListener('online',()=>{if(!titleActive)cloudAccount.flush();});
+window.addEventListener('online',()=>{if(!titleActive){heartbeat(state);dungeonUI.refreshKeys();save(storage,state);cloudAccount.flush();}});
 schedule();
 if (loaded.status === "invalid")
   toast("저장 데이터를 읽을 수 없어 새 모험을 시작했어요.");
