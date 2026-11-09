@@ -98,3 +98,16 @@ test('reward chest shares HUD visibility and dungeon keys have distinct art with
  expect(new Set(await evolution.locator('svg').evaluateAll(els=>els.map(e=>e.outerHTML))).size).toBe(1);
  await expect(evolution.first()).toHaveText('4/6');
 });
+test('reward panel keeps teal surfaces and candy level button updates without losing its sprite',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;s.candies=1000;s.offlineRewards={lastSeen:Date.now(),seconds:60,gold:100,candies:1};
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();await page.locator('.offline-chest').click();
+ await expect(page.locator('.offline-reward-modal .modal-body')).toHaveCSS('background-color','rgb(7, 84, 101)');
+ await expect(page.locator('.offline-reward-modal h2')).toHaveCSS('color','rgb(255, 255, 255)');
+ await page.screenshot({path:'/tmp/offline-colors.png'});await page.locator('[data-action="close"]').click();
+ await page.locator('.nav-button[data-action="collection"]').click();await page.locator('.pokemon-card[data-action="detail"]').first().click();
+ const button=page.locator('[data-action="level"]');await button.scrollIntoViewIfNeeded();await expect(button.locator('svg')).toHaveCount(0);await expect(button).not.toContainText('이상한사탕');
+ await expect(button.locator('img')).toBeVisible();expect(await button.locator('img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+ const before=await button.locator('.level-candy-count').textContent();await button.click();await expect(button.locator('.level-candy-count')).not.toHaveText(before);await expect(button.locator('img')).toBeVisible();
+ await page.screenshot({path:'/tmp/candy-level.png'});
+});
