@@ -572,7 +572,7 @@ function pumpBattle(){
     needsBattlePaint=true;clearSkillEffects();skillPresentations.clear();periodicFloats.clear();
     $("#effects").replaceChildren();persist();
   }
-  if(!document.hidden){
+  if(!document.hidden && battleClock.steps===0){
     if(needsBattlePaint){renderBattle();updateHud();needsBattlePaint=false;}
     if(pendingDungeonResult){const completed=pendingDungeonResult;pendingDungeonResult=null;showDungeonResult(completed);}
   }

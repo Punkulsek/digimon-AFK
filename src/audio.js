@@ -218,12 +218,9 @@ export class GameAudio {
     }
   }
   async visibility(hidden) {
-    this.hidden = hidden;
-    if (hidden) {
-      if (this.context?.state === "running") await this.context.suspend();
-    } else {
-      await this.unlock();
-    }
+    // Tab visibility alone must not mute the player's music.
+    this.hidden = false;
+    if (this.started) await this.unlock();
   }
   status() {
     return !this.context &&
