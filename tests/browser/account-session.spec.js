@@ -81,3 +81,20 @@ test('failed Firebase startup can be retried without reloading or opening Google
  available=true;await page.locator('.title-link').click();await expect(page.locator('.title-start')).toBeEnabled();expect(await page.evaluate(()=>window.popupCount||0)).toBe(0);
  await page.locator('.title-start').click();await expect(page.locator('.eternal-title')).toHaveCount(0);
 });
+test('reward chest shares HUD visibility and dungeon keys have distinct art with shared evolution design',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;s.offlineRewards={lastSeen:Date.now(),seconds:60,gold:100,candies:1};s.dungeonKeys={day:new Date(Date.now()+9*3600000).toISOString().slice(0,10),coin:2,candy:6,rune:6,evolution:4};
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ await expect(page.locator('.topbar>.offline-chest')).toBeVisible();await expect(page.locator('.offline-ready-dot')).toBeVisible();
+ await page.screenshot({path:'/tmp/eternal-chest-hud.png'});
+ await page.locator('.offline-chest').click();await page.locator('[data-action="claimOffline"]').click();await expect(page.locator('.offline-ready-dot')).toBeHidden();
+ await page.locator('.nav-button[data-action="collection"]').click();await expect(page.locator('.offline-chest')).toBeHidden();
+ await page.locator('.nav-button[data-action="dungeons"]').click();await expect(page.locator('.offline-chest')).toBeHidden();
+ const badges=page.locator('.dungeon-cards .dungeon-key-badge');await expect(badges).toHaveCount(4);
+ await expect(page.locator('[data-key-type="coin"]')).toHaveText('2/6');
+ const icons=await badges.locator('svg').evaluateAll(els=>els.map(e=>e.outerHTML));expect(new Set(icons).size).toBe(4);
+ await page.screenshot({path:'/tmp/eternal-dungeon-keys.png'});
+ await page.locator('[data-dungeon="evolution"]').click();const evolution=page.locator('.dungeon-types [data-key-type="evolution"]');await expect(evolution).toHaveCount(18);
+ expect(new Set(await evolution.locator('svg').evaluateAll(els=>els.map(e=>e.outerHTML))).size).toBe(1);
+ await expect(evolution.first()).toHaveText('4/6');
+});

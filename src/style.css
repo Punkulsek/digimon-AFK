@@ -2931,4 +2931,4 @@ h1 {
 .party-grid .placeholder small {
   display: none;
 }
-.offline-chest{position:absolute;top:106px;left:24px;z-index:20;display:flex;flex-direction:column;align-items:center;background:#122b39d9;border:1px solid #cce6c2;border-radius:12px;padding:8px 12px;color:white;font-size:30px;cursor:pointer}.offline-chest small{font-size:11px}@media(max-height:550px){.offline-chest{top:85px;left:12px;font-size:22px;padding:4px 8px}}
+.topbar .offline-chest{position:absolute;top:calc(100% + 8px);left:0;width:72px;height:72px;padding:0;border:0;background:none;box-shadow:none;cursor:pointer;filter:drop-shadow(0 3px 1px #14202c66)}.offline-chest svg{width:100%;height:100%;display:block}.offline-ready-dot{position:absolute;right:1px;top:2px;width:18px;height:18px;background:#ff357b;border:2px solid #ba2657;border-radius:50%;box-shadow:inset 2px 2px 2px #ffb0d6}.offline-ready-dot[hidden]{display:none}.offline-chest:focus-visible{outline:3px solid #ffe17a;border-radius:10px}@media(max-height:550px){.topbar .offline-chest{width:54px;height:54px;top:calc(100% + 5px)}.offline-ready-dot{width:14px;height:14px}}

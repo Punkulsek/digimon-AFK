@@ -1,3 +1,4 @@
+import {rewardChest} from './reward-icons.js';
 import {accrueOffline,heartbeat,claimOffline,stageCandy} from './activity-rewards.js';
 import {BattleClock} from './battle-clock.js';
 import {FIREBASE_PROJECT,FIREBASE_DATABASE} from './firebase-config.js';
@@ -255,7 +256,7 @@ ${stageHud(i,art)}<button class="battle-report-button" data-action="battleReport
 <section id="collection-page" class="collection-page" hidden aria-label="포켓몬 관리"></section>
 <nav class="bottom-nav" aria-label="주요 메뉴"><div class="nav-inner"><button class="nav-button" data-action="collection"><svg class="menu-emblem" viewBox="0 0 48 48" aria-hidden="true"><path d="M13 18 9 4l13 8 5-2L39 4l-3 16q7 8 1 16l4 8-11-3q-7 4-15 0L5 44l5-12q-5-8 3-14Z"/><path d="m17 25 2 1m11-1 2-1M21 33q3 3 6 0" fill="none" stroke="#84715a" stroke-width="3"/></svg><span>포켓몬</span></button><button class="nav-button" data-action="upgrades"><svg class="menu-emblem" viewBox="0 0 48 48" aria-hidden="true"><path d="m24 2 9 11 12 7-8 19-13 7L11 39 3 20l12-7Z"/><path d="m24 10 7 13-7 17-7-17Z" fill="#b4a088"/><path d="m4 26 13 5M44 26l-13 5" fill="none" stroke="#84715a" stroke-width="3"/></svg><span>강화</span></button><button class="nav-button active" data-action="home" aria-current="page">${i("home")}<span>홈</span></button><button class="nav-button" data-action="dungeons">${i("swords")}<span>던전</span></button><button class="nav-button" data-action="summon"><span class="nav-ball" aria-hidden="true"></span><span>소환</span></button></div></nav>
 </div><div id="modal-root"></div><div id="toast" role="status"></div>`;
-const offlineChest=document.createElement('button');offlineChest.className='offline-chest';offlineChest.dataset.action='offlineRewards';offlineChest.setAttribute('aria-label','오프라인 보상');offlineChest.innerHTML='📦<small>오프라인 보상</small>';$('.game-shell').append(offlineChest);
+const offlineChest=document.createElement('button');offlineChest.className='offline-chest';offlineChest.dataset.action='offlineRewards';offlineChest.setAttribute('aria-label','오프라인 보상');offlineChest.innerHTML=rewardChest+'<span class="offline-ready-dot" hidden aria-hidden="true"></span>';$('.topbar').append(offlineChest);
 let overworldBattle = null;
 function restoreOverworld(){
  if(!overworldBattle)return;
@@ -278,6 +279,7 @@ function hudText(selector, value) {
   if (element) element.textContent = value;
 }
 function updateHud() {
+  const chest=$('.offline-chest');if(chest){const ready=!!(state.offlineRewards?.gold||state.offlineRewards?.candies);chest.querySelector('.offline-ready-dot').hidden=!ready;chest.setAttribute('aria-label',ready?'오프라인 보상 · 수령 가능':'오프라인 보상');}
   refreshUpgradeButtons();
   const trainerLevel=trainerProgress(state);
   $(".topbar .avatar>span").textContent=String(trainerLevel.level).padStart(2,'0');
