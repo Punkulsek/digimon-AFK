@@ -779,3 +779,20 @@
 @media(max-height:540px){.detail-modal:has(.rune-embedded:not([hidden])) .detail-info{height:calc(96dvh - 95px);padding:5px}.rune-embedded .rune-rows{gap:1px}.rune-embedded .rune-row button{padding:1px 3px;font-size:9px}.rune-embedded .rune-grade{font-size:12px;min-width:26px}.rune-embedded .rune-help{display:none}.rune-embedded .rune-wheel{max-height:30vh}.rune-embedded .rune-hero p{font-size:9px;margin:3px}.rune-embedded .primary-button{font-size:10px!important;min-height:23px!important;padding:2px!important}}
 .modal-backdrop,.modal,.modal-body,.modal [tabindex]{overscroll-behavior:contain}
 body:has(#modal-root .modal) .game-shell{overscroll-behavior:none}
+/* Evolution content stays inside the existing growth panel dimensions. */
+.detail-modal .evolution-option{padding:10px;margin:10px 0;min-width:0}
+.evolution-overview{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:10px;align-items:start}
+.evolution-portraits{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);align-items:center;gap:3px;background:#087580;border-radius:10px;padding:10px 3px}
+.evolution-portraits>div{display:flex;flex-direction:column;align-items:center;min-width:0;text-align:center;gap:5px}
+.detail-modal .evolution-portraits .pokemon-art{width:100%;height:84px;min-height:0;margin:0}.detail-modal .evolution-portraits .pokemon-art img{width:100%;height:100%;object-fit:contain}
+.evolution-portraits small{font-size:10px;color:#b9f7e7}.evolution-portraits b{font-size:12px;color:#fff6bd}.evolution-portraits span{font-size:10px}.evolution-arrow{color:#ffdc50;font-size:22px}
+.evolution-comparison{min-width:0}.evolution-comparison h4,.evolution-requirements h4{margin:0 0 8px;color:#e6ffcc;font-size:13px}
+.evolution-comparison table{width:100%;border-collapse:collapse;font-size:10px}.evolution-comparison th,.evolution-comparison td{padding:5px 3px;border-bottom:1px solid #268c94;text-align:right}.evolution-comparison th:first-child{text-align:left}.evolution-comparison td b{color:#fff07b}.evolution-comparison td small{display:block;color:#b6eadb;font-size:9px}
+.evolution-requirements{margin-top:12px;padding-top:10px;border-top:1px solid #258e92}.evolution-condition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.evolution-condition{display:flex;flex-direction:column;gap:5px;background:#086b70;border:1px solid #389b91;border-radius:8px;padding:8px;font-size:11px}.evolution-condition small{color:#c8f5e8}.evolution-condition b{display:flex;align-items:center;gap:4px}.evolution-condition span{color:#c5fcb5}.evolution-condition.unmet{border-color:#b87485;background:#55515e}.evolution-condition.unmet span{color:#ffd3d3}
+@media(max-height:540px){.detail-modal .evolution-portraits .pokemon-art{height:60px}.evolution-comparison th,.evolution-comparison td{padding:3px 2px}.evolution-condition{padding:5px}}
+.detail-modal .evolution-comparison table{font-size:10px;line-height:1.25}
+.detail-modal .evolution-comparison th,.detail-modal .evolution-comparison td{padding:5px 2px;line-height:1.25;height:auto}
+.detail-modal .evolution-comparison td small{display:inline;margin-left:4px;font-size:9px;white-space:nowrap}
+.detail-modal .evolution-comparison h4{font-size:12px}
+.detail-modal .evolution-requirements h4{font-size:13px;margin:0 0 7px}
+.detail-modal .evolution-option>.primary-button{font-size:14px;padding:8px;min-height:36px}

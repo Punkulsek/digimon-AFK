@@ -110,4 +110,10 @@ test('reward panel keeps teal surfaces and candy level button updates without lo
  await expect(button.locator('img')).toBeVisible();expect(await button.locator('img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
  const before=await button.locator('.level-candy-count').textContent();await button.click();await expect(button.locator('.level-candy-count')).not.toHaveText(before);await expect(button.locator('img')).toBeVisible();
  await page.screenshot({path:'/tmp/candy-level.png'});
+ await page.locator('[data-action="growthTab"][data-tab="evolution"]').click();
+ await expect(page.locator('.evolution-overview')).toHaveCount(3);
+ await expect(page.locator('.evolution-portraits img')).toHaveCount(6);
+ await expect(page.locator('.evolution-comparison').first()).toContainText('진화 시 능력치 변화');
+ await expect(page.locator('.evolution-condition.unmet').first()).toBeVisible();
+ await page.screenshot({path:'/tmp/evolution-layout.png'});
 });
