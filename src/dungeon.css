@@ -150,3 +150,27 @@
 /* Reserve a visible action row; stage selection alone scrolls. */
 .dungeon-challenge .challenge-footer{display:grid;grid-template-columns:auto minmax(90px,1fr) minmax(110px,1.4fr);align-items:center;flex-shrink:0;flex-wrap:nowrap;background:#075366;padding:8px 0 0;position:sticky;bottom:0;z-index:2}.challenge-footer>.dungeon-key-badge{padding:0;justify-content:center}.challenge-footer>.soft-button{min-height:48px;background:#ffc83d;color:#3a2d14;border:2px solid #ffe794;font-weight:900}.challenge-footer>.challenge-enter{width:100%;max-width:none;min-height:48px}.dungeon-challenge .challenge-team{min-height:0}.dungeon-challenge .challenge-party{flex-shrink:1;min-height:0}@media(max-height:540px){.dungeon-challenge .challenge-footer{grid-template-columns:auto 1fr 1.3fr;gap:4px}.challenge-footer>.soft-button,.challenge-footer>.challenge-enter{min-height:36px;font-size:12px}}
 .challenge-reward .dungeon-reward-sprite{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;display:block}
+/* Daily selection: illustrated horizontal banners with angled name plates. */
+.dungeon-selection .dungeon-cards:has(.daily-banner){width:min(100%,800px);grid-auto-rows:clamp(132px,20vh,190px);gap:22px;padding:10px 10px 16px;min-height:0}
+.dungeon-selection .daily-banner{overflow:visible;border:0;box-shadow:none;background:none;border-radius:0;--banner-color:#ffc342}
+.dungeon-selection .daily-banner::after{content:'';position:absolute;inset:16px 0 0;z-index:-3;background:var(--banner-color);clip-path:polygon(0 0,100% 0,100% 100%,4% 100%);box-shadow:0 5px #052b39}
+.dungeon-selection .daily-banner>.type-background{inset:20px 4px 5px;width:calc(100% - 8px);height:calc(100% - 25px);clip-path:polygon(0 0,100% 0,100% 100%,4% 100%);z-index:-2}
+.dungeon-selection .daily-banner::before{inset:20px 4px 5px;clip-path:polygon(0 0,100% 0,100% 100%,4% 100%);background:linear-gradient(90deg,transparent 25%,#051a3044 55%,#071526bb);z-index:-1}
+.dungeon-selection .daily-banner .dungeon-banner-art{left:12%;width:36%;height:110%;bottom:0;pointer-events:none;align-items:flex-end}
+.dungeon-selection .daily-banner .pokemon-art{height:100%;width:100%;max-width:none}
+.dungeon-selection .daily-banner .pokemon-art img{transform:none;object-fit:contain;object-position:center;max-width:none;max-height:none}
+.dungeon-selection .daily-banner .dungeon-banner-title{top:0;right:0;min-width:53%;padding:5px 16px 8px 40px;transform:rotate(-2deg);transform-origin:right center;background:linear-gradient(135deg,#02080c,#081d30);border-bottom:3px solid var(--banner-color)}
+.dungeon-selection .daily-banner h2{font-size:clamp(19px,2.4vw,30px)}
+.dungeon-selection .daily-banner:has(.dungeon-key-badge)>small{top:49px;bottom:auto;right:14px;font-style:italic;font-size:clamp(12px,1.5vw,17px);color:#fff}
+.dungeon-selection .daily-banner>.dungeon-key-badge{bottom:8px;right:12px;background:#071c36bb;padding:1px 10px 1px 6px;border-radius:6px;min-width:78px;justify-content:center}
+.dungeon-selection .daily-banner .dungeon-emblem{left:18px;bottom:10px;width:50px;height:50px;border:3px solid #081c32;background:var(--banner-color);color:#fff;box-shadow:0 3px #081c32}
+.dungeon-selection .daily-banner[data-dungeon="evolution"]{--banner-color:#b785ff}
+.dungeon-selection .daily-banner[data-dungeon="candy"]{--banner-color:#5de4bb}
+.dungeon-selection .daily-banner[data-dungeon="rune"]{--banner-color:#ae89ff}
+.dungeon-selection .daily-banner:focus-visible{outline:3px solid #fff;outline-offset:6px}
+@media(max-height:540px){.dungeon-selection .dungeon-cards:has(.daily-banner){grid-auto-rows:120px;gap:15px;padding-top:6px}.dungeon-selection .daily-banner h2{font-size:20px}.dungeon-selection .daily-banner:has(.dungeon-key-badge)>small{top:40px;font-size:12px}.dungeon-selection .daily-banner .dungeon-emblem{width:38px;height:38px}}
+@media(max-width:500px){.dungeon-selection .daily-banner .dungeon-banner-title{min-width:66%;padding-left:25px}.dungeon-selection .daily-banner h2{font-size:19px}.dungeon-selection .daily-banner .dungeon-banner-art{left:12%;width:42%}.dungeon-selection .daily-banner .dungeon-emblem{left:10px;width:38px;height:38px}}
+
+.daily-banner .dungeon-emblem img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
+
+.dungeon-selection .daily-banner .dungeon-banner-art{overflow:hidden;bottom:0;height:calc(100% + 12px)}

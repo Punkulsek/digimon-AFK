@@ -1,5 +1,5 @@
 /* Scenery strips shared by dungeon previews and combat. */
-.scene,.dungeon-selection .type-dungeon,.challenge-hero{container-type:size}
+.scene,.dungeon-selection .daily-banner,.dungeon-selection .type-dungeon,.challenge-hero{container-type:size}
 .type-background{position:absolute;inset:0;width:100%;height:100%;background-size:100% calc(100% * var(--panorama-rows,4));background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none;z-index:-2}
 .type-background[hidden]{display:none!important}
 .scene[data-dungeon]>.type-background:not([hidden]){display:block;z-index:0;height:var(--scenery-height)}
@@ -16,10 +16,10 @@
 .type-background[data-atlas="rune"]{background-image:url('/scene/panoramas/rune-amethyst.png')}
 /* Cover one atlas strip without stretching its pixels or exposing adjacent rows.
    Container units refer to the preview card, not the whole viewport. */
-.challenge-hero>.type-background,.dungeon-selection .type-dungeon>.type-background{
+.challenge-hero>.type-background,.dungeon-selection .daily-banner>.type-background,.dungeon-selection .type-dungeon>.type-background{
   --panorama-aspect:4;
   background-size:max(100cqw,calc(100cqh * var(--panorama-aspect))) calc(max(100cqh,calc(100cqw / var(--panorama-aspect))) * var(--panorama-rows,4));
   background-position-x:50%!important;
 }
-.challenge-hero>.type-background[data-atlas="rune"],.dungeon-selection .type-dungeon>.type-background[data-atlas="rune"]{--panorama-aspect:3}
+.challenge-hero>.type-background[data-atlas="rune"],.dungeon-selection .daily-banner>.type-background[data-atlas="rune"],.dungeon-selection .type-dungeon>.type-background[data-atlas="rune"]{--panorama-aspect:3}
 .challenge-hero>.type-background[data-atlas="6"]{--panorama-aspect:2}

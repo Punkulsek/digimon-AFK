@@ -152,6 +152,9 @@ test('daily themed scenery appears in previews and rune combat',async({page})=>{
  await mockFirebase(page);const s=initialState();s.auto=false;
  await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
  await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ await page.locator('.nav-button[data-action="dungeons"]').click();
+ await expect(page.locator('.daily-banner')).toHaveCount(4);await page.locator('.daily-banner>.type-background').evaluateAll(els=>Promise.all(els.map(async el=>{const img=new Image();img.src=getComputedStyle(el).backgroundImage.slice(5,-2);await img.decode();})));await page.screenshot({path:'/tmp/daily-banners.png'});
+ await page.setViewportSize({width:844,height:390});await page.locator('.daily-banner[data-dungeon="rune"]').scrollIntoViewIfNeeded();await page.screenshot({path:'/tmp/daily-banners-mobile.png'});await page.setViewportSize({width:1440,height:810});
  for(const id of ['coin','candy','rune']){
  await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator(`[data-action="dungeonSelect"][data-dungeon="${id}"]`).click();
  await expect(page.locator('.challenge-hero .type-background')).toBeVisible();

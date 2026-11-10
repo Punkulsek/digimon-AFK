@@ -94,6 +94,18 @@ for(const file of await readdir(resolve(root,'public/effects'))){if(!file.endsWi
 const titleAssets={};
 for(const [key,file,mime] of [['logo','logo.png','image/png'],['background','background.png','image/png'],['bgm','bgm.mp3','audio/mpeg']]){const bytes=await readFile(resolve(root,'public/title',file));titleAssets[key]=`data:${mime};base64,${bytes.toString('base64')}`;}
 const authConfig=JSON.parse(await readFile(resolve(root,'public/auth-config.json'),'utf8'));
+// Share repeated embedded textures without changing their bytes or rendering.
+// Keeps the single-file build below GitHub's 100 MiB file limit as art grows.
+const embeddedUrls=new Map();
+offlineCss.replace(/url\(["']?data:[^)]+\)/g,url=>{embeddedUrls.set(url,(embeddedUrls.get(url)||0)+1);return url;});
+const textureVars=[];
+for(const [url,count] of embeddedUrls){
+  if(count<2)continue;
+  const name=`--embedded-texture-${textureVars.length}`;
+  textureVars.push(`${name}:${url}`);
+  offlineCss=offlineCss.split(url).join(`var(${name})`);
+}
+if(textureVars.length)offlineCss=`:root{${textureVars.join(';')}}`+offlineCss;
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 이터널</title><style>${offlineCss}</style></head>

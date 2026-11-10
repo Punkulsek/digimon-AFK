@@ -126,3 +126,11 @@
 #scene.scene[data-floor="basalt"]>:is(.region-art,.type-background){--edge-y:36.872%}
 #scene.scene[data-floor="ice"]>:is(.region-art,.type-background){--edge-y:64.525%}
 #scene.scene[data-floor="amethyst"]>:is(.region-art,.type-background){--edge-y:92.458%}
+/* Regional arena materials: gym fossils, ship teak, mansion tiles and League marble. */
+#scene:is([data-floor="fossil"],[data-floor="ship"],[data-floor="mansion"],[data-floor="league"])>.battle-floor{background-image:url('/scene/panoramas/floors-kanto.png')}
+#scene[data-floor="fossil"]>.battle-floor{background-position:0% 0%}
+#scene[data-floor="ship"]>.battle-floor{background-position:100% 0%}
+#scene[data-floor="mansion"]>.battle-floor{background-position:0% 100%}
+#scene[data-floor="league"]>.battle-floor{background-position:100% 100%}
+#scene.scene[data-floor="ship"]>.region-art::after{filter:sepia(.6) saturate(.7)}
+#scene.scene[data-floor="mansion"]>.region-art::after{filter:sepia(.3) hue-rotate(310deg) brightness(.75)}

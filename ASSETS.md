@@ -162,3 +162,6 @@ Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].t
 
 ### Material terrace edges
 `public/scene/panoramas/terrace-materials.png` is original generated transparent pixel artwork with Egyptian sandstone, volcanic basalt, frost-covered stone and amethyst slate variants. CSS crops the four strips to give matching battle floors a visible raised front face. Source: `exec-91b56c8c-5185-45c6-86a5-f58e8a461dce.png`.
+
+### Kanto regional arena floors
+`public/scene/panoramas/floors-kanto.png`: generated pixel-art atlas, fossil limestone for Pewter Gym, brass-trimmed teak for the S.S. Anne, worn burgundy tiles for Pokémon Mansion, and ivory/gold marble for Indigo Plateau. Source: `exec-a5e63f1c-7df4-4104-873b-bea2e5dca33e.png`.
