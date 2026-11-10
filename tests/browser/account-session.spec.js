@@ -144,7 +144,9 @@ test('ordinary terrace edge separates scenery without changing dungeon surfaces'
  await page.screenshot({path:`/tmp/terrace-${region}.png`});
  }
  await page.setViewportSize({width:844,height:390});await page.screenshot({path:'/tmp/terrace-mobile.png'});
- await page.locator('#scene').evaluate(el=>el.dataset.dungeon='coin');expect(await edge()).toBe('none');
+ await page.locator('#scene').evaluate(el=>{el.dataset.dungeon='coin';el.querySelector('.type-background').hidden=false;});
+ await expect(page.locator('#scene .type-background')).toHaveCSS('mask-image','none');
+ expect(await page.locator('#scene .type-background').evaluate(el=>getComputedStyle(el,'::after').backgroundImage)).toContain('terrace-edges.png');
 });
 test('daily themed scenery appears in previews and rune combat',async({page})=>{
  await mockFirebase(page);const s=initialState();s.auto=false;

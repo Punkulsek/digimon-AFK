@@ -1,4 +1,4 @@
-/* Overlap the scenery's foreground with the ground instead of cutting it off. */
+/* Shared combat layout; all scenery ends at a raised terrace edge. */
 .battlefield { --scenery-height:48%; --scenery-blend:clamp(20px,6vh,72px); --combat-top:calc(48% + 20px); }
 #scene.scene,#scene.scene[data-dungeon] { background:#202a37; filter:none; transition:none; }
 #scene.scene[data-dungeon] > .type-background:not([hidden]) { display:block; }
@@ -63,24 +63,20 @@
   #enemy.enemy-squad .fighter.enemy { height:7.5vh; }
   #enemy.enemy-squad .fighter.enemy.boss { height:9vh; }
 }
-/* Ordinary-stage vistas are separate from the existing battle platform.
-   Do not fade the landscape into the arena; dungeon styling remains unchanged. */
-#scene.scene:not([data-dungeon]) > .region-art {
+/* Scenery and combat remain separate spaces in every battle. */
+#scene.scene > :is(.region-art,.type-background:not([hidden])) {
   height:var(--scenery-height);
   -webkit-mask-image:none;
   mask-image:none;
 }
-#scene.scene:not([data-dungeon]) > .battle-floor {
-  background-position:100% 0%;
-}
 /* A shallow terrace coping gives the distant vista and arena different depths.
    Source slices include transparent silhouettes, a top plane, front lip and shadow. */
-#scene.scene:not([data-dungeon]) > .region-art {
+#scene.scene > :is(.region-art,.type-background:not([hidden])) {
   --edge-height:clamp(54px,10vh,104px);
   --edge-y:70.21%;
   overflow:visible;
 }
-#scene.scene:not([data-dungeon]) > .region-art::after {
+#scene.scene > :is(.region-art,.type-background:not([hidden]))::after {
   content:'';position:absolute;left:-1%;right:-1%;
   top:calc(100% - var(--edge-height)*.68);
   height:var(--edge-height);pointer-events:none;
@@ -102,8 +98,21 @@
 #scene.scene[data-region="8"] > .region-art,
 #scene.scene[data-region="10"] > .region-art,
 #scene.scene[data-region="12"] > .region-art {--edge-y:96.77%}
-#scene.scene:not([data-dungeon]) > .battle-floor::before {
+#scene.scene > .battle-floor::before {
   content:'';position:absolute;left:0;right:0;top:0;height:clamp(20px,4vh,40px);
   background:linear-gradient(to bottom,#1126374d,#2034471a 55%,transparent);
   pointer-events:none;
 }
+/* Dungeon selector has higher specificity than the shared scenic base. */
+#scene.scene[data-dungeon] > .type-background:not([hidden]){height:var(--scenery-height);mask-image:none;-webkit-mask-image:none;overflow:visible}
+#scene[data-floor="moss"]>.battle-floor,#scene[data-floor="basalt"]>.battle-floor,#scene[data-floor="ice"]>.battle-floor,#scene[data-floor="sandstone"]>.battle-floor{background-image:url('/scene/panoramas/floors-nature.png')}
+#scene[data-floor="water"]>.battle-floor,#scene[data-floor="amethyst"]>.battle-floor,#scene[data-floor="temple"]>.battle-floor,#scene[data-floor="fairy"]>.battle-floor{background-image:url('/scene/panoramas/floors-mystic.png')}
+#scene[data-floor="moss"]>.battle-floor,#scene[data-floor="water"]>.battle-floor{background-position:0% 0%}
+#scene[data-floor="basalt"]>.battle-floor,#scene[data-floor="amethyst"]>.battle-floor{background-position:100% 0%}
+#scene[data-floor="ice"]>.battle-floor,#scene[data-floor="temple"]>.battle-floor{background-position:0% 100%}
+#scene[data-floor="sandstone"]>.battle-floor,#scene[data-floor="fairy"]>.battle-floor{background-position:100% 100%}
+#scene.scene[data-floor="moss"]>:is(.region-art,.type-background){--edge-y:16.13%}
+#scene.scene[data-floor="basalt"]>:is(.region-art,.type-background),#scene.scene[data-floor="ice"]>:is(.region-art,.type-background),#scene.scene[data-floor="amethyst"]>:is(.region-art,.type-background){--edge-y:44.12%}
+#scene.scene[data-floor="metal"]>:is(.region-art,.type-background){--edge-y:96.77%}
+#scene.scene[data-floor="sandstone"]>:is(.region-art,.type-background)::after{filter:sepia(.6) saturate(.8)}
+#scene.scene[data-floor="amethyst"]>:is(.region-art,.type-background)::after{filter:sepia(.2) hue-rotate(25deg)}

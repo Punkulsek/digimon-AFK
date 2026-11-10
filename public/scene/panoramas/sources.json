@@ -459,12 +459,12 @@
   },
   {
     "file": "rune-amethyst.png",
-    "source": "exec-9509ce2b-67f7-4160-905b-6fdfa13b1362.png",
-    "width": 1774,
-    "height": 887,
+    "source": "exec-38a326de-9550-43d7-8d81-0abb1f29be76.png",
+    "width": 2172,
+    "height": 724,
     "rows": 1,
     "columns": 1,
-    "sha256": "b7bd736c62750bbf8668dce42175c3228888013bd5a5088698731c69d44b4f90",
+    "sha256": "00e13249f7b76edaa7a969463f83850bcf3ea7dac4ac1864260b25caeab9e5ad",
     "usage": "Original generated amethyst cavern pixel art",
     "scenes": [
       {
@@ -475,5 +475,25 @@
         "floor": "stone"
       }
     ]
+  },
+  {
+    "file": "floors-nature.png",
+    "rows": 2,
+    "columns": 2,
+    "usage": "Original generated pixel-art battle floor atlas",
+    "source": "exec-a524f8fd-088d-4c13-b57f-f2273940fd16.png",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "cb01caa9863f88a22a2dcbc0ee70c2a49aad61b2761f22f000f6818bf041a3a6"
+  },
+  {
+    "file": "floors-mystic.png",
+    "rows": 2,
+    "columns": 2,
+    "usage": "Original generated pixel-art battle floor atlas",
+    "source": "exec-94d2c018-df35-46c7-8d14-a8610da2a7d8.png",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "5aa973ce6ed6c13e57c7730384c1fd577b4ec180509a2c8ed00812ecc7da1597"
   }
 ]
