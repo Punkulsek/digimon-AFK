@@ -156,3 +156,6 @@ structure. These assets are embedded in the standalone HTML for offline play.
 
 ## Self-hosted font
 Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].ttf`), losslessly converted to WOFF2 for delivery from this site. SIL Open Font License 1.1 is included at `public/fonts/OFL.txt`. The typeface and weights are unchanged.
+
+### Ordinary-stage terrace edge
+`public/scene/panoramas/terrace-edges.png` is original generated transparent environment artwork (forest, cave, indoor and industrial variants). It adds the shallow top plane, chipped front lip and contact shadow between the distant panorama and existing arena. Dungeon assets and the floor atlas are unchanged. Source: `exec-0ee1cdae-6479-4aa3-9969-320c23589669.png`.

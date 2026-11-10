@@ -73,3 +73,37 @@
 #scene.scene:not([data-dungeon]) > .battle-floor {
   background-position:100% 0%;
 }
+/* A shallow terrace coping gives the distant vista and arena different depths.
+   Source slices include transparent silhouettes, a top plane, front lip and shadow. */
+#scene.scene:not([data-dungeon]) > .region-art {
+  --edge-height:clamp(54px,10vh,104px);
+  --edge-y:70.21%;
+  overflow:visible;
+}
+#scene.scene:not([data-dungeon]) > .region-art::after {
+  content:'';position:absolute;left:-1%;right:-1%;
+  top:calc(100% - var(--edge-height)*.68);
+  height:var(--edge-height);pointer-events:none;
+  background:url('/scene/panoramas/terrace-edges.png') 0 var(--edge-y) / 100% 627% no-repeat;
+  image-rendering:pixelated;
+}
+/* Forest/garden, cave, finished interior and industrial edges share stonework. */
+#scene.scene[data-region="0"] > .region-art,
+#scene.scene[data-region="9"] > .region-art,
+#scene.scene[data-region="11"] > .region-art,
+#scene.scene[data-region="18"] > .region-art {--edge-y:16.13%}
+#scene.scene[data-region="2"] > .region-art,
+#scene.scene[data-region="6"] > .region-art,
+#scene.scene[data-region="13"] > .region-art,
+#scene.scene[data-region="17"] > .region-art,
+#scene.scene[data-region="19"] > .region-art {--edge-y:44.12%}
+#scene.scene[data-region="4"] > .region-art,
+#scene.scene[data-region="5"] > .region-art,
+#scene.scene[data-region="8"] > .region-art,
+#scene.scene[data-region="10"] > .region-art,
+#scene.scene[data-region="12"] > .region-art {--edge-y:96.77%}
+#scene.scene:not([data-dungeon]) > .battle-floor::before {
+  content:'';position:absolute;left:0;right:0;top:0;height:clamp(20px,4vh,40px);
+  background:linear-gradient(to bottom,#1126374d,#2034471a 55%,transparent);
+  pointer-events:none;
+}

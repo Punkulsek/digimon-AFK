@@ -133,3 +133,16 @@ test('mobile game dex keeps collection records, detail tabs and responsive scrol
  await page.locator('[data-action="dexTab"][data-tab="1"]').click();await expect(page.locator('.dex-stat-grid>div')).toHaveCount(11);await page.screenshot({path:'/tmp/mobile-dex-detail.png'});
  await page.getByRole('button',{name:'닫기',exact:true}).click();await page.locator('[data-action="collectionTab"][data-tab="pokemon"]').click();await expect(page.locator('#collection-page')).not.toHaveClass(/dex-page/);
 });
+test('ordinary terrace edge separates scenery without changing dungeon surfaces',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ const edge=()=>page.locator('.region-art').evaluate(el=>getComputedStyle(el,'::after').backgroundImage);
+ expect(await edge()).toContain('terrace-edges.png');
+ for(const [region,atlas,row] of [[0,1,0],[2,1,2],[10,3,2]]){
+ await page.locator('#scene').evaluate((el,{region,atlas,row})=>{el.dataset.region=region;const art=el.querySelector('.region-art');art.dataset.atlas=atlas;art.style.backgroundPosition=`0% ${row/3*100}%`;},{region,atlas,row});
+ await page.screenshot({path:`/tmp/terrace-${region}.png`});
+ }
+ await page.setViewportSize({width:844,height:390});await page.screenshot({path:'/tmp/terrace-mobile.png'});
+ await page.locator('#scene').evaluate(el=>el.dataset.dungeon='coin');expect(await edge()).toBe('none');
+});
