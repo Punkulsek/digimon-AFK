@@ -117,3 +117,19 @@ test('reward panel keeps teal surfaces and candy level button updates without lo
  await expect(page.locator('.evolution-condition.unmet').first()).toBeVisible();
  await page.screenshot({path:'/tmp/evolution-layout.png'});
 });
+test('mobile game dex keeps collection records, detail tabs and responsive scrolling',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ await page.locator('.nav-button[data-action="collection"]').click();await page.locator('[data-action="collectionTab"][data-tab="dex"]').click();
+ await expect(page.locator('.dex-card')).toHaveCount(151);await expect(page.locator('.dex-progress-panel progress')).toHaveAttribute('max','151');
+ await expect(page.locator('.dex-card.registered').first()).toContainText('등록');
+ for(const viewport of [{width:1440,height:810},{width:844,height:390}]){
+ await page.setViewportSize(viewport);await page.screenshot({path:`/tmp/mobile-dex-${viewport.width}.png`});
+ await page.locator('.dex-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);await expect(page.locator('.dex-card').last()).toBeInViewport();
+ await page.locator('.dex-scroll').evaluate(el=>el.scrollTop=0);
+ }
+ await page.setViewportSize({width:1440,height:810});await page.locator('.dex-card.registered').first().click();await expect(page.locator('.dex-detail-tabs button')).toHaveCount(4);
+ await page.locator('[data-action="dexTab"][data-tab="1"]').click();await expect(page.locator('.dex-stat-grid>div')).toHaveCount(11);await page.screenshot({path:'/tmp/mobile-dex-detail.png'});
+ await page.getByRole('button',{name:'닫기',exact:true}).click();await page.locator('[data-action="collectionTab"][data-tab="pokemon"]').click();await expect(page.locator('#collection-page')).not.toHaveClass(/dex-page/);
+});
