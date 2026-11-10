@@ -63,3 +63,13 @@
   #enemy.enemy-squad .fighter.enemy { height:7.5vh; }
   #enemy.enemy-squad .fighter.enemy.boss { height:9vh; }
 }
+/* Ordinary-stage vistas are separate from the existing battle platform.
+   Do not fade the landscape into the arena; dungeon styling remains unchanged. */
+#scene.scene:not([data-dungeon]) > .region-art {
+  height:var(--scenery-height);
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+#scene.scene:not([data-dungeon]) > .battle-floor {
+  background-position:100% 0%;
+}

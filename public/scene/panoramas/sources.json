@@ -1,13 +1,13 @@
 [
   {
     "file": "regions-1.png",
-    "source": "exec-bb0bb1ed-04ff-4f39-98db-9bde9cb885da.png",
+    "source": "exec-3c1dbff4-3c5d-4bab-834d-52571d13a98f.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "a0090e48f0fa3600e1015551694cac0b081a2c80d3c326feae5c9f3723fc2de3",
+    "sha256": "cdbc35b65d2fef309fb35b0aead0c7f83748872145a8944eef648da6714d8de3",
     "columns": 1,
-    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "usage": "Original generated distant pixel-art panorama with foreground framing, middle ground and atmospheric distance; ordinary stages only",
     "scenes": [
       {
         "name": "상록숲",
@@ -41,13 +41,13 @@
   },
   {
     "file": "regions-2.png",
-    "source": "exec-cf694e59-e423-4bda-95fb-9b9539196e7a.png",
+    "source": "exec-4005a78d-4ddc-424b-bbb9-05b44565a600.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "8ae39740e5d18cf1fac13c9ac9c00f844b039461799470a9ed47497da6cd3479",
+    "sha256": "ffd3bd9b1dce3777a8d602742897eb18d1c0cf125281f62e140298cdfadb729c",
     "columns": 1,
-    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "usage": "Original generated distant pixel-art panorama with foreground framing, middle ground and atmospheric distance; ordinary stages only",
     "scenes": [
       {
         "name": "상트안느호",
@@ -81,13 +81,13 @@
   },
   {
     "file": "regions-3.png",
-    "source": "exec-b0a6c559-cc44-43fb-8cc7-2150ca6ee820.png",
+    "source": "exec-aa926a45-1f7f-4db0-994f-fe3690bb608d.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "0f50fe966656cf635a6b6dd7cf86592911257923fd00a96dd859e332e2a0d80e",
+    "sha256": "1bb74e4f5ec6b318a625e0a1b2c65dce6d371580712ae9d06a19a9882c8b24af",
     "columns": 1,
-    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "usage": "Original generated distant pixel-art panorama with foreground framing, middle ground and atmospheric distance; ordinary stages only",
     "scenes": [
       {
         "name": "로켓단 아지트",
@@ -121,13 +121,13 @@
   },
   {
     "file": "regions-4.png",
-    "source": "exec-66a292d6-9af9-4df7-83f6-5e1272913ecc.png",
+    "source": "exec-1acf8cd8-b90d-4945-a6f5-599a132f0228.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "ba468a5c420148e669385e297b8b72da79c54e90a4fe9f2f11fe54a65a523cc3",
+    "sha256": "34f7a1898a863e4ddced4558febab9b4f4ab22ae31945a49a04ae6e593d431a1",
     "columns": 1,
-    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "usage": "Original generated distant pixel-art panorama with foreground framing, middle ground and atmospheric distance; ordinary stages only",
     "scenes": [
       {
         "name": "무인발전소",
@@ -161,13 +161,13 @@
   },
   {
     "file": "regions-5.png",
-    "source": "exec-d7df4f02-c4bf-43a3-9517-b65af190ba5c.png",
+    "source": "exec-1b1b676a-1618-48f2-a0f8-48415481b168.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "02598a57bdc90abc68529809327d5981ebccfc3ca58135982655b145395de04a",
+    "sha256": "fe2158e5a81c60357c310b4333cc9ef4c33dc9511c7ce26d7a25fb16103a6bcb",
     "columns": 1,
-    "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
+    "usage": "Original generated distant pixel-art panorama with foreground framing, middle ground and atmospheric distance; ordinary stages only",
     "scenes": [
       {
         "name": "상록체육관",
