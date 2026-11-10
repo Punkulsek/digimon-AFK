@@ -38,14 +38,14 @@ export function createDungeonUI({state,art,icon,icons,onEnter,onLeave,onHome,sou
   const towerStatusLabel={cleared:'클리어 완료',current:'도전 가능',locked:'미개방'};
   const ballMark='<span class="tower-ball" aria-hidden="true"></span>';
   function towerDetail(stage){
-    const d=dungeonInfo('tower',stage),status=towerStatus(stage),a=dungeonScenery('tower');
+    const d=dungeonInfo('tower',stage),status=towerStatus(stage);
     return `<header class="tower-detail-heading"><span class="tower-heading-leaf" aria-hidden="true">${icon('leaf')}</span><h2>모다피의 탑 <b>${stage}</b>층</h2><span class="tower-state ${status}">${status==='cleared'?icon('check'):icon(status==='current'?'swords':'shield')}${towerStatusLabel[status]}</span></header>
       <div class="tower-detail-body">
         <div class="tower-encounter">
-          <figure class="tower-battle-preview" role="img" aria-label="${stage}층 전투 배경 · 모다피의 탑 목조 실내"><div class="type-background" data-atlas="${a.atlas}" style="${panoramaStyle(a)}" aria-hidden="true"></div><div class="tower-preview-floor" aria-hidden="true"></div><figcaption>${d.boss?`${icon('crown')} 보스 층`:'모다피의 탑 · 전투 배경'}</figcaption></figure>
+
           <section class="tower-opponents"><h3>${ballMark} 출현 정보 <small>5마리</small></h3><div class="tower-enemies">${d.enemies.map((id,i)=>`<div class="tower-enemy-card ${d.boss&&i===0?'tower-boss':''}">${d.boss&&i===0?`<span class="tower-boss-label">${icon('crown')} 보스</span>`:''}${art(species(id))}<strong>${species(id).name}</strong></div>`).join('')}</div></section>
         </div>
-        <div class="tower-reward-info"><section class="tower-rewards"><h3>${icon('gift')} 클리어 보상</h3><div class="tower-reward"><span class="tower-coin"><img src="${globalThis.POKEMON_CURRENCY?.pokecoin||'/currency/pokecoin.png'}" alt="포켓코인"></span><div><span>포켓코인</span><strong>× ${n(d.amount)}</strong></div>${d.boss?'<span class="tower-bonus">보스 층 보상</span>':''}</div></section><section class="tower-floor-info"><p>${icon('swords')}<span>상대 전투력</span><strong>${n(d.power)}</strong></p><p>${icon(d.boss?'crown':'leaf')}<span>층 구분</span><strong>${d.boss?'보스 층':'일반 층'}</strong></p></section></div>
+        <div class="tower-reward-info"><section class="tower-rewards"><h3>${icon('gift')} 클리어 보상</h3><div class="tower-reward"><span class="tower-coin"><img src="${globalThis.POKEMON_CURRENCY?.pokecoin||'/currency/pokecoin.png'}" alt="포켓코인"></span><div><span>포켓코인</span><strong>× ${n(d.amount)}</strong></div>${d.boss?'<span class="tower-bonus">보스 층 보상</span>':''}</div></section><section class="tower-floor-info"><p>${icon('swords')}<span>상대 전투력</span><strong>${n(d.power)}</strong></p></section></div>
         <footer class="tower-detail-footer">${status==='current'?`<button class="tower-enter" data-action="dungeonEnter" aria-label="던전 입장">${ballMark} 도전하기</button><p>현재 편성으로 ${stage}층에 도전합니다.</p>`:`<div class="tower-unavailable ${status}">${icon(status==='cleared'?'check':'shield')}<strong>${status==='cleared'?'클리어한 층입니다':`${stage-1}층 클리어 후 도전할 수 있습니다`}</strong></div><button class="tower-current-link" data-action="towerCurrent">${(state.dungeonClears.tower||0)>=dungeonLimit('tower')?'최상층 보기':`현재 도전 층 · ${towerCurrent()}층으로 이동`}${icon('chevron-right')}</button>`}</footer>
       </div>`;
   }

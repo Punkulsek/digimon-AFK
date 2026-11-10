@@ -164,3 +164,15 @@ test('daily themed scenery appears in previews and rune combat',async({page})=>{
  }
  await page.locator('[data-action="dungeonEnter"]').click();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','rune');await expect(page.locator('#scene .type-background')).toHaveCSS('background-image',/rune-amethyst/);await page.screenshot({path:'/tmp/daily-rune-battle.png'});
 });
+
+test('tower redesign keeps floor selection and challenge without scenic preview',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;s.dungeonClears.tower=4;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator('[data-action="dungeonTab"][data-tab="challenge"]').click();await page.locator('[data-action="dungeonSelect"][data-dungeon="tower"]').click();
+ await expect(page.locator('.tower-floor')).toHaveCount(200);await expect(page.locator('.tower-battle-preview')).toHaveCount(0);await expect(page.locator('.tower-details')).not.toContainText('층 구분');await expect(page.locator('.tower-enemy-card')).toHaveCount(5);
+ await page.screenshot({path:'/tmp/tower-redesign.png'});
+ await page.locator('.tower-floor[data-stage="6"]').click();await expect(page.locator('.tower-enter')).toHaveCount(0);await expect(page.locator('.tower-detail-heading h2')).toContainText('6');
+ await page.locator('.tower-current-link').click();await expect(page.locator('.tower-enter')).toBeVisible();
+ await page.setViewportSize({width:844,height:390});await page.screenshot({path:'/tmp/tower-redesign-mobile.png'});await page.locator('.tower-enter').click();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','tower');
+});
