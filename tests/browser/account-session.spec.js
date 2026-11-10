@@ -154,7 +154,10 @@ test('daily themed scenery appears in previews and rune combat',async({page})=>{
  await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
  for(const id of ['coin','candy','rune']){
  await page.locator('.nav-button[data-action="dungeons"]').click();await page.locator(`[data-action="dungeonSelect"][data-dungeon="${id}"]`).click();
- await expect(page.locator('.challenge-hero .type-background')).toBeVisible();await page.screenshot({path:`/tmp/daily-${id}.png`});
+ await expect(page.locator('.challenge-hero .type-background')).toBeVisible();
+ const geometry=await page.locator('.challenge-hero .type-background').evaluate(el=>{const css=getComputedStyle(el),[w,h]=css.backgroundSize.split(' ').map(parseFloat);return {w,h,rows:Number(css.getPropertyValue('--panorama-rows')),ratio:Number(css.getPropertyValue('--panorama-aspect')),width:el.clientWidth,height:el.clientHeight};});
+ expect(geometry.w).toBeGreaterThanOrEqual(geometry.width-1);expect(geometry.h/geometry.rows).toBeGreaterThanOrEqual(geometry.height-1);expect(geometry.w/(geometry.h/geometry.rows)).toBeCloseTo(geometry.ratio,2);
+ await page.screenshot({path:`/tmp/daily-${id}.png`});
  }
  await page.locator('[data-action="dungeonEnter"]').click();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','rune');await expect(page.locator('#scene .type-background')).toHaveCSS('background-image',/rune-amethyst/);await page.screenshot({path:'/tmp/daily-rune-battle.png'});
 });

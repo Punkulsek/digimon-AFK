@@ -159,3 +159,6 @@ Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].t
 
 ### Ordinary-stage terrace edge
 `public/scene/panoramas/terrace-edges.png` is original generated transparent environment artwork (forest, cave, indoor and industrial variants). It adds the shallow top plane, chipped front lip and contact shadow between the distant panorama and existing arena. Dungeon assets and the floor atlas are unchanged. Source: `exec-0ee1cdae-6479-4aa3-9969-320c23589669.png`.
+
+### Material terrace edges
+`public/scene/panoramas/terrace-materials.png` is original generated transparent pixel artwork with Egyptian sandstone, volcanic basalt, frost-covered stone and amethyst slate variants. CSS crops the four strips to give matching battle floors a visible raised front face. Source: `exec-91b56c8c-5185-45c6-86a5-f58e8a461dce.png`.

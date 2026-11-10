@@ -14,3 +14,12 @@
 @media(max-width:900px){.dungeon-selection .dungeon-types{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:110px}}
 @media(max-height:540px){.dungeon-selection .dungeon-types{grid-auto-rows:85px;gap:9px}}
 .type-background[data-atlas="rune"]{background-image:url('/scene/panoramas/rune-amethyst.png')}
+/* Cover one atlas strip without stretching its pixels or exposing adjacent rows.
+   Container units refer to the preview card, not the whole viewport. */
+.challenge-hero>.type-background,.dungeon-selection .type-dungeon>.type-background{
+  --panorama-aspect:4;
+  background-size:max(100cqw,calc(100cqh * var(--panorama-aspect))) calc(max(100cqh,calc(100cqw / var(--panorama-aspect))) * var(--panorama-rows,4));
+  background-position-x:50%!important;
+}
+.challenge-hero>.type-background[data-atlas="rune"],.dungeon-selection .type-dungeon>.type-background[data-atlas="rune"]{--panorama-aspect:3}
+.challenge-hero>.type-background[data-atlas="6"]{--panorama-aspect:2}

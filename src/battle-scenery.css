@@ -116,3 +116,13 @@
 #scene.scene[data-floor="metal"]>:is(.region-art,.type-background){--edge-y:96.77%}
 #scene.scene[data-floor="sandstone"]>:is(.region-art,.type-background)::after{filter:sepia(.6) saturate(.8)}
 #scene.scene[data-floor="amethyst"]>:is(.region-art,.type-background)::after{filter:sepia(.2) hue-rotate(25deg)}
+/* Material-specific coping: actual separate artwork, not recolored gray stone. */
+#scene.scene:is([data-floor="sandstone"],[data-floor="basalt"],[data-floor="ice"],[data-floor="amethyst"])>:is(.region-art,.type-background){--edge-height:clamp(54px,8vh,88px)}
+#scene.scene:is([data-floor="sandstone"],[data-floor="basalt"],[data-floor="ice"],[data-floor="amethyst"])>:is(.region-art,.type-background)::after{
+  background-image:url('/scene/panoramas/terrace-materials.png');
+  background-size:100% 696.667%;filter:none;
+}
+#scene.scene[data-floor="sandstone"]>:is(.region-art,.type-background){--edge-y:9.311%}
+#scene.scene[data-floor="basalt"]>:is(.region-art,.type-background){--edge-y:36.872%}
+#scene.scene[data-floor="ice"]>:is(.region-art,.type-background){--edge-y:64.525%}
+#scene.scene[data-floor="amethyst"]>:is(.region-art,.type-background){--edge-y:92.458%}
