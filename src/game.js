@@ -47,6 +47,16 @@ export function summon(state,count,rng=Math.random){
  recordCollection(state);mergeDuplicates(state);return {result,cost};
 }
 export function levelUp(state,uid){const p=state.inventory.find(p=>p.uid===uid);if(!p)return '포켓몬을 찾을 수 없어요.';if(p.level>=maxLevel(p))return '최고 레벨이에요.';const cost=levelCost(p);if(state.candies<cost)return '이상한사탕이 부족해요. 이상한사탕 던전에서 획득할 수 있어요.';state.candies-=cost;p.level++;return null;}
+// Level costs are deterministic; only the current breakthrough cycle is refundable.
+export function levelRefund(p){return Array.from({length:Math.max(0,p.level-1)},(_,i)=>levelCost({level:i+1})).reduce((a,b)=>a+b,0);}
+export function resetLevel(state,uid){
+ const p=state.inventory.find(p=>p.uid===uid);
+ if(!p)return '포켓몬을 찾을 수 없어요.';
+ if(p.level<=1)return '이미 레벨 1이에요.';
+ const refund=levelRefund(p);
+ if(!Number.isSafeInteger(state.candies+refund))return '사탕 보유량을 확인해 주세요.';
+ state.candies+=refund;p.level=1;return null;
+}
 export function toggleParty(state,uid){if(!state.inventory.some(p=>p.uid===uid))return '포켓몬을 찾을 수 없어요.';if(state.party.includes(uid)){if(state.party.length===1)return '최소 한 마리는 편성해야 해요.';state.party=state.party.filter(id=>id!==uid);}else{if(state.party.length>=PARTY_LIMIT)return '파티가 가득 찼어요. 먼저 한 마리를 해제해 주세요.';state.party.push(uid);}return null;}
 export class Battle {
  constructor(state,dungeon=null,rng=Math.random){

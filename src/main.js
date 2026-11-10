@@ -85,6 +85,8 @@ import {
   levelCost,
   summon,
   levelUp,
+  levelRefund,
+  resetLevel,
   toggleParty,
   Battle,
 } from "./game.js";
@@ -726,7 +728,7 @@ function detail(uid) {
   modal(
     s.name,
     `관동 도감 No. ${String(s.id).padStart(3, "0")} · ${s.genus}`,
-    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><section data-detail-panel="stats"><h3>Lv. ${p.level} <small>/ ${maxLevel(p)}</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= maxLevel(p) ? "disabled" : ""}><img class="rare-candy-sprite" src="/items/rare-candy.png" alt="이상한사탕"><b class="level-label">레벨업</b><span class="level-candy-count">${num(state.candies)} / ${num(levelCost(p))}</span></button><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></section><section data-detail-panel="growth" hidden>${growthPanel(p)}</section><section data-detail-panel="runes" class="rune-embedded" hidden></section></div><nav class="growth-tabs growth-side-menu" aria-label="포켓몬 성장 메뉴"><button data-action="detailStats" aria-pressed="true"><span>능력치</span></button><button data-action="growthTab" data-tab="evolution" aria-pressed="${growthTab==='evolution'}"><span>진화</span></button><button data-action="growthTab" data-tab="breakthrough" aria-pressed="${growthTab==='breakthrough'}"><span>돌파</span></button><button data-action="openRunes" data-id="${p.uid}"><span>포켓룬</span></button></nav></div>`,
+    `<button class="text-button" data-action="collection">${i("chevron-left")}보유 목록</button><div class="detail-layout"><div class="detail-art rarity-${[0,2,3,4][summonGrade(s.id)]}" style="--rarity:${r.color}"><div class="detail-orbit"></div><span class="detail-equipped">${state.party.includes(uid)?"편성중":"보유 포켓몬"}</span>${art(s, "field-art detail-sprite")}<span class="rarity-badge" style="color:${r.color}"><b class="rate-grade grade-${summonGrade(s.id)}">${r.name}</b> · ${typeIcons(s.types)} ${s.types.join(" / ")}</span><small>키 ${s.height}m · 몸무게 ${s.weight}kg</small><span class="detail-stars" style="color:${r.color}">${growthStars(p)}</span></div><div class="detail-info"><section data-detail-panel="stats"><h3>Lv. ${p.level} <small>/ ${maxLevel(p)}</small></h3><div class="detail-power">전투력 <b data-detail-power>${num(power(p,state))}</b></div><div class="detail-stats">${STAT_FIELDS.map(([key,label])=>`<div class="stat-row" title="${key==='attackSpeed'?'기본 대비 공격 빈도':key==='skillHaste'?'기술 게이지 충전속도 증가':key==='skillAmplification'?'기술 피해·회복·보호막 증가':label}"><span>${label}</span><b data-stat="${key}">${formatStat(key,st[key])}</b></div>`).join('')}</div><p class="stat-note">급소 적용 ${criticalStats(st).chance}% · 피해 ${criticalStats(st).damage}%<br>스킬 가속은 게이지 충전에, 스킬 증폭은 기술 효과에 적용</p>${skillDetail(s.id)}<div class="level-actions"><button class="primary-button full" data-action="level" data-id="${uid}" ${p.level >= maxLevel(p) ? "disabled" : ""}><img class="rare-candy-sprite" src="/items/rare-candy.png" alt="이상한사탕"><b class="level-label">레벨업</b><span class="level-candy-count">${num(state.candies)} / ${num(levelCost(p))}</span></button><button class="level-reset-button" data-action="resetLevelPreview" data-id="${uid}" aria-label="레벨 초기화 및 사탕 환급" title="레벨 초기화 및 사탕 환급" ${p.level<=1?'disabled':''}>${i("rotate-ccw")}</button></div><button class="soft-button full" data-action="party" data-id="${uid}">${i(state.party.includes(uid) ? "check" : "plus")}${state.party.includes(uid) ? "탐험대에서 해제" : "탐험대에 편성"}</button><small class="muted">보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개</small></section><section data-detail-panel="growth" hidden>${growthPanel(p)}</section><section data-detail-panel="runes" class="rune-embedded" hidden></section></div><nav class="growth-tabs growth-side-menu" aria-label="포켓몬 성장 메뉴"><button data-action="detailStats" aria-pressed="true"><span>능력치</span></button><button data-action="growthTab" data-tab="evolution" aria-pressed="${growthTab==='evolution'}"><span>진화</span></button><button data-action="growthTab" data-tab="breakthrough" aria-pressed="${growthTab==='breakthrough'}"><span>돌파</span></button><button data-action="openRunes" data-id="${p.uid}"><span>포켓룬</span></button></nav></div>`,
     "detail-modal",
   );
 }
@@ -1074,6 +1076,17 @@ document.addEventListener("click", (e) => {
       battle.resetParty();persist();renderBattle();collection();detail(btn.dataset.id);sound.effect("level");toast(evolving?'진화 완료!':'돌파 완료!');
       break;
     }
+    case "resetLevelPreview": {
+      const p=state.inventory.find(p=>p.uid===btn.dataset.id);if(!p||p.level<=1)break;
+      modal("레벨 초기화", species(p.speciesId).name, `<div class="level-reset-summary"><b>Lv. ${p.level} → Lv. 1</b><p><img class="rare-candy-sprite" src="/items/rare-candy.png" alt="이상한사탕"> ${num(levelRefund(p))}개 반환</p></div><p>진화 상태, 돌파 ${p.breakthrough||0}단계, 포켓룬과 편성은 유지됩니다.</p><p class="muted">현재 돌파 이후 레벨업에 사용한 사탕만 반환됩니다. 돌파 이전에 사용한 사탕과 진화 재료는 반환되지 않습니다.</p><button class="primary-button full" data-action="resetLevelConfirm" data-id="${p.uid}">초기화하고 사탕 받기</button><button class="soft-button full" data-action="detail" data-id="${p.uid}">취소</button>`);
+      break;
+    }
+    case "resetLevelConfirm": {
+      const p=state.inventory.find(p=>p.uid===btn.dataset.id);if(!p)break;
+      const refund=levelRefund(p),error=resetLevel(state,p.uid);
+      if(error){toast(error);break;}
+      battle.resetParty();persist();renderBattle();collection();detail(p.uid);updateHud();toast(`레벨 초기화 · 이상한사탕 ${num(refund)}개 반환`);break;
+    }
     case "level": {
       const error = levelUp(state, btn.dataset.id);
       if (error) {
@@ -1090,6 +1103,7 @@ document.addEventListener("click", (e) => {
       info.querySelector("[data-detail-power]").textContent = num(power(p,state));
       btn.querySelector(".level-candy-count").textContent = `${num(state.candies)} / ${num(levelCost(p))}`;
       btn.disabled = p.level >= maxLevel(p);
+      info.querySelector(".level-reset-button").disabled=false;
       info.querySelector("small.muted").textContent = `보유 이상한사탕 ${num(state.candies)}개 · 필요 ${num(levelCost(p))}개`;
       // Refresh evolution eligibility without replacing the dialog, sprite or level button.
       const panel = $(".growth-panel"), template = document.createElement("template");

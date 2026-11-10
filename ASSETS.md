@@ -165,3 +165,6 @@ Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].t
 
 ### Kanto regional arena floors
 `public/scene/panoramas/floors-kanto.png`: generated pixel-art atlas, fossil limestone for Pewter Gym, brass-trimmed teak for the S.S. Anne, worn burgundy tiles for Pokémon Mansion, and ivory/gold marble for Indigo Plateau. Source: `exec-a5e63f1c-7df4-4104-873b-bea2e5dca33e.png`.
+
+### Tower atrium panorama
+`public/scene/panoramas/tower-atrium.png`: original generated pixel panorama with timber galleries descending into a deep atrium, Bellsprout banners, lanterns and distant mountain windows. Its thick foreground beam separates the elevated vista from the wooden combat floor. Source: `exec-817eddb0-5016-4b7f-992a-93b590919526.png`.

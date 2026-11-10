@@ -174,5 +174,15 @@ test('tower redesign keeps floor selection and challenge without scenic preview'
  await page.screenshot({path:'/tmp/tower-redesign.png'});
  await page.locator('.tower-floor[data-stage="6"]').click();await expect(page.locator('.tower-enter')).toHaveCount(0);await expect(page.locator('.tower-detail-heading h2')).toContainText('6');
  await page.locator('.tower-current-link').click();await expect(page.locator('.tower-enter')).toBeVisible();
- await page.setViewportSize({width:844,height:390});await page.screenshot({path:'/tmp/tower-redesign-mobile.png'});await page.locator('.tower-enter').click();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','tower');
+ await page.setViewportSize({width:844,height:390});await page.screenshot({path:'/tmp/tower-redesign-mobile.png'});await page.locator('.tower-enter').click();await expect(page.locator('#scene')).toHaveAttribute('data-dungeon','tower');await page.setViewportSize({width:1440,height:810});await page.locator('#scene .type-background').evaluate(async el=>{const img=new Image();img.src=getComputedStyle(el).backgroundImage.slice(5,-2);await img.decode();});await page.screenshot({path:'/tmp/tower-atrium-battle.png'});
+});
+
+test('level reset button refunds candy, preserves breakthrough and disables repeat claims',async({page})=>{
+ await mockFirebase(page);const s=initialState();s.auto=false;s.candies=5000;s.inventory[0].level=3;s.inventory[0].breakthrough=2;
+ await page.addInitScript(s=>localStorage.setItem('pokemon-days-v1',JSON.stringify(s)),s);
+ await page.goto('/');await page.locator('.title-link').click();await page.locator('.title-start').click();
+ await page.locator('.nav-button[data-action="collection"]').click();await page.locator('.pokemon-card[data-action="detail"][data-id="starter-0"]').click();
+ await page.locator('[data-action="resetLevelPreview"]').click();await expect(page.locator('.level-reset-summary')).toContainText('205개 반환');await page.screenshot({path:'/tmp/level-reset-confirm.png'});
+ await page.locator('[data-action="resetLevelConfirm"]').click();await expect(page.locator('[data-action="resetLevelPreview"]')).toBeDisabled();await expect(page.locator('.detail-info h3').first()).toContainText('Lv. 1');await expect(page.locator('.level-candy-count')).toContainText('5,205');
+ await page.locator('[data-action="level"]').click();await expect(page.locator('[data-action="resetLevelPreview"]')).toBeEnabled();await expect(page.locator('.level-candy-count')).toContainText('5,105');
 });

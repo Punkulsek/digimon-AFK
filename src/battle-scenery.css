@@ -134,3 +134,7 @@
 #scene[data-floor="league"]>.battle-floor{background-position:100% 100%}
 #scene.scene[data-floor="ship"]>.region-art::after{filter:sepia(.6) saturate(.7)}
 #scene.scene[data-floor="mansion"]>.region-art::after{filter:sepia(.3) hue-rotate(310deg) brightness(.75)}
+/* The atrium's illustrated timber front face separates the high gallery from combat. */
+#scene.scene[data-dungeon="tower"]>.type-background{background-size:cover;background-position:center bottom!important}
+#scene.scene[data-dungeon="tower"]>.type-background::after{display:none}
+#scene.scene[data-dungeon="tower"]>.battle-floor::before{height:clamp(20px,4vh,38px);background:linear-gradient(#160f1dcc,transparent)}

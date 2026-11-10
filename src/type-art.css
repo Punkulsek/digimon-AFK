@@ -8,7 +8,6 @@
 .type-background[data-atlas="3"]{background-image:url('/scene/panoramas/dungeons-3.png')}
 .type-background[data-atlas="4"]{background-image:url('/scene/panoramas/dungeons-4.png')}
 .type-background[data-atlas="5"]{background-image:url('/scene/panoramas/dungeons-5.png')}
-.type-background[data-atlas="6"]{background-image:url('/scene/panoramas/dungeons-6.png')}
 .dungeon-selection .dungeon-content:has(.dungeon-types){overflow-y:auto;display:block;scrollbar-gutter:stable}
 .dungeon-selection .dungeon-types{height:auto;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:135px;gap:14px;padding-bottom:8px}
 @media(max-width:900px){.dungeon-selection .dungeon-types{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:110px}}
@@ -22,4 +21,4 @@
   background-position-x:50%!important;
 }
 .challenge-hero>.type-background[data-atlas="rune"],.dungeon-selection .daily-banner>.type-background[data-atlas="rune"],.dungeon-selection .type-dungeon>.type-background[data-atlas="rune"]{--panorama-aspect:3}
-.challenge-hero>.type-background[data-atlas="6"]{--panorama-aspect:2}
+.type-background[data-atlas="tower"]{background-image:url('/scene/panoramas/tower-atrium.png')}
