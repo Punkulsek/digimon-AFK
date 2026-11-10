@@ -13,3 +13,4 @@
 .dungeon-selection .dungeon-types{height:auto;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:135px;gap:14px;padding-bottom:8px}
 @media(max-width:900px){.dungeon-selection .dungeon-types{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:110px}}
 @media(max-height:540px){.dungeon-selection .dungeon-types{grid-auto-rows:85px;gap:9px}}
+.type-background[data-atlas="rune"]{background-image:url('/scene/panoramas/rune-amethyst.png')}

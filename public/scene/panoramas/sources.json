@@ -239,11 +239,11 @@
   },
   {
     "file": "dungeons-1.png",
-    "source": "exec-037750e0-3f0b-4287-b9de-de772633e681.png",
+    "source": "exec-10ab0943-b06a-46a9-9730-f06c95d1a6b2.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "be46339cef5a5742531b5b7b974a207db2740bd256568bf5f13bf3aefd0b4089",
+    "sha256": "9a09e482530d4fdcd9c643db29bb9f5624178d9b357e24084ec036c8e516fe14",
     "columns": 1,
     "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
     "scenes": [
@@ -283,11 +283,11 @@
   },
   {
     "file": "dungeons-2.png",
-    "source": "exec-8fbbe14a-b422-4339-8d72-2cfd74705dd2.png",
+    "source": "exec-8fc6d6c1-42e9-46bc-9828-ab7bf221c3a1.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "329663057c92b4abeb51a720f344ead3af34ba5420018e4b57de58b3a759a050",
+    "sha256": "7a89af3d7186a738e03ad308c7b7c0b4decc36ce1ba5cdf230c1b7d9a78cc238",
     "columns": 1,
     "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
     "scenes": [
@@ -327,11 +327,11 @@
   },
   {
     "file": "dungeons-3.png",
-    "source": "exec-47cb3f31-fa56-4302-be4f-453ee07bfd4d.png",
+    "source": "exec-fc653941-2640-46aa-87f2-842a22e7ee5d.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "013980fc5794eb58714ff3520b9ed2643c605efafb8df2e3835670f2400f48eb",
+    "sha256": "a639817b8680bd009275c7285b966376c10b4071b5bbe9156a75cc6ecb821d22",
     "columns": 1,
     "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
     "scenes": [
@@ -371,11 +371,11 @@
   },
   {
     "file": "dungeons-4.png",
-    "source": "exec-95b252a4-1d43-4539-a05e-fded2b34d309.png",
+    "source": "exec-7785d452-ee28-4887-913a-e53b1e868154.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "fb29bdc09a5d22e9602e0f7bc5f54938c9cf0bdfc0431a50c5c58bcd5194e886",
+    "sha256": "d20965c6b52fb5226269094c450a0effc21136f6ad772db306f3bba7b2499c45",
     "columns": 1,
     "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
     "scenes": [
@@ -415,11 +415,11 @@
   },
   {
     "file": "dungeons-5.png",
-    "source": "exec-26289d2f-cdb4-4adb-b8ed-e202c3b57f0c.png",
+    "source": "exec-ce22ed1c-e7c6-40f1-8807-f1fe4668dfe9.png",
     "rows": 4,
     "width": 1254,
     "height": 1254,
-    "sha256": "254014ca8eef3820558efd6f31fb3c5e1f5545626c523b419c9b9fb78d6be05a",
+    "sha256": "aadf96d60835cd3925cb6b6823ca8e255832e43ffdeee61a112ae588c6481e22",
     "columns": 1,
     "usage": "Generated mobile RPG pixel-art scenery; not extracted game graphics",
     "scenes": [
@@ -453,6 +453,25 @@
         "atlas": 5,
         "row": 1,
         "rows": 4,
+        "floor": "stone"
+      }
+    ]
+  },
+  {
+    "file": "rune-amethyst.png",
+    "source": "exec-9509ce2b-67f7-4160-905b-6fdfa13b1362.png",
+    "width": 1774,
+    "height": 887,
+    "rows": 1,
+    "columns": 1,
+    "sha256": "b7bd736c62750bbf8668dce42175c3228888013bd5a5088698731c69d44b4f90",
+    "usage": "Original generated amethyst cavern pixel art",
+    "scenes": [
+      {
+        "id": "rune",
+        "atlas": "rune",
+        "row": 0,
+        "rows": 1,
         "floor": "stone"
       }
     ]
