@@ -171,3 +171,6 @@ Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].t
 
 ### Bellsprout floor-selector tower replacement
 `public/scene/tower/tower-story.png` was redrawn as a transparent architectural silhouette with Bellsprout roof carvings, illustrated banners and curved tile eaves. Replaces the previous rectangular building strip; no image border or bottom separator bar. Source: `exec-886a4177-3e09-4ac1-aae9-53b254e9df98.png`.
+
+### Tower courtyard backdrop
+`public/scene/panoramas/tower-courtyard.png`: generated pixel-art forest temple courtyard, warm cedar lighting and grounded stone approach matched to the tower selector. Source: `exec-7f3f167e-5f65-45cc-b999-896fd182dfc7.png`.

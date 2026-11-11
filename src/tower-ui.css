@@ -60,3 +60,13 @@
 @media(max-height:600px){.tower-story{min-height:82px;padding:0 27%}.tower-page .tower-floor{min-height:28px}.tower-floor-text b{font-size:18px}.tower-floor .tower-ball{width:16px;height:16px}.tower-floor-state svg{width:12px;height:12px}}
 @media(max-width:600px) and (orientation:portrait){.tower-story{min-height:85px;padding:0 15%}.tower-page .tower-floor{gap:3px;min-height:29px}.tower-floor-text b{font-size:18px}.tower-floor-state{display:none}.tower-floor .tower-ball{display:none}}
 .tower-page .tower-floor.cleared:not(.selected){background:linear-gradient(#2f6577,#173f51);border-color:#75b7b5;color:#fff}
+/* One continuous timber body behind the roof silhouettes, grounded in a courtyard. */
+.dungeon-page.tower-page::before{background-image:url('/scene/panoramas/tower-courtyard.png');background-size:cover;background-position:center;image-rendering:auto}
+.dungeon-page.tower-page::after{background:linear-gradient(90deg,#132a2310,#002c3944 65%),linear-gradient(transparent 70%,#09272b55)}
+.tower-story{background:none;margin-top:-2.5cqw;isolation:isolate}
+.tower-story::before{display:block;content:'';position:absolute;z-index:-2;left:11.5%;right:11.5%;top:-2px;bottom:-2px;pointer-events:none;background:linear-gradient(90deg,#4c2b21 0 3%,#93603a 3% 5%,#48332a 5% 46%,#6b3824 46% 54%,#48332a 54% 95%,#93603a 95% 97%,#4c2b21 97%)}
+.tower-story::after{display:block;content:'';position:absolute;z-index:-1;inset:0;pointer-events:none;background:url('/scene/tower/tower-story.png') center/100% 100% no-repeat;image-rendering:pixelated}
+.tower-page .tower-floors{padding-top:45px;padding-bottom:24px;filter:drop-shadow(5px 8px 6px #07191055)}
+.tower-entrance{height:52px;overflow:visible;background:radial-gradient(ellipse at 50% 25%,#101d18aa,transparent 65%)}
+.tower-entrance::before{left:11.5%;right:11.5%;top:-3px;height:19px;clip-path:polygon(0 0,100% 0,100% 80%,97% 100%,3% 100%,0 80%);background:linear-gradient(#938e6c 0 3px,#625f4f 3px 12px,#3b4237 12px);border-top:2px solid #b0a77b}
+.tower-entrance::after{content:'';position:absolute;left:29%;right:29%;top:10px;height:34px;clip-path:polygon(10% 0,90% 0,100% 100%,0 100%);background:repeating-linear-gradient(#8d8b70 0 5px,#484f43 5px 8px);box-shadow:0 5px 6px #17281c}

@@ -1,4 +1,5 @@
 import { readFile, writeFile, readdir } from "node:fs/promises";
+import {gzipSync} from "node:zlib";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 
@@ -106,12 +107,23 @@ for(const [url,count] of embeddedUrls){
   offlineCss=offlineCss.split(url).join(`var(${name})`);
 }
 if(textureVars.length)offlineCss=`:root{${textureVars.join(';')}}`+offlineCss;
+// Lossless ASCII85 + gzip packaging for standalone media only. Exclude HTML/JS
+// delimiters from the alphabet; decode all media before the game starts.
+const mediaAlphabet=Array.from({length:94},(_,i)=>String.fromCharCode(i+33)).filter(c=>!['<','>','"',"'",String.fromCharCode(92),'`'].includes(c)).slice(0,85).join('');
+const packedBytes=gzipSync(JSON.stringify({title:titleAssets,bgm:`data:audio/mpeg;base64,${bgm.toString('base64')}`}),{level:9});
+const mediaGroups=[];
+for(let i=0;i<packedBytes.length;i+=4){
+ let value=0;for(let j=0;j<4;j++)value=value*256+(packedBytes[i+j]||0);
+ const group=Array(5);for(let j=4;j>=0;j--){group[j]=mediaAlphabet[value%85];value=Math.floor(value/85);}mediaGroups.push(group.join(''));
+}
+const packedMedia=mediaGroups.join('');
+const titleBootstrap=`{const alphabet=${JSON.stringify(mediaAlphabet)},packed=${JSON.stringify(packedMedia)},bytes=new Uint8Array(${packedBytes.length});let offset=0;for(let i=0;i<packed.length;i+=5){let value=0;for(let j=0;j<5;j++)value=value*85+alphabet.indexOf(packed[i+j]);for(let j=3;j>=0;j--){if(offset+j<bytes.length)bytes[offset+j]=value%256;value=Math.floor(value/256);}offset+=4;}const media=JSON.parse(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text());window.POKEMON_TITLE=media.title;window.POKEMON_BGM=media.bgm;}`;
 const html = `<!doctype html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>포켓몬 이터널</title><style>${offlineCss}</style></head>
 <body><div id="app"></div>
-<script>window.POKEMON_TITLE=${JSON.stringify(titleAssets)};window.POKEMON_AUTH_CONFIG=${JSON.stringify(authConfig)};window.POKEMON_SETTINGS_GEAR="data:image/png;base64,${settingsGear.toString("base64")}";window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_BGM="data:audio/mpeg;base64,${bgm.toString("base64")}";window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
-<script type="module">${safeScript}</script>
+<script>window.POKEMON_AUTH_CONFIG=${JSON.stringify(authConfig)};window.POKEMON_SETTINGS_GEAR="data:image/png;base64,${settingsGear.toString("base64")}";window.POKEMON_SUMMON_VIDEO="data:video/mp4;base64,${summonVideo.toString("base64")}";window.POKEMON_EFFECTS=${JSON.stringify(effectData)};window.POKEMON_CURRENCY=${JSON.stringify(currencyData)};window.POKEMON_SPRITES=${JSON.stringify(spriteData)};</script>
+<script type="module">${titleBootstrap}\n${safeScript}</script>
 <!-- PokeAPI data attribution and license:\n${license.replace(/-->/g, "-- >")}-->
 <!-- Asset credits:\n${credits.replace(/-->/g, "-- >")}-->
 </body></html>`;
