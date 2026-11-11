@@ -168,3 +168,6 @@ Noto Sans KR variable font from Google Fonts (`ofl/notosanskr/NotoSansKR[wght].t
 
 ### Tower atrium panorama
 `public/scene/panoramas/tower-atrium.png`: original generated pixel panorama with timber galleries descending into a deep atrium, Bellsprout banners, lanterns and distant mountain windows. Its thick foreground beam separates the elevated vista from the wooden combat floor. Source: `exec-817eddb0-5016-4b7f-992a-93b590919526.png`.
+
+### Bellsprout floor-selector tower replacement
+`public/scene/tower/tower-story.png` was redrawn as a transparent architectural silhouette with Bellsprout roof carvings, illustrated banners and curved tile eaves. Replaces the previous rectangular building strip; no image border or bottom separator bar. Source: `exec-886a4177-3e09-4ac1-aae9-53b254e9df98.png`.
